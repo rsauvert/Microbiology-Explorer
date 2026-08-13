@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gram Stain Learning Game</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#06365b;color:white}
+.wrap{max-width:1200px;margin:auto;padding:20px}
+header{background:#062844;border-radius:16px;padding:20px;margin-bottom:16px}
+h1{margin:0;color:white}.sub{color:#ffd54f;font-weight:bold;margin-top:5px}
+.ready{display:inline-block;margin-top:10px;padding:7px 12px;border-radius:20px;background:#9b2c2c;font-weight:bold}
+.ready.on{background:#23863a}
+.grid{display:grid;grid-template-columns:210px 1fr;gap:16px}
+.panel{background:#0a476f;border-radius:16px;padding:16px}
+.stats div{margin:12px 0;padding:10px;background:#073653;border-radius:10px}
+.stats b{display:block;color:#8eea69;font-size:13px}.stats span{font-size:26px;font-weight:bold}
+.game{background:#0a476f;border-radius:16px;padding:16px}
+.sequence{background:#eefaff;color:#15364d;border-radius:16px;padding:15px}
+.sequence h2{margin-top:0}
+.step{display:block;width:100%;border:0;border-radius:10px;padding:12px;margin:8px 0;background:#e9f3f8;color:#15364d;font-size:15px;font-weight:bold;text-align:left;cursor:pointer}
+.step:hover{outline:3px solid #ffd54f}.step.done{background:#92e39d;opacity:.65}.step:disabled{cursor:default}
+.feedback{margin-top:14px;padding:14px;background:#062e4d;border-radius:12px;min-height:70px}
+.feedback.good{border:2px solid #69df7c}.feedback.bad{border:2px solid #ff6b72}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.cellbox{background:white;color:#17384e;border-radius:14px;padding:12px;text-align:center}
+.cells{height:140px;background:#e8f7fb;border-radius:70px;position:relative;overflow:hidden;border:3px solid #9ccbd8}
+.bac{position:absolute;width:46px;height:17px;border-radius:15px;background:#d5dde1;border:2px solid #abb4b9}
+.bac:nth-child(1){left:18%;top:24%;transform:rotate(20deg)}.bac:nth-child(2){left:55%;top:25%;transform:rotate(-12deg)}
+.bac:nth-child(3){left:36%;top:55%;transform:rotate(8deg)}.bac:nth-child(4){left:66%;top:66%;transform:rotate(32deg)}
+.controls{display:flex;gap:10px;margin-top:14px}.controls button{flex:1;border:0;border-radius:10px;padding:12px;background:#158ed0;color:white;font-weight:bold;cursor:pointer}
+.protocol{margin-top:14px;background:#5c4300;border:1px solid #ffd54f;border-radius:12px;padding:12px;line-height:1.5}
+#level2{display:none}#quiz{display:none}
+.choice{display:block;width:100%;border:0;border-radius:10px;padding:11px;margin:7px 0;background:#eef7fb;color:#15364d;font-weight:bold;text-align:left;cursor:pointer}
+@media(max-width:750px){.grid{grid-template-columns:1fr}.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body onload="gameReady()">
+<div class="wrap">
+<header>
+<h1>MICROBIOLOGY EXPLORER</h1>
+<div class="sub">Gram Stain Learning Game</div>
+<div style="margin-top:7px;font-size:16px;font-weight:bold;color:#d8edf8;">
+Designed by Dr. R. Salas-Auvert
+</div>
+<div id="ready" class="ready">LOADING GAME…</div>
+</header>
+
+<div class="grid">
+<aside class="panel stats">
+<div><b>LEVEL</b><span id="levelStat">1</span></div>
+<div><b>SCORE</b><span id="scoreStat">0</span></div>
+<div><b>CORRECT</b><span id="correctStat">0</span></div>
+<div><b>NEXT STEP</b><span id="nextStat" style="font-size:15px">Prepare smear</span></div>
+</aside>
+
+<main class="game">
+
+<section id="level1">
+<div class="sequence">
+<h2>Level 1 — Build the Gram Stain in Order</h2>
+<p>Click the steps in the correct sequence. Every rinse is a separate required step.</p>
+
+<button id="b_smear" class="step" onclick="chooseStep('smear')">Prepare smear → air-dry → heat-fix</button>
+<button id="b_cv" class="step" onclick="chooseStep('cv')">Crystal violet — primary stain — 60 seconds</button>
+<button id="b_r1" class="step" onclick="chooseStep('r1')">Rinse with water</button>
+<button id="b_iodine" class="step" onclick="chooseStep('iodine')">Gram’s iodine — MORDANT — 60 seconds</button>
+<button id="b_r2" class="step" onclick="chooseStep('r2')">Rinse with water</button>
+<button id="b_alcohol" class="step" onclick="chooseStep('alcohol')">Alcohol / acetone-alcohol — decolorizer — about 10–20 seconds</button>
+<button id="b_r3" class="step" onclick="chooseStep('r3')">Rinse immediately with water</button>
+<button id="b_safranin" class="step" onclick="chooseStep('safranin')">Safranin — counterstain — 60 seconds</button>
+<button id="b_r4" class="step" onclick="chooseStep('r4')">Rinse with water</button>
+<button id="b_dry" class="step" onclick="chooseStep('dry')">Blot dry</button>
+<button id="b_observe" class="step" onclick="chooseStep('observe')">Examine microscopically under oil immersion</button>
+</div>
+</section>
+
+<section id="level2">
+<div class="sequence">
+<h2>Level 2 — Perform the Stain</h2>
+<p>Now repeat the staining sequence and watch what happens to Gram-positive and Gram-negative cells.</p>
+
+<div class="compare">
+<div class="cellbox">
+<b>Gram-positive</b>
+<div class="cells">
+<div class="bac gp"></div><div class="bac gp"></div><div class="bac gp"></div><div class="bac gp"></div>
+</div>
+<p id="gpText">Colorless before staining</p>
+</div>
+<div class="cellbox">
+<b>Gram-negative</b>
+<div class="cells">
+<div class="bac gn"></div><div class="bac gn"></div><div class="bac gn"></div><div class="bac gn"></div>
+</div>
+<p id="gnText">Colorless before staining</p>
+</div>
+</div>
+
+<button id="p_cv" class="step" onclick="performStep('cv')">1. Crystal violet — 60 seconds</button>
+<button id="p_r1" class="step" onclick="performStep('r1')">2. Rinse with water</button>
+<button id="p_iodine" class="step" onclick="performStep('iodine')">3. Gram’s iodine — MORDANT — 60 seconds</button>
+<button id="p_r2" class="step" onclick="performStep('r2')">4. Rinse with water</button>
+<button id="p_alcohol" class="step" onclick="performStep('alcohol')">5. Alcohol / decolorizer — 10–20 seconds</button>
+<button id="p_r3" class="step" onclick="performStep('r3')">6. Rinse immediately with water</button>
+<button id="p_safranin" class="step" onclick="performStep('safranin')">7. Safranin — 60 seconds</button>
+<button id="p_r4" class="step" onclick="performStep('r4')">8. Rinse with water</button>
+<button id="p_dry" class="step" onclick="performStep('dry')">9. Blot dry</button>
+<button id="p_observe" class="step" onclick="performStep('observe')">10. Examine microscopically</button>
+</div>
+</section>
+
+<section id="quiz">
+<div class="sequence">
+<h2>Level 3 — Final Check</h2>
+<div id="question"></div>
+<div id="answers"></div>
+</div>
+</section>
+
+<div id="feedback" class="feedback">
+<b>Ready.</b><br>Begin with preparation of the bacterial smear.
+</div>
+
+<div class="controls">
+<button onclick="showHint()">Hint</button>
+<button onclick="resetGame()">Reset Game</button>
+</div>
+
+<div class="protocol">
+<b>Correct staining sequence:</b><br>
+Crystal violet → rinse → <b>Gram’s iodine (mordant)</b> → rinse → alcohol/decolorizer → <b>rinse immediately</b> → safranin → rinse → blot dry → examine.
+</div>
+
+</main>
+</div>
+<div style="text-align:center;margin-top:18px;padding:12px;color:#c7dfec;font-size:13px;">
+Microbiology Explorer — Gram Stain Learning Game &nbsp;|&nbsp; Dr. R. Salas-Auvert
+</div>
+</div>
+
+<script>
+var sequence=["smear","cv","r1","iodine","r2","alcohol","r3","safranin","r4","dry","observe"];
+var perform=["cv","r1","iodine","r2","alcohol","r3","safranin","r4","dry","observe"];
+var names={
+smear:"Prepare smear, air-dry, and heat-fix",
+cv:"Crystal violet",
+r1:"Rinse with water",
+iodine:"Gram’s iodine (mordant)",
+r2:"Rinse with water",
+alcohol:"Alcohol / decolorizer",
+r3:"Immediate water rinse",
+safranin:"Safranin",
+r4:"Final water rinse",
+dry:"Blot dry",
+observe:"Examine microscopically"
+};
+var seqIndex=0;
+var perfIndex=0;
+var score=0;
+var correct=0;
+var quizIndex=0;
+
+var questions=[
+["What is the mordant in the Gram stain?","Gram’s iodine",["Crystal violet","Gram’s iodine","Safranin"]],
+["What comes immediately after crystal violet?","Rinse with water",["Gram’s iodine","Rinse with water","Alcohol"]],
+["What comes immediately after Gram’s iodine?","Rinse with water",["Alcohol","Rinse with water","Safranin"]],
+["What comes immediately after alcohol/decolorizer?","Rinse immediately with water",["Safranin","Rinse immediately with water","Gram’s iodine"]],
+["What comes immediately after safranin?","Rinse with water",["Alcohol","Rinse with water","Gram’s iodine"]],
+["What color are Gram-positive cells at the end?","Purple",["Purple","Pink/red","Colorless"]],
+["What color are Gram-negative cells at the end?","Pink/red",["Purple","Pink/red","Colorless"]]
+];
+
+function gameReady(){
+ document.getElementById("ready").innerHTML="GAME READY — CLICK A STEP";
+ document.getElementById("ready").className="ready on";
+ updateStats();
+}
+
+function updateStats(){
+ document.getElementById("scoreStat").innerHTML=score;
+ document.getElementById("correctStat").innerHTML=correct;
+ if(document.getElementById("level1").style.display!="none"){
+  document.getElementById("nextStat").innerHTML=seqIndex<sequence.length?names[sequence[seqIndex]]:"Complete";
+ }else if(document.getElementById("level2").style.display!="none"){
+  document.getElementById("nextStat").innerHTML=perfIndex<perform.length?names[perform[perfIndex]]:"Complete";
+ }else{
+  document.getElementById("nextStat").innerHTML="Answer quiz";
+ }
+}
+
+function good(title,text){
+ var f=document.getElementById("feedback");
+ f.className="feedback good";
+ f.innerHTML="<b>"+title+"</b><br>"+text;
+}
+
+function bad(text){
+ var f=document.getElementById("feedback");
+ f.className="feedback bad";
+ f.innerHTML="<b>Try again.</b><br>"+text;
+ score=Math.max(0,score-10);
+ updateStats();
+}
+
+function chooseStep(id){
+ if(id==sequence[seqIndex]){
+  var btn=document.getElementById(buttonIdFor(id));
+  btn.disabled=true;
+  btn.className="step done";
+  score+=100;
+  correct+=1;
+  good("Correct — "+names[id],explain(id));
+  seqIndex+=1;
+  updateStats();
+  if(seqIndex==sequence.length){
+   setTimeout(startLevel2,500);
+  }
+ }else{
+  bad("That is not the next step. The next required action is: "+names[sequence[seqIndex]]+".");
+ }
+}
+
+function buttonIdFor(id){
+ if(id=="r1")return "b_r1";
+ if(id=="r2")return "b_r2";
+ if(id=="r3")return "b_r3";
+ if(id=="r4")return "b_r4";
+ return "b_"+id;
+}
+
+function explain(id){
+ if(id=="smear")return "Prepare a thin smear, allow it to air-dry completely, then heat-fix gently.";
+ if(id=="cv")return "Crystal violet is the primary stain. Apply for about 60 seconds.";
+ if(id=="r1")return "Rinse away excess crystal violet.";
+ if(id=="iodine")return "Gram’s iodine is the MORDANT. Apply for about 60 seconds. It forms the crystal-violet–iodine complex.";
+ if(id=="r2")return "Rinse away excess iodine.";
+ if(id=="alcohol")return "Alcohol or acetone-alcohol is the decolorizer. Use about 10–20 seconds or until runoff is nearly clear.";
+ if(id=="r3")return "Rinse immediately to stop decolorization.";
+ if(id=="safranin")return "Safranin is the counterstain. Apply for about 60 seconds.";
+ if(id=="r4")return "Rinse away excess safranin.";
+ if(id=="dry")return "Blot the slide dry gently.";
+ return "Examine under oil immersion and report Gram reaction, morphology, and arrangement.";
+}
+
+function startLevel2(){
+ document.getElementById("level1").style.display="none";
+ document.getElementById("level2").style.display="block";
+ document.getElementById("levelStat").innerHTML="2";
+ perfIndex=0;
+ good("Level 2","Perform the stain in the correct order. The smear is already prepared and heat-fixed.");
+ updateStats();
+}
+
+function performStep(id){
+ if(id!=perform[perfIndex]){
+  bad("Wrong order. Next: "+names[perform[perfIndex]]+".");
+  return;
+ }
+
+ var btn=document.getElementById("p_"+id);
+ btn.disabled=true;
+ btn.className="step done";
+
+ if(id=="cv"){
+  colorGroup("gp","#6b39a5","#4b2479");
+  colorGroup("gn","#6b39a5","#4b2479");
+  document.getElementById("gpText").innerHTML="Purple";
+  document.getElementById("gnText").innerHTML="Purple";
+ }
+ if(id=="iodine"){
+  colorGroup("gp","#603097","#43216d");
+  colorGroup("gn","#603097","#43216d");
+  document.getElementById("gpText").innerHTML="Purple — CV–iodine complex";
+  document.getElementById("gnText").innerHTML="Purple — CV–iodine complex";
+ }
+ if(id=="alcohol"){
+  colorGroup("gp","#603097","#43216d");
+  colorGroup("gn","#f3f7f9","#b8c4ca");
+  document.getElementById("gpText").innerHTML="Purple — stain retained";
+  document.getElementById("gnText").innerHTML="Colorless after decolorization";
+ }
+ if(id=="safranin"){
+  colorGroup("gp","#603097","#43216d");
+  colorGroup("gn","#e85c82","#b43b60");
+  document.getElementById("gpText").innerHTML="Gram positive = PURPLE";
+  document.getElementById("gnText").innerHTML="Gram negative = PINK/RED";
+ }
+
+ score+=100;
+ correct+=1;
+ good("Correct — "+names[id],explain(id));
+ perfIndex+=1;
+ updateStats();
+
+ if(perfIndex==perform.length){
+  setTimeout(startQuiz,500);
+ }
+}
+
+function colorGroup(cls,bg,border){
+ var all=document.getElementsByClassName(cls);
+ var i;
+ for(i=0;i<all.length;i++){
+  all[i].style.background=bg;
+  all[i].style.borderColor=border;
+ }
+}
+
+function startQuiz(){
+ document.getElementById("level2").style.display="none";
+ document.getElementById("quiz").style.display="block";
+ document.getElementById("levelStat").innerHTML="3";
+ quizIndex=0;
+ showQuestion();
+ updateStats();
+}
+
+function showQuestion(){
+ if(quizIndex>=questions.length){
+  good("Game complete!","Final score: "+score+". You completed the full Gram-stain sequence.");
+  document.getElementById("nextStat").innerHTML="Complete";
+  return;
+ }
+ var q=questions[quizIndex];
+ document.getElementById("question").innerHTML="<h3>"+(quizIndex+1)+". "+q[0]+"</h3>";
+ var a=document.getElementById("answers");
+ a.innerHTML="";
+ var i;
+ for(i=0;i<q[2].length;i++){
+  var b=document.createElement("button");
+  b.className="choice";
+  b.innerHTML=q[2][i];
+  b.setAttribute("data-answer",q[2][i]);
+  b.onclick=function(){answerQuestion(this.getAttribute("data-answer"));};
+  a.appendChild(b);
+ }
+}
+
+function answerQuestion(ans){
+ var q=questions[quizIndex];
+ if(ans==q[1]){
+  score+=100;
+  correct+=1;
+  good("Correct",q[1]+" is correct.");
+  quizIndex+=1;
+  updateStats();
+  setTimeout(showQuestion,300);
+ }else{
+  bad("That answer is incorrect. Try again.");
+ }
+}
+
+function showHint(){
+ if(document.getElementById("level1").style.display!="none"){
+  good("Hint","Next step: "+names[sequence[seqIndex]]+".");
+ }else if(document.getElementById("level2").style.display!="none"){
+  good("Hint","Next action: "+names[perform[perfIndex]]+".");
+ }else{
+  good("Hint","Remember the sequence: crystal violet → rinse → Gram’s iodine → rinse → alcohol → rinse → safranin → rinse.");
+ }
+}
+
+function resetGame(){
+ window.location.reload();
+}
+</script>
+</body>
+</html>
