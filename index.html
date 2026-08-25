@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microbiology Explorer</title>
+  <style>
+    :root {
+      --navy:#071b3a; --navy2:#0d2d5b; --blue:#38bdf8; --purple:#a78bfa;
+      --green:#4ade80; --pink:#f472b6; --gold:#fbbf24; --text:#eaf2ff;
+      --muted:#aebdd1; --card:#10284b;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh;
+      font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 15% 15%, rgba(56,189,248,.14), transparent 30%),
+        radial-gradient(circle at 85% 75%, rgba(167,139,250,.14), transparent 32%),
+        linear-gradient(145deg,#06152e,#0b2347 55%,#07182f);
+    }
+    .wrap { width:min(1120px,92%); margin:auto; padding:42px 0 50px; }
+    header { text-align:center; margin-bottom:32px; }
+    .eyebrow {
+      display:inline-block; padding:6px 13px; border:1px solid rgba(56,189,248,.35);
+      border-radius:999px; color:#9bdfff; font-size:.82rem; font-weight:700;
+      letter-spacing:.08em; text-transform:uppercase; background:rgba(7,27,58,.55);
+    }
+    h1 {
+      margin:14px 0 8px; font-size:clamp(2.2rem,5vw,4rem); line-height:1;
+      background:linear-gradient(90deg,#67e8f9,#a78bfa,#f9a8d4);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .subtitle { margin:0 auto; max-width:760px; color:var(--muted); font-size:1.05rem; }
+    .grid {
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px;
+    }
+    .card {
+      display:flex; flex-direction:column; min-height:225px; padding:24px;
+      border-radius:20px; text-decoration:none; color:var(--text);
+      background:linear-gradient(155deg,rgba(20,53,94,.94),rgba(11,35,71,.96));
+      border:1px solid rgba(174,189,209,.16);
+      box-shadow:0 16px 35px rgba(0,0,0,.22);
+      transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+    }
+    .card:hover, .card:focus {
+      transform:translateY(-5px); border-color:rgba(56,189,248,.65);
+      box-shadow:0 20px 45px rgba(0,0,0,.32); outline:none;
+    }
+    .card:last-child { grid-column:1/-1; }
+    .icon {
+      width:52px; height:52px; display:grid; place-items:center; border-radius:15px;
+      font-size:1.7rem; margin-bottom:18px; background:rgba(255,255,255,.08);
+    }
+    h2 { margin:0 0 8px; font-size:1.35rem; }
+    .card p { margin:0; color:var(--muted); line-height:1.55; flex:1; }
+    .open { margin-top:20px; font-weight:750; color:#8bdcff; }
+    .c2 .open { color:#c4b5fd; } .c3 .open { color:#86efac; }
+    .c4 .open { color:#f9a8d4; } .c5 .open { color:#fde68a; }
+    footer {
+      text-align:center; color:#8fa4bf; font-size:.88rem; margin-top:30px;
+      padding-top:20px; border-top:1px solid rgba(174,189,209,.12);
+    }
+    @media (max-width:720px) {
+      .wrap { padding-top:28px; }
+      .grid { grid-template-columns:1fr; }
+      .card:last-child { grid-column:auto; }
+      .card { min-height:205px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="eyebrow">Interactive Learning</div>
+      <h1>Microbiology Explorer</h1>
+      <p class="subtitle">Choose an interactive activity to explore microbiology concepts, laboratory methods, and cellular structures.</p>
+    </header>
+
+    <section class="grid" aria-label="Microbiology interactive activities">
+      <a class="card c1" href="Bacterial%20Anatomy%20Interactive%20Explorer.html">
+        <div class="icon">🦠</div>
+        <h2>Bacterial Anatomy</h2>
+        <p>Explore bacterial structures and compare key anatomical features through an interactive learning experience.</p>
+        <div class="open">Open activity →</div>
+      </a>
+
+      <a class="card c2" href="Gram%20Stain%20Interactive.html">
+        <div class="icon">🔬</div>
+        <h2>Gram Stain</h2>
+        <p>Work through the Gram-staining process and reinforce the principles that distinguish Gram-positive and Gram-negative bacteria.</p>
+        <div class="open">Open activity →</div>
+      </a>
+
+      <a class="card c3" href="Microbiology_Explorer_Capsule_Stain_Challenge(1).html">
+        <div class="icon">🧫</div>
+        <h2>Capsule Staining Challenge</h2>
+        <p>Practice the sequence and interpretation of capsule-staining methods in an interactive laboratory challenge.</p>
+        <div class="open">Open activity →</div>
+      </a>
+
+      <a class="card c4" href="Prokaryotes%20and%20Eukaryotes%20interactive.html">
+        <div class="icon">⚖️</div>
+        <h2>Prokaryotes vs. Eukaryotes</h2>
+        <p>Compare cellular organization and distinguish the defining characteristics of prokaryotic and eukaryotic cells.</p>
+        <div class="open">Open activity →</div>
+      </a>
+
+      <a class="card c5" href="Spore%20Stain%20Interactive.html">
+        <div class="icon">🧪</div>
+        <h2>Spore Stain</h2>
+        <p>Explore the Schaeffer-Fulton endospore-staining procedure and practice interpreting staining results.</p>
+        <div class="open">Open activity →</div>
+      </a>
+    </section>
+
+    <footer>
+      Microbiology Explorer · Interactive educational resources
+    </footer>
+  </main>
+</body>
+</html>
