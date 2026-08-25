@@ -515,9 +515,52 @@
     footer .designer {
       display: inline-block; margin-top: 0.3rem; color: #a5b4fc;
     }
-  </style>
+  
+  /* Microbiology Explorer hub navigation */
+  .hub-return-btn{
+    position:fixed;
+    top:14px;
+    left:14px;
+    z-index:99999;
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    padding:.62rem .9rem;
+    border-radius:999px;
+    text-decoration:none;
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    font-size:.86rem;
+    font-weight:700;
+    line-height:1;
+    color:#ffffff;
+    background:rgba(8,40,88,.94);
+    border:1px solid rgba(255,255,255,.24);
+    box-shadow:0 6px 18px rgba(0,0,0,.28);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .hub-return-btn:hover,
+  .hub-return-btn:focus{
+    transform:translateY(-1px);
+    background:rgba(13,62,126,.98);
+    box-shadow:0 8px 22px rgba(0,0,0,.34);
+    outline:none;
+  }
+  @media (max-width:600px){
+    .hub-return-btn{
+      top:8px;
+      left:8px;
+      padding:.55rem .72rem;
+      font-size:.76rem;
+    }
+  }
+
+</style>
 </head>
 <body>
+<a class="hub-return-btn" href="index.html" aria-label="Return to Microbiology Explorer Hub">← Microbiology Explorer Hub</a>
+
   <div class="container">
     <header>
       <h1>🦠 Bacterial Anatomy Explorer</h1>
