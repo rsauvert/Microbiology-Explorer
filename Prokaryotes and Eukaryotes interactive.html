@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PROKARYOTE vs EUKARYOTE — The Ludicrous Showdown</title>
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --card: #16162a;
+      --prok: #22d3ee;
+      --euk: #f472b6;
+      --accent: #a78bfa;
+      --success: #4ade80;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(34, 211, 238, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(244, 114, 182, 0.08) 0%, transparent 50%),
+        linear-gradient(160deg, #0a0a12 0%, #1a1030 50%, #0a0a12 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 1.2rem; }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.2rem;
+      padding: 1.4rem 1rem;
+      background: rgba(22, 22, 42, 0.9);
+      border-radius: 20px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(90deg, #22d3ee, #a78bfa, #f472b6, #22d3ee);
+      background-size: 300% 100%;
+      animation: borderShift 6s linear infinite;
+      z-index: -1;
+      border-radius: 22px;
+    }
+    @keyframes borderShift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 300% 50%; }
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      background: linear-gradient(90deg, #22d3ee, #e879f9, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+      font-style: italic;
+    }
+    .tagline {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #c4b5fd;
+    }
+
+    .tabs {
+      display: flex; gap: 0.4rem; margin-bottom: 1.1rem;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .tab-btn {
+      padding: 0.55rem 1.05rem; border: none; border-radius: 999px;
+      background: var(--card); color: var(--muted); font-weight: 700;
+      cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
+      font-size: 0.88rem;
+    }
+    .tab-btn:hover { color: var(--text); border-color: var(--accent); transform: scale(1.03); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #22d3ee, #a78bfa 50%, #f472b6);
+      color: #0a0a12; box-shadow: 0 4px 18px rgba(167, 139, 250, 0.4);
+    }
+
+    .panel { display: none; animation: popIn 0.35s ease; }
+    .panel.active { display: block; }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.97) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 1.3rem;
+      margin-bottom: 1.1rem;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+    }
+
+    h2 { font-size: 1.3rem; margin-bottom: 0.7rem; }
+    h2.prok-color { color: var(--prok); }
+    h2.euk-color { color: var(--euk); }
+    h2.neutral { color: var(--accent); }
+
+    p { margin-bottom: 0.7rem; }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+
+    /* ===== ARENA ===== */
+    .arena {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0.75rem;
+      align-items: stretch;
+      margin: 1rem 0;
+    }
+    @media (max-width: 700px) {
+      .arena { grid-template-columns: 1fr; }
+      .vs-badge { transform: rotate(0) !important; margin: 0.5rem auto; }
+    }
+
+    .fighter {
+      background: #0f0f1a;
+      border-radius: 16px;
+      padding: 1.1rem;
+      border: 2px solid;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .fighter:hover { transform: translateY(-3px); }
+    .fighter.prok {
+      border-color: rgba(34, 211, 238, 0.5);
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.1);
+    }
+    .fighter.euk {
+      border-color: rgba(244, 114, 182, 0.5);
+      box-shadow: 0 0 30px rgba(244, 114, 182, 0.1);
+    }
+
+    .fighter-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 0.3rem;
+    }
+    .prok .fighter-title { color: var(--prok); }
+    .euk .fighter-title { color: var(--euk); }
+
+    .fighter-emoji {
+      font-size: 2.8rem;
+      text-align: center;
+      display: block;
+      margin: 0.3rem 0 0.6rem;
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    .stat-list {
+      list-style: none;
+      font-size: 0.88rem;
+    }
+    .stat-list li {
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(148,163,184,0.1);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .stat-list li span:last-child { color: var(--muted); text-align: right; }
+
+    .vs-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #22d3ee, #f472b6);
+      color: #0a0a12;
+      font-weight: 900;
+      font-size: 1.1rem;
+      align-self: center;
+      box-shadow: 0 0 25px rgba(167, 139, 250, 0.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* Feature buttons */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .feat-btn {
+      padding: 0.7rem 0.5rem;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      background: #0f0f1a;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .feat-btn:hover {
+      border-color: var(--accent);
+      background: rgba(167, 139, 250, 0.12);
+      transform: translateY(-2px);
+    }
+    .feat-btn.selected-prok {
+      border-color: var(--prok);
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--prok);
+    }
+    .feat-btn.selected-euk {
+      border-color: var(--euk);
+      background: rgba(244, 114, 182, 0.15);
+      color: var(--euk);
+    }
+
+    .reveal-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 12px;
+      background: #0f0f1a;
+      border: 1px solid #334155;
+      min-height: 90px;
+      font-size: 0.95rem;
+    }
+    .reveal-box.prok-bg { border-color: var(--prok); box-shadow: 0 0 20px rgba(34,211,238,0.15); }
+    .reveal-box.euk-bg { border-color: var(--euk); box-shadow: 0 0 20px rgba(244,114,182,0.15); }
+    .reveal-box.both-bg { border-color: var(--accent); }
+
+    /* ===== SORTING GAME ===== */
+    .sort-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+    @media (max-width: 600px) { .sort-area { grid-template-columns: 1fr; } }
+
+    .sort-bin {
+      min-height: 180px;
+      border-radius: 14px;
+      padding: 0.8rem;
+      border: 3px dashed;
+      transition: background 0.2s;
+    }
+    .sort-bin.prok-bin {
+      border-color: rgba(34, 211, 238, 0.5);
+      background: rgba(34, 211, 238, 0.05);
+    }
+    .sort-bin.euk-bin {
+      border-color: rgba(244, 114, 182, 0.5);
+      background: rgba(244, 114, 182, 0.05);
+    }
+    .sort-bin.over { filter: brightness(1.3); }
+    .sort-bin h3 {
+      text-align: center;
+      margin-bottom: 0.6rem;
+      font-size: 1rem;
+    }
+    .prok-bin h3 { color: var(--prok); }
+    .euk-bin h3 { color: var(--euk); }
+
+    .item-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      justify-content: center;
+      margin: 1rem 0;
+      min-height: 50px;
+      padding: 0.6rem;
+      background: #0f0f1a;
+      border-radius: 12px;
+      border: 1px dashed #475569;
+    }
+
+    .sort-item {
+      padding: 0.45rem 0.8rem;
+      border-radius: 10px;
+      background: #1e1e36;
+      border: 2px solid #475569;
+      cursor: grab;
+      font-size: 0.85rem;
+      font-weight: 600;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .sort-item:hover { border-color: var(--accent); transform: scale(1.04); }
+    .sort-item.correct { border-color: var(--success); background: rgba(74, 222, 128, 0.15); }
+    .sort-item.wrong { border-color: var(--danger); background: rgba(248, 113, 113, 0.15); animation: shake 0.4s; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* ===== QUIZ ===== */
+    .question-card {
+      background: rgba(15, 15, 30, 0.7);
+      border-radius: 14px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      border: 1px solid #334155;
+    }
+    .options { display: grid; gap: 0.5rem; margin-top: 0.9rem; }
+    .option {
+      padding: 0.8rem 1rem;
+      background: #0f0f1a;
+      border: 2px solid #334155;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+    .option:hover:not(.correct):not(.wrong) {
+      border-color: var(--accent);
+      background: rgba(167, 139, 250, 0.1);
+    }
+    .option.correct { border-color: var(--success); background: rgba(74, 222, 128, 0.15); }
+    .option.wrong { border-color: var(--danger); background: rgba(248, 113, 113, 0.15); }
+
+    .score-board {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(15,15,30,0.6);
+      border-radius: 14px;
+      padding: 0.9rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .score-board div span {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #22d3ee, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .feedback {
+      margin-top: 0.7rem;
+      padding: 0.75rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct { background: rgba(74,222,128,0.12); border: 1px solid var(--success); }
+    .feedback.wrong { background: rgba(248,113,113,0.12); border: 1px solid var(--danger); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22d3ee, #a78bfa 50%, #f472b6);
+      color: #0a0a12;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(167, 139, 250, 0.4);
+    }
+
+    /* ===== CHAOS MODE ===== */
+    .chaos-card {
+      background: #0f0f1a;
+      border-radius: 14px;
+      padding: 1.1rem;
+      border: 2px solid #334155;
+      margin-bottom: 0.8rem;
+      transition: all 0.3s;
+    }
+    .chaos-card:hover { border-color: var(--accent); }
+    .chaos-card h3 { margin-bottom: 0.4rem; font-size: 1.05rem; }
+    .chaos-result {
+      margin-top: 0.6rem;
+      padding: 0.7rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .chaos-result.show { display: block; animation: popIn 0.3s ease; }
+
+    footer {
+      text-align: center;
+      margin-top: 1.8rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    footer .designer {
+      display: inline-block;
+      margin-top: 0.35rem;
+      color: #c4b5fd;
+      font-weight: 600;
+    }
+
+    .big-laugh {
+      font-size: 1.6rem;
+      text-align: center;
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>⚔️ PROKARYOTE vs EUKARYOTE</h1>
+      <p class="subtitle">The Ludicrous Cellular Showdown</p>
+      <p class="tagline">Where size doesn’t always matter… but a nucleus absolutely does.</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="arena">The Arena</button>
+      <button class="tab-btn" data-tab="sort">Sorting Mayhem</button>
+      <button class="tab-btn" data-tab="quiz">Ludicrous Quiz</button>
+      <button class="tab-btn" data-tab="chaos">Chaos Mode</button>
+      <button class="tab-btn" data-tab="facts">Deep Lore</button>
+    </div>
+
+    <!-- ========== ARENA ========== -->
+    <div id="arena" class="panel active">
+      <div class="card">
+        <h2 class="neutral">Choose your fighter… or just stare in awe</h2>
+        <p class="muted">Two domains of life enter. Only one has mitochondria. (Most of the time.)</p>
+
+        <div class="arena">
+          <div class="fighter prok">
+            <div class="fighter-title">PROKARYOTE</div>
+            <span class="fighter-emoji">🦠</span>
+            <ul class="stat-list">
+              <li><span>Nucleus</span><span>Nope. Just vibes (nucleoid)</span></li>
+              <li><span>Size</span><span>0.5–5 µm (tiny menace)</span></li>
+              <li><span>Organelles</span><span>Zero membrane-bound</span></li>
+              <li><span>Ribosomes</span><span>70S (the original)</span></li>
+              <li><span>DNA</span><span>Circular, free-range</span></li>
+              <li><span>Cell wall</span><span>Peptidoglycan (Bacteria)</span></li>
+              <li><span>Reproduction</span><span>Binary fission (no drama)</span></li>
+              <li><span>Examples</span><span>Bacteria & Archaea</span></li>
+            </ul>
+          </div>
+
+          <div class="vs-badge">VS</div>
+
+          <div class="fighter euk">
+            <div class="fighter-title">EUKARYOTE</div>
+            <span class="fighter-emoji">🧬</span>
+            <ul class="stat-list">
+              <li><span>Nucleus</span><span>Yes. Fancy membrane bag</span></li>
+              <li><span>Size</span><span>10–100 µm (show-off)</span></li>
+              <li><span>Organelles</span><span>Mitochondria, ER, Golgi…</span></li>
+              <li><span>Ribosomes</span><span>80S (plus 70S in mito)</span></li>
+              <li><span>DNA</span><span>Linear chromosomes</span></li>
+              <li><span>Cell wall</span><span>Cellulose / chitin / none</span></li>
+              <li><span>Reproduction</span><span>Mitosis / meiosis (complicated)</span></li>
+              <li><span>Examples</span><span>Animals, plants, fungi, protists</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="color:var(--accent);margin:1.2rem 0 0.6rem;text-align:center;">Click a feature to see who owns it</h3>
+        <div class="feature-grid" id="featureGrid"></div>
+        <div class="reveal-box" id="revealBox">
+          <span class="muted">Pick any feature above. The truth (and some attitude) will appear here.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== SORTING ========== -->
+    <div id="sort" class="panel">
+      <div class="card">
+        <h2 class="neutral">Sorting Mayhem</h2>
+        <p class="muted">Drag each item into the correct kingdom of chaos. Wrong answers will be publicly shamed.</p>
+
+        <div class="item-pool" id="itemPool"></div>
+
+        <div class="sort-area">
+          <div class="sort-bin prok-bin" id="prokBin" data-side="prok">
+            <h3>🦠 PROKARYOTE BIN</h3>
+            <div class="bin-contents"></div>
+          </div>
+          <div class="sort-bin euk-bin" id="eukBin" data-side="euk">
+            <h3>🧬 EUKARYOTE BIN</h3>
+            <div class="bin-contents"></div>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:1rem;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+          <button class="btn-primary" onclick="checkSort()">Judge My Sorting</button>
+          <button class="btn-primary" style="background:linear-gradient(135deg,#64748b,#475569);color:white;" onclick="resetSort()">Reset Chaos</button>
+        </div>
+        <div id="sortResult" style="text-align:center;margin-top:0.8rem;font-weight:700;font-size:1.05rem;"></div>
+      </div>
+    </div>
+
+    <!-- ========== QUIZ ========== -->
+    <div id="quiz" class="panel">
+      <div class="card">
+        <h2 class="neutral">The Ludicrous Quiz</h2>
+        <p class="muted">Answer correctly or face the ridicule of microscopic entities.</p>
+        <div class="score-board">
+          <div><span id="qScore">0</span>Score</div>
+          <div><span id="qCurrent">1</span>/ <span id="qTotal">12</span></div>
+          <div><span id="qStreak">0</span>Streak</div>
+        </div>
+        <div id="quizArea"></div>
+        <div style="text-align:center;margin-top:1rem;">
+          <button class="btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">Next Outrage →</button>
+          <button class="btn-primary" id="restartQuizBtn" onclick="startQuiz()" style="display:none;">Fight Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== CHAOS MODE ========== -->
+    <div id="chaos" class="panel">
+      <div class="card">
+        <h2 class="neutral">Chaos Mode: What If…?</h2>
+        <p class="muted">Hypothetical abominations. Click to unleash scientific nonsense (with a grain of real biology).</p>
+
+        <div class="chaos-card" onclick="toggleChaos(this, 0)">
+          <h3>🦠 + 🧬 What if a bacterium swallowed a mitochondrion and kept it?</h3>
+          <p class="muted">Click to reveal the ancient plot twist…</p>
+          <div class="chaos-result">
+            <strong style="color:var(--success)">Congratulations — you just rediscovered endosymbiotic theory.</strong><br>
+            That’s basically how eukaryotes got mitochondria ~1.5 billion years ago. A prokaryote (alphaproteobacterium) was engulfed by an ancestral host cell and never left. Same story with chloroplasts (from cyanobacteria). You monster. You beautiful, textbook monster.
+          </div>
+        </div>
+
+        <div class="chaos-card" onclick="toggleChaos(this, 1)">
+          <h3>What if humans had 70S ribosomes instead of 80S?</h3>
+          <p class="muted">Click at your own risk…</p>
+          <div class="chaos-result">
+            <strong style="color:var(--danger)">Most antibiotics would also kill you.</strong><br>
+            Aminoglycosides, tetracyclines, macrolides, chloramphenicol, and linezolid all target 70S ribosomes. The reason they (usually) don’t kill us is that our cytoplasmic ribosomes are 80S. Our mitochondria still have 70S ribosomes — which is why some antibiotics have mitochondrial toxicity. Biology is metal.
+          </div>
+        </div>
+
+        <div class="chaos-card" onclick="toggleChaos(this, 2)">
+          <h3>What if <em>E. coli</em> decided to grow a nucleus tomorrow?</h3>
+          <p class="muted">Click for the bureaucratic nightmare…</p>
+          <div class="chaos-result">
+            <strong style="color:var(--warning)">It would stop being a prokaryote by definition… and also probably explode.</strong><br>
+            Building a nuclear envelope, linear chromosomes, mitosis machinery, and proper organelles is not a weekend project. Evolution took over a billion years. Also, transcription and translation would no longer be coupled — a major lifestyle change for a bacterium that prides itself on speed.
+          </div>
+        </div>
+
+        <div class="chaos-card" onclick="toggleChaos(this, 3)">
+          <h3>What if eukaryotes had peptidoglycan cell walls?</h3>
+          <p class="muted">Click to meet your new rigid self…</p>
+          <div class="chaos-result">
+            <strong style="color:var(--prok)">You’d be a lot harder to hug… and lysozyme would be a bioweapon.</strong><br>
+            Animal cells deliberately lack rigid walls so they can move, change shape, and form tissues. Plants use cellulose; fungi use chitin. If we had peptidoglycan, every time someone cried (lysozyme in tears) or ate an egg white, cellular chaos could ensue. Also β-lactam antibiotics would become personal attacks.
+          </div>
+        </div>
+
+        <div class="chaos-card" onclick="toggleChaos(this, 4)">
+          <h3>Who would win in a fight: one elephant or one trillion bacteria?</h3>
+          <p class="muted">The ultimate matchup…</p>
+          <div class="chaos-result">
+            <strong style="color:var(--euk)">Technically the bacteria already live on and inside the elephant, so they’ve already infiltrated.</strong><br>
+            Biomass-wise, bacteria on Earth outweigh all animals combined. Numerically, your own body has roughly as many bacterial cells as human cells. The “fight” was over before it started. Prokaryotes win by sheer existential ubiquity. Eukaryotes win by writing the history books (and this game).
+          </div>
+        </div>
+
+        <div class="chaos-card" onclick="toggleChaos(this, 5)">
+          <h3>Can a prokaryote ever become a multicellular organism?</h3>
+          <p class="muted">Click for the plot of several origin-of-complexity papers…</p>
+          <div class="chaos-result">
+            <strong style="color:var(--accent)">They already do… kind of.</strong><br>
+            Biofilms, cyanobacterial filaments, myxobacteria fruiting bodies, and Streptomyces hyphae show coordinated multicellular behavior. True complex multicellularity with specialized tissues is rare outside eukaryotes, but prokaryotes are not strictly “loners.” They just prefer the soft launch of cooperation over the full nuclear upgrade.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== DEEP LORE ========== -->
+    <div id="facts" class="panel">
+      <div class="card">
+        <h2 class="neutral">Deep Lore (Actually Useful)</h2>
+
+        <h3 style="color:var(--prok);margin-top:0.5rem;">Prokaryote Power-Ups</h3>
+        <ul style="margin:0.4rem 0 1rem 1.2rem;color:var(--text);">
+          <li>No nucleus = transcription & translation can happen at the same time (speedrun mode)</li>
+          <li>Plasmids let them trade antibiotic resistance like rare Pokémon cards</li>
+          <li>Endospores = “pause the game and survive the apocalypse”</li>
+          <li>Horizontal gene transfer makes their evolution feel like multiplayer</li>
+          <li>Archaea invented weird lipids and live in places that would melt your face</li>
+        </ul>
+
+        <h3 style="color:var(--euk);">Eukaryote Flexes</h3>
+        <ul style="margin:0.4rem 0 1rem 1.2rem;">
+          <li>Nucleus = protected genome + sophisticated gene regulation</li>
+          <li>Mitochondria = efficient ATP factories (thanks, ancient bacteria)</li>
+          <li>Cytoskeleton = shape-shifting, phagocytosis, and mitosis</li>
+          <li>Sexual reproduction = genetic shuffling for long-term survival</li>
+          <li>Multicellularity with true tissues and organs (the ultimate cooperative DLC)</li>
+        </ul>
+
+        <h3 style="color:var(--accent);">The Shared Origin Story</h3>
+        <p>All life shares a common ancestor. Eukaryotes are essentially the result of a successful long-term merger between prokaryotic lineages (endosymbiosis). Your mitochondria still have their own circular DNA and 70S ribosomes — little prokaryotic ghosts living rent-free inside you.</p>
+
+        <div class="big-laugh">🧬 + 🦠 = 🌍</div>
+        <p class="muted" style="text-align:center;">Without prokaryotes there would be no eukaryotes, no oxygen atmosphere as we know it, and no one to make this ridiculous game.</p>
+      </div>
+    </div>
+
+    <footer>
+      An excessively detailed yet shamelessly ludicrous educational experience<br>
+      <span class="designer">Design by Dr. R. Salas-Auvert</span>
+    </footer>
+  </div>
+
+  <script>
+    // ========== FEATURE DATA ==========
+    const features = [
+      {
+        name: "Nucleus",
+        owner: "euk",
+        text: "Eukaryotes only. A membrane-bound headquarters for the genome. Prokaryotes keep their DNA in a nucleoid region — no fancy envelope, no nuclear pores, no problem."
+      },
+      {
+        name: "Mitochondria",
+        owner: "euk",
+        text: "Eukaryotes. These ATP powerhouses started as free-living prokaryotes. Prokaryotes do respiration in their plasma membrane instead — no need for internal batteries."
+      },
+      {
+        name: "70S Ribosomes",
+        owner: "prok",
+        text: "Classic prokaryote equipment. Eukaryotic cytoplasm uses 80S, but their mitochondria and chloroplasts still run 70S — a dead giveaway of their bacterial ancestry."
+      },
+      {
+        name: "Peptidoglycan",
+        owner: "prok",
+        text: "Bacteria (not Archaea) build walls from peptidoglycan. Eukaryotes use cellulose (plants), chitin (fungi), or pure confidence (animals)."
+      },
+      {
+        name: "Circular Chromosome",
+        owner: "prok",
+        text: "Prokaryotes rock one circular chromosome (plus optional plasmids). Eukaryotes prefer multiple linear chromosomes packed with histones."
+      },
+      {
+        name: "Binary Fission",
+        owner: "prok",
+        text: "Prokaryotes divide by binary fission — simple, fast, no mitotic spindle required. Eukaryotes invented mitosis and meiosis because drama."
+      },
+      {
+        name: "Endoplasmic Reticulum",
+        owner: "euk",
+        text: "Eukaryotes only. A whole internal highway system for protein and lipid trafficking. Prokaryotes just do business at the plasma membrane."
+      },
+      {
+        name: "Flagella (structure)",
+        owner: "both",
+        text: "Both can have flagella… but they are completely different machines. Bacterial flagella rotate like propellers; eukaryotic flagella bend with a 9+2 microtubule arrangement. Convergent evolution at its finest."
+      },
+      {
+        name: "Plasmids",
+        owner: "prok",
+        text: "Mostly a prokaryote party trick — extra circular DNA that can carry resistance or virulence genes. Eukaryotes rarely bother (though some yeasts and organelles have plasmid-like DNA)."
+      },
+      {
+        name: "Histones",
+        owner: "euk",
+        text: "Eukaryotes package DNA with histones. Archaea also have histone-like proteins, but classic bacterial chromosomes are more “naked and proud.”"
+      },
+      {
+        name: "Chloroplasts",
+        owner: "euk",
+        text: "Plant and algal eukaryotes. Again, former free-living cyanobacteria that moved in and never paid rent. Photosynthetic bacteria do it without the organelle upgrade."
+      },
+      {
+        name: "Coupled Transcription-Translation",
+        owner: "prok",
+        text: "Prokaryote speedrun feature: ribosomes can start translating mRNA while it’s still being transcribed. Eukaryotes separate these processes in space and time (nucleus vs cytoplasm)."
+      }
+    ];
+
+    // build feature buttons
+    const grid = document.getElementById('featureGrid');
+    features.forEach((f, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'feat-btn';
+      btn.textContent = f.name;
+      btn.onclick = () => showFeature(i, btn);
+      grid.appendChild(btn);
+    });
+
+    function showFeature(i, btn) {
+      document.querySelectorAll('.feat-btn').forEach(b => {
+        b.classList.remove('selected-prok', 'selected-euk');
+      });
+      const f = features[i];
+      const box = document.getElementById('revealBox');
+      box.className = 'reveal-box';
+      if (f.owner === 'prok') {
+        btn.classList.add('selected-prok');
+        box.classList.add('prok-bg');
+        box.innerHTML = `<strong style="color:var(--prok)">🦠 PROKARYOTE specialty</strong><br>${f.text}`;
+      } else if (f.owner === 'euk') {
+        btn.classList.add('selected-euk');
+        box.classList.add('euk-bg');
+        box.innerHTML = `<strong style="color:var(--euk)">🧬 EUKARYOTE specialty</strong><br>${f.text}`;
+      } else {
+        box.classList.add('both-bg');
+        box.innerHTML = `<strong style="color:var(--accent)">🤝 BOTH (but different)</strong><br>${f.text}`;
+      }
+    }
+
+    // ========== TABS ==========
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'quiz' && !quizStarted) startQuiz();
+        if (btn.dataset.tab === 'sort') initSort();
+      });
+    });
+
+    // ========== SORTING ==========
+    const sortItems = [
+      { name: "Nucleoid region", side: "prok" },
+      { name: "Membrane-bound nucleus", side: "euk" },
+      { name: "70S ribosomes (cytoplasm)", side: "prok" },
+      { name: "80S ribosomes", side: "euk" },
+      { name: "Peptidoglycan wall", side: "prok" },
+      { name: "Mitochondria", side: "euk" },
+      { name: "Circular chromosome", side: "prok" },
+      { name: "Linear chromosomes", side: "euk" },
+      { name: "Binary fission", side: "prok" },
+      { name: "Mitosis", side: "euk" },
+      { name: "Plasmids (common)", side: "prok" },
+      { name: "Endoplasmic reticulum", side: "euk" },
+      { name: "No membrane organelles", side: "prok" },
+      { name: "Golgi apparatus", side: "euk" }
+    ];
+
+    let sortState = {};
+
+    function initSort() {
+      const pool = document.getElementById('itemPool');
+      pool.innerHTML = '';
+      document.querySelectorAll('.bin-contents').forEach(b => b.innerHTML = '');
+      document.getElementById('sortResult').textContent = '';
+      sortState = {};
+
+      const shuffled = [...sortItems].sort(() => Math.random() - 0.5);
+      shuffled.forEach((item, idx) => {
+        const el = document.createElement('div');
+        el.className = 'sort-item';
+        el.draggable = true;
+        el.dataset.side = item.side;
+        el.dataset.idx = idx;
+        el.textContent = item.name;
+        el.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', idx);
+          e.dataTransfer.setData('side', item.side);
+          e.dataTransfer.setData('name', item.name);
+        });
+        pool.appendChild(el);
+      });
+
+      ['prokBin', 'eukBin'].forEach(id => {
+        const bin = document.getElementById(id);
+        bin.ondragover = e => { e.preventDefault(); bin.classList.add('over'); };
+        bin.ondragleave = () => bin.classList.remove('over');
+        bin.ondrop = e => {
+          e.preventDefault();
+          bin.classList.remove('over');
+          const idx = e.dataTransfer.getData('text/plain');
+          const side = e.dataTransfer.getData('side');
+          const name = e.dataTransfer.getData('name');
+          const itemEl = document.querySelector(`.sort-item[data-idx="${idx}"]`);
+          if (!itemEl || itemEl.classList.contains('placed')) return;
+          itemEl.classList.add('placed');
+          itemEl.remove();
+          const clone = document.createElement('div');
+          clone.className = 'sort-item';
+          clone.textContent = name;
+          clone.dataset.side = side;
+          clone.dataset.correct = bin.dataset.side;
+          bin.querySelector('.bin-contents').appendChild(clone);
+          sortState[idx] = { side, placed: bin.dataset.side };
+        };
+      });
+    }
+
+    function checkSort() {
+      let correct = 0, total = 0;
+      document.querySelectorAll('.bin-contents .sort-item').forEach(el => {
+        total++;
+        el.classList.remove('correct', 'wrong');
+        if (el.dataset.side === el.dataset.correct) {
+          el.classList.add('correct');
+          correct++;
+        } else {
+          el.classList.add('wrong');
+        }
+      });
+      const remaining = document.querySelectorAll('#itemPool .sort-item').length;
+      const res = document.getElementById('sortResult');
+      if (remaining > 0) {
+        res.style.color = 'var(--warning)';
+        res.textContent = `Still ${remaining} item(s) floating in the void. Finish the job!`;
+      } else if (correct === total) {
+        res.style.color = 'var(--success)';
+        res.textContent = `🏆 Perfect! ${correct}/${total} — the domains bow before your classification skills.`;
+      } else {
+        res.style.color = 'var(--danger)';
+        res.textContent = `${correct}/${total} correct. The misclassified organelles are plotting revenge.`;
+      }
+    }
+
+    function resetSort() { initSort(); }
+
+    // ========== QUIZ ==========
+    const questions = [
+      {
+        q: "A cell has no nucleus, 70S ribosomes, and a peptidoglycan wall. It is almost certainly a:",
+        options: ["Plant cell", "Fungal cell", "Bacterium", "Protozoan"],
+        answer: 2,
+        good: "Correct! Classic prokaryote (Bacteria) profile. No nucleus, 70S ribosomes, peptidoglycan — textbook.",
+        bad: "Nope. Plants, fungi, and protozoa are all eukaryotes with nuclei and 80S ribosomes."
+      },
+      {
+        q: "Which of these is a eukaryotic specialty?",
+        options: ["Binary fission as the main division method", "Circular chromosome in a nucleoid", "Mitochondria", "Coupled transcription and translation"],
+        answer: 2,
+        good: "Yes! Mitochondria are defining eukaryotic organelles (of endosymbiotic origin).",
+        bad: "The other three are proud prokaryotic features."
+      },
+      {
+        q: "Why don’t most antibiotics that target 70S ribosomes kill us?",
+        options: [
+          "Because we don’t have ribosomes",
+          "Our cytoplasmic ribosomes are 80S; only mitochondria have 70S",
+          "Antibiotics cannot enter human cells",
+          "We have peptidoglycan that blocks them"
+        ],
+        answer: 1,
+        good: "Exactly. Selective toxicity relies on the 70S vs 80S difference. (Mitochondrial 70S ribosomes can still cause side effects.)",
+        bad: "We do have ribosomes — just a different size in the cytoplasm."
+      },
+      {
+        q: "Endosymbiotic theory explains the origin of:",
+        options: ["Peptidoglycan", "Mitochondria and chloroplasts", "Bacterial flagella", "Plasmids"],
+        answer: 1,
+        good: "Nailed it. Ancient prokaryotes moved in and became organelles. One of biology’s greatest plot twists.",
+        bad: "Endosymbiosis is specifically about how mitochondria and chloroplasts originated from free-living prokaryotes."
+      },
+      {
+        q: "Which statement is TRUE?",
+        options: [
+          "All prokaryotes have peptidoglycan",
+          "All eukaryotes have cell walls",
+          "Archaea are prokaryotes but lack peptidoglycan",
+          "Only eukaryotes can have flagella"
+        ],
+        answer: 2,
+        good: "Correct. Archaea are prokaryotes with unique cell walls (no peptidoglycan) and distinct membrane lipids.",
+        bad: "Archaea are the exception to the peptidoglycan rule; animals lack walls; both domains can have flagella (of different designs)."
+      },
+      {
+        q: "A major advantage of the prokaryotic lifestyle is:",
+        options: [
+          "Ability to form complex tissues",
+          "Rapid reproduction and metabolic diversity",
+          "Sexual reproduction with meiosis every generation",
+          "Large cell size for storing organelles"
+        ],
+        answer: 1,
+        good: "Speed and metabolic versatility are prokaryotic superpowers. They can double in minutes and eat almost anything.",
+        bad: "Complex tissues and meiosis are eukaryotic flexes."
+      },
+      {
+        q: "The nucleoid is:",
+        options: [
+          "A membrane-bound organelle",
+          "The region where prokaryotic DNA is located",
+          "Another name for the eukaryotic nucleus",
+          "A type of inclusion body"
+        ],
+        answer: 1,
+        good: "Yes — the nucleoid is the irregular region containing the prokaryotic chromosome. No membrane around it.",
+        bad: "No membrane = not an organelle in the eukaryotic sense."
+      },
+      {
+        q: "Which pair is correctly matched?",
+        options: [
+          "Eukaryote → 70S cytoplasmic ribosomes",
+          "Prokaryote → linear chromosomes with histones (typical bacteria)",
+          "Eukaryote → membrane-bound organelles",
+          "Prokaryote → mitosis"
+        ],
+        answer: 2,
+        good: "Membrane-bound organelles are a hallmark of eukaryotes.",
+        bad: "Check the others: eukaryotes have 80S cytoplasmic ribosomes; typical bacteria have circular DNA; mitosis is eukaryotic."
+      },
+      {
+        q: "Horizontal gene transfer is especially common and important in:",
+        options: ["Mammals", "Prokaryotes", "Flowering plants only", "Human red blood cells"],
+        answer: 1,
+        good: "Prokaryotes swap genes via transformation, transduction, and conjugation like it’s a lifestyle.",
+        bad: "HGT happens in eukaryotes too, but it’s a core evolutionary engine for bacteria and archaea."
+      },
+      {
+        q: "If you removed every prokaryote on Earth tomorrow, eukaryotes would:",
+        options: [
+          "Barely notice",
+          "Mostly be fine because they are independent",
+          "Face ecological collapse (nutrient cycles, gut microbiomes, oxygen history, etc.)",
+          "Immediately evolve into new prokaryotes"
+        ],
+        answer: 2,
+        good: "Correct. Prokaryotes run planetary biogeochemical cycles and live in/on every eukaryote. Removing them is not a mild inconvenience.",
+        bad: "We are deeply dependent on prokaryotic partners and processes."
+      },
+      {
+        q: "A cell is 2 µm long, has no nucleus, and divides by binary fission. Best classification?",
+        options: ["Eukaryotic protist", "Prokaryote", "Fungal spore", "Plant pollen"],
+        answer: 1,
+        good: "Size, lack of nucleus, and binary fission scream prokaryote.",
+        bad: "Eukaryotes are generally larger and use mitosis/meiosis."
+      },
+      {
+        q: "The funniest (yet true) statement is:",
+        options: [
+          "Your mitochondria were once free-living bacteria",
+          "Bacteria have tiny nuclei that are hard to see",
+          "Eukaryotes invented peptidoglycan",
+          "Archaea are a type of virus"
+        ],
+        answer: 0,
+        good: "True and glorious. You contain multitudes — including ancient bacterial roommates who became mitochondria.",
+        bad: "The other options are gloriously wrong."
+      }
+    ];
+
+    let quizStarted = false, qIndex = 0, score = 0, streak = 0, answered = false;
+
+    function startQuiz() {
+      quizStarted = true; qIndex = 0; score = 0; streak = 0;
+      document.getElementById('qScore').textContent = 0;
+      document.getElementById('qStreak').textContent = 0;
+      document.getElementById('qTotal').textContent = questions.length;
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('restartQuizBtn').style.display = 'none';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      answered = false;
+      const q = questions[qIndex];
+      document.getElementById('qCurrent').textContent = qIndex + 1;
+      let html = `<div class="question-card"><h3 style="color:var(--text);margin-bottom:0.6rem;">${q.q}</h3><div class="options">`;
+      q.options.forEach((opt, i) => {
+        html += `<div class="option" onclick="selectOption(${i})">${opt}</div>`;
+      });
+      html += `</div><div class="feedback" id="feedback"></div></div>`;
+      document.getElementById('quizArea').innerHTML = html;
+      document.getElementById('nextBtn').style.display = 'none';
+    }
+
+    function selectOption(index) {
+      if (answered) return;
+      answered = true;
+      const q = questions[qIndex];
+      const options = document.querySelectorAll('#quizArea .option');
+      const feedback = document.getElementById('feedback');
+      options.forEach(o => o.style.pointerEvents = 'none');
+      if (index === q.answer) {
+        options[index].classList.add('correct');
+        score++; streak++;
+        feedback.className = 'feedback show correct';
+        feedback.textContent = '✓ ' + q.good;
+      } else {
+        options[index].classList.add('wrong');
+        options[q.answer].classList.add('correct');
+        streak = 0;
+        feedback.className = 'feedback show wrong';
+        feedback.textContent = '✗ ' + q.bad;
+      }
+      document.getElementById('qScore').textContent = score;
+      document.getElementById('qStreak').textContent = streak;
+      if (qIndex < questions.length - 1) {
+        document.getElementById('nextBtn').style.display = 'inline-block';
+      } else {
+        setTimeout(() => {
+          const msg = score === questions.length
+            ? "PERFECT SCORE. Both domains acknowledge your supremacy."
+            : score >= 9
+            ? "Strong performance. The microbes are moderately impressed."
+            : "The cells have questions about your classification skills. Review and return.";
+          document.getElementById('quizArea').innerHTML = `
+            <div class="question-card" style="text-align:center;">
+              <h2 style="color:var(--accent);">Quiz Complete!</h2>
+              <p style="font-size:1.4rem;margin:1rem 0;">${score} / ${questions.length}</p>
+              <p class="muted">${msg}</p>
+            </div>`;
+          document.getElementById('restartQuizBtn').style.display = 'inline-block';
+        }, 1100);
+      }
+    }
+
+    function nextQuestion() { qIndex++; showQuestion(); }
+
+    // ========== CHAOS ==========
+    function toggleChaos(card) {
+      const res = card.querySelector('.chaos-result');
+      res.classList.toggle('show');
+    }
+  </script>
+</body>
+</html>

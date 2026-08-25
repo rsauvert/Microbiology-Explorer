@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gram Stain Interactive Lab</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --accent2: #a78bfa;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --gram-pos: #4c1d95;   /* deep purple */
+      --gram-neg: #be123c;   /* deep pink/red */
+      --crystal: #7c3aed;
+      --safranin: #e11d48;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 16px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle { color: var(--muted); font-size: 0.95rem; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--muted);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+    }
+
+    .panel { display: none; animation: fadeIn 0.3s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+
+    h2 { font-size: 1.35rem; margin-bottom: 0.75rem; color: var(--accent); }
+    h3 { font-size: 1.1rem; margin: 1rem 0 0.5rem; color: var(--accent2); }
+
+    p { margin-bottom: 0.75rem; color: var(--text); }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+
+    /* Simulation */
+    .lab-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 700px) {
+      .lab-area { grid-template-columns: 1fr; }
+    }
+
+    .slide {
+      background: #0c1222;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      border: 2px dashed rgba(56, 189, 248, 0.3);
+      min-height: 220px;
+      position: relative;
+    }
+
+    .slide-label {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .bacteria-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 2rem 0 1rem;
+      min-height: 100px;
+      align-items: center;
+    }
+
+    .bacterium {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      transition: background 0.5s, box-shadow 0.5s, transform 0.3s;
+      box-shadow: 0 0 12px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    .bacterium.rod {
+      width: 58px;
+      height: 28px;
+      border-radius: 14px;
+    }
+
+    .bacterium.gram-pos { background: #c4b5fd; }
+    .bacterium.gram-neg { background: #fda4af; }
+
+    .bacterium.stained-purple { background: #7c3aed !important; box-shadow: 0 0 18px #a78bfa; }
+    .bacterium.stained-pink   { background: #e11d48 !important; box-shadow: 0 0 18px #fb7185; }
+    .bacterium.unstained      { background: #64748b !important; box-shadow: none; }
+    .bacterium.wrong          { animation: shake 0.4s; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    button.reagent {
+      padding: 0.7rem 1.1rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    button.reagent:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    button.reagent:not(:disabled):hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .btn-violet { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+    .btn-iodine { background: linear-gradient(135deg, #ca8a04, #a16207); }
+    .btn-alcohol { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
+    .btn-safranin { background: linear-gradient(135deg, #e11d48, #be123c); }
+    .btn-reset { background: linear-gradient(135deg, #64748b, #475569); }
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56,189,248,0.35); }
+
+    .status {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.6);
+      font-size: 0.95rem;
+      min-height: 3.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .status.good { border-left: 4px solid var(--success); }
+    .status.bad  { border-left: 4px solid var(--danger); }
+    .status.info { border-left: 4px solid var(--accent); }
+
+    /* Progress */
+    .steps {
+      display: flex;
+      justify-content: space-between;
+      margin: 1.25rem 0;
+      position: relative;
+    }
+
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 10%;
+      right: 10%;
+      height: 3px;
+      background: #334155;
+      z-index: 0;
+    }
+
+    .step {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      z-index: 1;
+      transition: all 0.3s;
+    }
+
+    .step.done { background: var(--success); color: #052e16; }
+    .step.current { background: var(--accent); color: #0c4a6e; box-shadow: 0 0 0 4px rgba(56,189,248,0.3); }
+
+    /* Quiz */
+    .question-card {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .options {
+      display: grid;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .option {
+      padding: 0.85rem 1rem;
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .option:hover:not(.selected):not(.correct):not(.wrong) {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .option.selected { border-color: var(--accent); }
+    .option.correct  { border-color: var(--success); background: rgba(34, 197, 94, 0.15); }
+    .option.wrong    { border-color: var(--danger); background: rgba(239, 68, 68, 0.15); }
+
+    .score-board {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(15,23,42,0.5);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .score-board div span {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* Results legend */
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+    }
+
+    .swatch.purple { background: #7c3aed; }
+    .swatch.pink   { background: #e11d48; }
+    .swatch.gray   { background: #64748b; }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .feedback {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct { background: rgba(34,197,94,0.15); border: 1px solid var(--success); }
+    .feedback.wrong   { background: rgba(239,68,68,0.15); border: 1px solid var(--danger); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔬 Gram Stain Interactive Lab</h1>
+      <p class="subtitle">Master the classic differential staining technique through simulation & quizzes</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="learn">Learn</button>
+      <button class="tab-btn" data-tab="sim">Lab Simulation</button>
+      <button class="tab-btn" data-tab="quiz">Quiz Challenge</button>
+      <button class="tab-btn" data-tab="id">Identify Bacteria</button>
+    </div>
+
+    <!-- LEARN PANEL -->
+    <div id="learn" class="panel active">
+      <div class="card">
+        <h2>What is the Gram Stain?</h2>
+        <p>Developed by Hans Christian Gram in 1884, the Gram stain is the most important differential stain in microbiology. It divides bacteria into two major groups based on cell wall structure:</p>
+        <ul style="margin: 0.75rem 0 0.75rem 1.25rem; color: var(--text);">
+          <li><strong style="color:#c4b5fd">Gram-positive</strong> — thick peptidoglycan layer → retain crystal violet → appear <strong>purple</strong></li>
+          <li><strong style="color:#fda4af">Gram-negative</strong> — thin peptidoglycan + outer membrane → lose crystal violet → take safranin → appear <strong>pink/red</strong></li>
+        </ul>
+
+        <h3>The Four Classic Steps</h3>
+        <ol style="margin: 0.5rem 0 0 1.25rem;">
+          <li><strong>Crystal Violet</strong> (primary stain) — all cells become purple</li>
+          <li><strong>Iodine</strong> (mordant) — forms large crystal violet–iodine complexes inside the cell</li>
+          <li><strong>Alcohol / Acetone</strong> (decolorizer) — critical differential step
+            <ul style="margin-left:1rem;">
+              <li>Gram+ : dehydrates thick peptidoglycan → traps the complexes → stays purple</li>
+              <li>Gram– : dissolves outer membrane & thin wall → complexes wash out → becomes colorless</li>
+            </ul>
+          </li>
+          <li><strong>Safranin</strong> (counterstain) — colors the now-colorless Gram-negative cells pink/red</li>
+        </ol>
+
+        <div class="legend">
+          <div class="legend-item"><span class="swatch purple"></span> Gram-positive (purple)</div>
+          <div class="legend-item"><span class="swatch pink"></span> Gram-negative (pink)</div>
+          <div class="legend-item"><span class="swatch gray"></span> Colorless / unstained</div>
+        </div>
+
+        <p class="muted" style="margin-top:1rem;">Common mistakes: over-decolorizing (Gram+ appear pink) or under-decolorizing (Gram– stay purple).</p>
+      </div>
+    </div>
+
+    <!-- SIMULATION PANEL -->
+    <div id="sim" class="panel">
+      <div class="card">
+        <h2>Virtual Gram Stain Station</h2>
+        <p class="muted">Apply the reagents in the correct order. Watch how Gram-positive cocci and Gram-negative rods respond differently!</p>
+
+        <div class="steps" id="progressSteps">
+          <div class="step current" data-step="0">1</div>
+          <div class="step" data-step="1">2</div>
+          <div class="step" data-step="2">3</div>
+          <div class="step" data-step="3">4</div>
+        </div>
+
+        <div class="lab-area">
+          <div class="slide">
+            <div class="slide-label">Gram-positive cocci</div>
+            <div class="bacteria-container" id="posContainer"></div>
+            <div style="font-size:0.85rem;color:var(--muted)">Staphylococcus-like</div>
+          </div>
+          <div class="slide">
+            <div class="slide-label">Gram-negative rods</div>
+            <div class="bacteria-container" id="negContainer"></div>
+            <div style="font-size:0.85rem;color:var(--muted)">E. coli-like</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="reagent btn-violet" id="btnViolet" onclick="applyReagent('violet')">1. Crystal Violet</button>
+          <button class="reagent btn-iodine" id="btnIodine" onclick="applyReagent('iodine')" disabled>2. Iodine</button>
+          <button class="reagent btn-alcohol" id="btnAlcohol" onclick="applyReagent('alcohol')" disabled>3. Alcohol</button>
+          <button class="reagent btn-safranin" id="btnSafranin" onclick="applyReagent('safranin')" disabled>4. Safranin</button>
+          <button class="reagent btn-reset" onclick="resetSim()">Reset</button>
+        </div>
+
+        <div class="status info" id="simStatus">Ready to begin. Click <strong>Crystal Violet</strong> to start staining.</div>
+      </div>
+    </div>
+
+    <!-- QUIZ PANEL -->
+    <div id="quiz" class="panel">
+      <div class="card">
+        <h2>Gram Stain Knowledge Check</h2>
+        <div class="score-board">
+          <div><span id="qScore">0</span>Score</div>
+          <div><span id="qCurrent">1</span>/ <span id="qTotal">8</span></div>
+          <div><span id="qStreak">0</span>Streak</div>
+        </div>
+
+        <div id="quizArea">
+          <!-- filled by JS -->
+        </div>
+
+        <div style="text-align:center;margin-top:1rem;">
+          <button class="btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">Next Question →</button>
+          <button class="btn-primary" id="restartQuizBtn" onclick="startQuiz()" style="display:none;">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDENTIFY PANEL -->
+    <div id="id" class="panel">
+      <div class="card">
+        <h2>Identify the Organism</h2>
+        <p class="muted">Based on the Gram reaction and morphology, choose the most likely identification.</p>
+
+        <div class="score-board">
+          <div><span id="idScore">0</span>Correct</div>
+          <div><span id="idTotal">0</span>Attempted</div>
+        </div>
+
+        <div id="idArea">
+          <!-- filled by JS -->
+        </div>
+
+        <div style="text-align:center;margin-top:1.25rem;">
+          <button class="btn-primary" id="idNextBtn" onclick="nextId()" style="display:none;">Next Organism →</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Educational game • Gram stain principle remains one of the most useful rapid tests in clinical microbiology
+    </footer>
+  </div>
+
+  <script>
+    // ========== TAB SWITCHING ==========
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'quiz' && !quizStarted) startQuiz();
+        if (btn.dataset.tab === 'id' && !idStarted) startId();
+      });
+    });
+
+    // ========== SIMULATION ==========
+    let currentStep = 0; // 0=ready, 1=violet done, 2=iodine, 3=alcohol, 4=safranin
+    const stepOrder = ['violet', 'iodine', 'alcohol', 'safranin'];
+
+    function createBacteria() {
+      const pos = document.getElementById('posContainer');
+      const neg = document.getElementById('negContainer');
+      pos.innerHTML = '';
+      neg.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const b = document.createElement('div');
+        b.className = 'bacterium gram-pos';
+        pos.appendChild(b);
+      }
+      for (let i = 0; i < 6; i++) {
+        const b = document.createElement('div');
+        b.className = 'bacterium rod gram-neg';
+        neg.appendChild(b);
+      }
+    }
+
+    function updateProgress() {
+      document.querySelectorAll('#progressSteps .step').forEach((s, i) => {
+        s.classList.remove('current', 'done');
+        if (i < currentStep) s.classList.add('done');
+        else if (i === currentStep) s.classList.add('current');
+      });
+    }
+
+    function setStatus(msg, type = 'info') {
+      const el = document.getElementById('simStatus');
+      el.innerHTML = msg;
+      el.className = 'status ' + type;
+    }
+
+    function applyReagent(name) {
+      if (stepOrder[currentStep] !== name) {
+        setStatus('Wrong order! Follow the classic sequence: Crystal Violet → Iodine → Alcohol → Safranin', 'bad');
+        return;
+      }
+
+      const posCells = document.querySelectorAll('#posContainer .bacterium');
+      const negCells = document.querySelectorAll('#negContainer .bacterium');
+
+      if (name === 'violet') {
+        posCells.forEach(c => { c.classList.remove('unstained'); c.classList.add('stained-purple'); });
+        negCells.forEach(c => { c.classList.remove('unstained'); c.classList.add('stained-purple'); });
+        setStatus('Both Gram-positive and Gram-negative cells are now purple. Next: add the mordant (Iodine).', 'good');
+        document.getElementById('btnViolet').disabled = true;
+        document.getElementById('btnIodine').disabled = false;
+      }
+      else if (name === 'iodine') {
+        // visual stays purple, but complexes form
+        setStatus('Crystal violet–iodine complexes formed inside both cell types. Now the critical decolorization step!', 'good');
+        document.getElementById('btnIodine').disabled = true;
+        document.getElementById('btnAlcohol').disabled = false;
+      }
+      else if (name === 'alcohol') {
+        // Gram+ stay purple, Gram- become colorless
+        negCells.forEach(c => {
+          c.classList.remove('stained-purple');
+          c.classList.add('unstained');
+        });
+        setStatus('Decolorizer washed the complexes out of the thin-walled Gram-negative cells. Gram-positive retained the purple. Final step: counterstain!', 'good');
+        document.getElementById('btnAlcohol').disabled = true;
+        document.getElementById('btnSafranin').disabled = false;
+      }
+      else if (name === 'safranin') {
+        negCells.forEach(c => {
+          c.classList.remove('unstained');
+          c.classList.add('stained-pink');
+        });
+        setStatus('🎉 Perfect! Gram-positive cocci = <strong style="color:#c4b5fd">PURPLE</strong> &nbsp;|&nbsp; Gram-negative rods = <strong style="color:#fda4af">PINK</strong>. You completed a successful Gram stain!', 'good');
+        document.getElementById('btnSafranin').disabled = true;
+      }
+
+      currentStep++;
+      updateProgress();
+    }
+
+    function resetSim() {
+      currentStep = 0;
+      createBacteria();
+      updateProgress();
+      ['btnViolet','btnIodine','btnAlcohol','btnSafranin'].forEach((id, i) => {
+        document.getElementById(id).disabled = i !== 0;
+      });
+      setStatus('Ready to begin. Click <strong>Crystal Violet</strong> to start staining.', 'info');
+    }
+
+    // ========== QUIZ ==========
+    const questions = [
+      {
+        q: "What is the primary stain in the Gram stain procedure?",
+        options: ["Safranin", "Crystal violet", "Methylene blue", "Malachite green"],
+        answer: 1,
+        explain: "Crystal violet is the primary stain that colors all cells purple initially."
+      },
+      {
+        q: "Why do Gram-positive bacteria retain the crystal violet–iodine complex?",
+        options: [
+          "They have an outer membrane",
+          "They have a thick peptidoglycan layer that dehydrates and traps the complex",
+          "They lack a cell wall",
+          "They produce a special enzyme"
+        ],
+        answer: 1,
+        explain: "The thick peptidoglycan of Gram-positive cells shrinks with alcohol, trapping the large CV-I complexes."
+      },
+      {
+        q: "What color are Gram-negative bacteria after a correctly performed Gram stain?",
+        options: ["Purple", "Pink / Red", "Green", "Colorless"],
+        answer: 1,
+        explain: "After losing the primary stain during decolorization, they take up the pink counterstain safranin."
+      },
+      {
+        q: "What is the role of iodine in the Gram stain?",
+        options: [
+          "It is the counterstain",
+          "It acts as a mordant, forming large complexes with crystal violet",
+          "It decolorizes the cells",
+          "It fixes the cells to the slide"
+        ],
+        answer: 1,
+        explain: "Iodine is the mordant. It forms crystal violet–iodine complexes that are harder to wash out."
+      },
+      {
+        q: "Which step is the most critical for differentiating Gram-positive from Gram-negative?",
+        options: ["Crystal violet", "Iodine", "Alcohol / Acetone decolorization", "Safranin"],
+        answer: 2,
+        explain: "The decolorization step is differential: Gram+ retain the stain, Gram– lose it."
+      },
+      {
+        q: "A culture of Staphylococcus aureus (Gram+) was over-decolorized. What color will the cells appear?",
+        options: ["Purple", "Pink", "Blue", "Colorless"],
+        answer: 1,
+        explain: "Over-decolorization can strip the crystal violet even from Gram-positive cells, so they take safranin and appear pink (false Gram-negative)."
+      },
+      {
+        q: "Which of the following organisms is typically Gram-negative?",
+        options: ["Streptococcus pyogenes", "Bacillus subtilis", "Escherichia coli", "Clostridium perfringens"],
+        answer: 2,
+        explain: "E. coli is a classic Gram-negative rod. The others are Gram-positive."
+      },
+      {
+        q: "After safranin is applied, why don’t Gram-positive cells become pink?",
+        options: [
+          "Safranin cannot enter Gram-positive cells",
+          "The purple color from crystal violet is much more intense and masks the pink",
+          "Gram-positive cells destroy safranin",
+          "Safranin only binds to LPS"
+        ],
+        answer: 1,
+        explain: "The deep purple of the retained crystal violet overwhelms the lighter pink of safranin."
+      }
+    ];
+
+    let quizStarted = false;
+    let qIndex = 0;
+    let score = 0;
+    let streak = 0;
+    let answered = false;
+
+    function startQuiz() {
+      quizStarted = true;
+      qIndex = 0;
+      score = 0;
+      streak = 0;
+      document.getElementById('qScore').textContent = 0;
+      document.getElementById('qStreak').textContent = 0;
+      document.getElementById('qTotal').textContent = questions.length;
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('restartQuizBtn').style.display = 'none';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      answered = false;
+      const q = questions[qIndex];
+      document.getElementById('qCurrent').textContent = qIndex + 1;
+
+      let html = `<div class="question-card">
+        <h3 style="color:var(--text);margin-bottom:0.75rem;">${q.q}</h3>
+        <div class="options">`;
+      q.options.forEach((opt, i) => {
+        html += `<div class="option" onclick="selectOption(${i})" data-index="${i}">${opt}</div>`;
+      });
+      html += `</div>
+        <div class="feedback" id="feedback"></div>
+      </div>`;
+      document.getElementById('quizArea').innerHTML = html;
+      document.getElementById('nextBtn').style.display = 'none';
+    }
+
+    function selectOption(index) {
+      if (answered) return;
+      answered = true;
+      const q = questions[qIndex];
+      const options = document.querySelectorAll('.option');
+      const feedback = document.getElementById('feedback');
+
+      options.forEach(o => o.style.pointerEvents = 'none');
+
+      if (index === q.answer) {
+        options[index].classList.add('correct');
+        score++;
+        streak++;
+        feedback.className = 'feedback show correct';
+        feedback.textContent = '✓ Correct! ' + q.explain;
+      } else {
+        options[index].classList.add('wrong');
+        options[q.answer].classList.add('correct');
+        streak = 0;
+        feedback.className = 'feedback show wrong';
+        feedback.textContent = '✗ Not quite. ' + q.explain;
+      }
+
+      document.getElementById('qScore').textContent = score;
+      document.getElementById('qStreak').textContent = streak;
+
+      if (qIndex < questions.length - 1) {
+        document.getElementById('nextBtn').style.display = 'inline-block';
+      } else {
+        // finished
+        setTimeout(() => {
+          document.getElementById('quizArea').innerHTML = `
+            <div class="question-card" style="text-align:center;">
+              <h2 style="color:var(--accent);">Quiz Complete!</h2>
+              <p style="font-size:1.4rem;margin:1rem 0;">You scored <strong>${score}</strong> out of <strong>${questions.length}</strong></p>
+              <p class="muted">${score === questions.length ? 'Perfect score — you have mastered the Gram stain!' :
+                score >= 6 ? 'Great job! A little review and you’ll be an expert.' :
+                'Keep practicing — review the Learn tab and try the simulation again.'}</p>
+            </div>`;
+          document.getElementById('restartQuizBtn').style.display = 'inline-block';
+        }, 1200);
+      }
+    }
+
+    function nextQuestion() {
+      qIndex++;
+      showQuestion();
+    }
+
+    // ========== IDENTIFY ==========
+    const organisms = [
+      {
+        description: "Purple cocci arranged in clusters",
+        answer: "Staphylococcus aureus (Gram-positive)",
+        options: [
+          "Staphylococcus aureus (Gram-positive)",
+          "Escherichia coli (Gram-negative)",
+          "Neisseria gonorrhoeae (Gram-negative)",
+          "Bacillus anthracis (Gram-positive)"
+        ],
+        explain: "Clusters of purple cocci are classic for Staphylococcus (Gram-positive)."
+      },
+      {
+        description: "Pink rods, single or in pairs",
+        answer: "Escherichia coli (Gram-negative)",
+        options: [
+          "Streptococcus pneumoniae (Gram-positive)",
+          "Escherichia coli (Gram-negative)",
+          "Clostridium tetani (Gram-positive)",
+          "Staphylococcus epidermidis (Gram-positive)"
+        ],
+        explain: "Pink rods are Gram-negative; E. coli is the classic example."
+      },
+      {
+        description: "Purple rods, some with spores",
+        answer: "Bacillus or Clostridium (Gram-positive)",
+        options: [
+          "Pseudomonas aeruginosa (Gram-negative)",
+          "Bacillus or Clostridium (Gram-positive)",
+          "Klebsiella pneumoniae (Gram-negative)",
+          "Haemophilus influenzae (Gram-negative)"
+        ],
+        explain: "Spore-forming rods that stain purple are Gram-positive (Bacillus or Clostridium)."
+      },
+      {
+        description: "Pink diplococci (pairs of cocci) inside neutrophils",
+        answer: "Neisseria gonorrhoeae (Gram-negative)",
+        options: [
+          "Streptococcus pyogenes (Gram-positive)",
+          "Staphylococcus aureus (Gram-positive)",
+          "Neisseria gonorrhoeae (Gram-negative)",
+          "Enterococcus faecalis (Gram-positive)"
+        ],
+        explain: "Intracellular pink diplococci are characteristic of Neisseria (Gram-negative)."
+      },
+      {
+        description: "Purple cocci in chains",
+        answer: "Streptococcus species (Gram-positive)",
+        options: [
+          "Streptococcus species (Gram-positive)",
+          "Escherichia coli (Gram-negative)",
+          "Proteus mirabilis (Gram-negative)",
+          "Acinetobacter baumannii (Gram-negative)"
+        ],
+        explain: "Chains of purple cocci indicate Streptococcus (Gram-positive)."
+      },
+      {
+        description: "Very small pink coccobacilli",
+        answer: "Haemophilus or Acinetobacter (Gram-negative)",
+        options: [
+          "Staphylococcus aureus (Gram-positive)",
+          "Haemophilus or Acinetobacter (Gram-negative)",
+          "Bacillus cereus (Gram-positive)",
+          "Clostridium perfringens (Gram-positive)"
+        ],
+        explain: "Tiny pink coccobacilli are typical of certain Gram-negative organisms such as Haemophilus."
+      }
+    ];
+
+    let idStarted = false;
+    let idIndex = 0;
+    let idScore = 0;
+    let idTotal = 0;
+    let idAnswered = false;
+    let currentOrg = null;
+
+    function startId() {
+      idStarted = true;
+      idIndex = 0;
+      idScore = 0;
+      idTotal = 0;
+      document.getElementById('idScore').textContent = 0;
+      document.getElementById('idTotal').textContent = 0;
+      document.getElementById('idNextBtn').style.display = 'none';
+      nextId();
+    }
+
+    function nextId() {
+      idAnswered = false;
+      // random order-ish
+      currentOrg = organisms[idIndex % organisms.length];
+      idIndex++;
+
+      // shuffle options
+      const opts = [...currentOrg.options];
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]];
+      }
+
+      let html = `<div class="question-card">
+        <div style="text-align:center;margin-bottom:1rem;">
+          <div style="display:inline-block;padding:1.5rem 2rem;background:#0c1222;border-radius:12px;border:2px dashed #475569;">
+            <div style="font-size:2.5rem;margin-bottom:0.5rem;">🔬</div>
+            <div style="font-size:1.15rem;font-weight:600;">${currentOrg.description}</div>
+          </div>
+        </div>
+        <p style="text-align:center;color:var(--muted);margin-bottom:0.75rem;">What is the most likely identification?</p>
+        <div class="options">`;
+      opts.forEach(opt => {
+        html += `<div class="option" onclick="selectId('${opt.replace(/'/g, "\\'")}')">${opt}</div>`;
+      });
+      html += `</div>
+        <div class="feedback" id="idFeedback"></div>
+      </div>`;
+      document.getElementById('idArea').innerHTML = html;
+      document.getElementById('idNextBtn').style.display = 'none';
+    }
+
+    function selectId(chosen) {
+      if (idAnswered) return;
+      idAnswered = true;
+      idTotal++;
+      document.getElementById('idTotal').textContent = idTotal;
+
+      const options = document.querySelectorAll('#idArea .option');
+      const feedback = document.getElementById('idFeedback');
+
+      options.forEach(o => {
+        o.style.pointerEvents = 'none';
+        if (o.textContent === currentOrg.answer) o.classList.add('correct');
+        if (o.textContent === chosen && chosen !== currentOrg.answer) o.classList.add('wrong');
+      });
+
+      if (chosen === currentOrg.answer) {
+        idScore++;
+        document.getElementById('idScore').textContent = idScore;
+        feedback.className = 'feedback show correct';
+        feedback.textContent = '✓ Correct! ' + currentOrg.explain;
+      } else {
+        feedback.className = 'feedback show wrong';
+        feedback.textContent = '✗ The answer is: ' + currentOrg.answer + '. ' + currentOrg.explain;
+      }
+
+      document.getElementById('idNextBtn').style.display = 'inline-block';
+    }
+
+    // Initialize simulation
+    createBacteria();
+  </script>
+</body>
+</html>

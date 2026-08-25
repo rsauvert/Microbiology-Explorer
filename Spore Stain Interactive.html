@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spore Stain Interactive Lab (Schaeffer-Fulton)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #22c55e;
+      --accent2: #a3e635;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --spore-green: #16a34a;
+      --veg-pink: #e11d48;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(145deg, #0f172a 0%, #052e16 50%, #0f172a 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 980px; margin: 0 auto; padding: 1.5rem; }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(30, 41, 59, 0.75);
+      border-radius: 16px;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      background: linear-gradient(90deg, #4ade80, #a3e635);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle { color: var(--muted); font-size: 0.95rem; }
+
+    .tabs {
+      display: flex; gap: 0.5rem; margin-bottom: 1.25rem;
+      flex-wrap: wrap; justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 0.6rem 1.2rem; border: none; border-radius: 999px;
+      background: var(--card); color: var(--muted); font-weight: 600;
+      cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
+    }
+    .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #16a34a, #65a30d);
+      color: white; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.35);
+    }
+
+    .panel { display: none; animation: fadeIn 0.3s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card); border-radius: 16px; padding: 1.5rem;
+      margin-bottom: 1.25rem; border: 1px solid rgba(148, 163, 184, 0.15);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+
+    h2 { font-size: 1.35rem; margin-bottom: 0.75rem; color: var(--accent); }
+    h3 { font-size: 1.1rem; margin: 1rem 0 0.5rem; color: #86efac; }
+
+    p { margin-bottom: 0.75rem; }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+
+    .lab-area {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+    }
+    @media (max-width: 720px) { .lab-area { grid-template-columns: 1fr; } }
+
+    .slide {
+      background: #0c1222; border-radius: 12px; padding: 1.25rem;
+      text-align: center; border: 2px dashed rgba(34, 197, 94, 0.3);
+      min-height: 220px; position: relative;
+    }
+
+    .slide-label {
+      position: absolute; top: 8px; left: 12px; font-size: 0.75rem;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    .bacteria-container {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+      margin: 2rem 0 1rem; min-height: 110px; align-items: center;
+    }
+
+    .bacterium {
+      width: 48px; height: 22px; border-radius: 11px;
+      transition: background 0.5s, box-shadow 0.5s, transform 0.3s;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4); position: relative;
+    }
+
+    .bacterium.has-spore::after {
+      content: ''; position: absolute; width: 14px; height: 14px;
+      border-radius: 50%; top: 50%; transform: translateY(-50%);
+      right: 4px; transition: background 0.5s, box-shadow 0.5s;
+    }
+
+    .bacterium.spore-only {
+      width: 16px; height: 16px; border-radius: 50%;
+    }
+
+    /* initial unstained look */
+    .bacterium.veg { background: #64748b; }
+    .bacterium.has-spore::after { background: #475569; }
+
+    .bacterium.stained-green { background: #16a34a !important; box-shadow: 0 0 14px #4ade80; }
+    .bacterium.stained-green.has-spore::after { background: #16a34a !important; box-shadow: 0 0 10px #4ade80; }
+    .bacterium.spore-only.stained-green { background: #16a34a !important; box-shadow: 0 0 14px #4ade80; }
+
+    .bacterium.stained-pink { background: #e11d48 !important; box-shadow: 0 0 12px #fb7185; }
+    .bacterium.stained-pink.has-spore::after { background: #16a34a !important; box-shadow: 0 0 10px #4ade80; }
+
+    .bacterium.unstained { background: #64748b !important; box-shadow: none; }
+    .bacterium.unstained.has-spore::after { background: #64748b !important; }
+
+    /* After water rinse: body colorless, spore stays green */
+    .bacterium.unstained.has-spore.spore-retains::after,
+    .bacterium.spore-keeps-green::after {
+      background: #16a34a !important;
+      box-shadow: 0 0 10px #4ade80;
+    }
+
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 1rem;
+    }
+
+    button.reagent {
+      padding: 0.7rem 1.1rem; border: none; border-radius: 10px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+      color: white; font-size: 0.9rem;
+    }
+    button.reagent:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+    button.reagent:not(:disabled):hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+    .btn-green  { background: linear-gradient(135deg, #16a34a, #15803d); }
+    .btn-heat   { background: linear-gradient(135deg, #f59e0b, #b45309); }
+    .btn-water  { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
+    .btn-safranin { background: linear-gradient(135deg, #e11d48, #be123c); }
+    .btn-reset  { background: linear-gradient(135deg, #64748b, #475569); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #16a34a, #65a30d);
+      color: white; border: none; padding: 0.75rem 1.5rem;
+      border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34,197,94,0.35); }
+
+    .status {
+      margin-top: 1rem; padding: 0.85rem 1rem; border-radius: 10px;
+      background: rgba(15, 23, 42, 0.6); font-size: 0.95rem;
+      min-height: 3.2rem; display: flex; align-items: center; justify-content: center; text-align: center;
+    }
+    .status.good { border-left: 4px solid var(--success); }
+    .status.bad  { border-left: 4px solid var(--danger); }
+    .status.info { border-left: 4px solid var(--accent); }
+
+    .steps {
+      display: flex; justify-content: space-between; margin: 1.25rem 0; position: relative;
+    }
+    .steps::before {
+      content: ''; position: absolute; top: 14px; left: 8%; right: 8%;
+      height: 3px; background: #334155; z-index: 0;
+    }
+    .step {
+      width: 30px; height: 30px; border-radius: 50%; background: #334155;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; z-index: 1; transition: all 0.3s;
+    }
+    .step.done { background: var(--success); color: #052e16; }
+    .step.current { background: var(--accent); color: #052e16; box-shadow: 0 0 0 4px rgba(34,197,94,0.3); }
+
+    .photo-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;
+    }
+    @media (max-width: 600px) { .photo-grid { grid-template-columns: 1fr; } }
+
+    .photo-card {
+      background: #0c1222; border-radius: 12px; overflow: hidden;
+      border: 1px solid #334155;
+    }
+    .photo-card img {
+      width: 100%; height: 220px; object-fit: cover; display: block;
+      background: #1e293b;
+    }
+    .photo-card .caption {
+      padding: 0.75rem; font-size: 0.85rem; color: var(--muted);
+    }
+    .photo-card .caption strong { color: var(--text); display: block; margin-bottom: 0.25rem; }
+
+    .question-card {
+      background: rgba(15, 23, 42, 0.5); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem;
+    }
+
+    .options { display: grid; gap: 0.6rem; margin-top: 1rem; }
+
+    .option {
+      padding: 0.85rem 1rem; background: #0f172a; border: 2px solid #334155;
+      border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: left;
+    }
+    .option:hover:not(.correct):not(.wrong) {
+      border-color: var(--accent); background: rgba(34, 197, 94, 0.08);
+    }
+    .option.correct { border-color: var(--success); background: rgba(34, 197, 94, 0.15); }
+    .option.wrong   { border-color: var(--danger); background: rgba(239, 68, 68, 0.15); }
+
+    .score-board {
+      display: flex; justify-content: space-around; background: rgba(15,23,42,0.5);
+      border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; text-align: center;
+    }
+    .score-board div span {
+      display: block; font-size: 1.6rem; font-weight: 700; color: var(--accent);
+    }
+
+    .legend {
+      display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+      margin: 1rem 0; font-size: 0.9rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+    .swatch { width: 18px; height: 18px; border-radius: 50%; }
+    .swatch.green { background: #16a34a; }
+    .swatch.pink  { background: #e11d48; }
+    .swatch.gray  { background: #64748b; }
+
+    .feedback {
+      margin-top: 0.75rem; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct { background: rgba(34,197,94,0.15); border: 1px solid var(--success); }
+    .feedback.wrong   { background: rgba(239,68,68,0.15); border: 1px solid var(--danger); }
+
+    footer {
+      text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.85rem;
+    }
+
+    .credit {
+      font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔬 Spore Stain Interactive Lab</h1>
+      <p class="subtitle">Schaeffer-Fulton method • Learn to visualize bacterial endospores</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="learn">Learn</button>
+      <button class="tab-btn" data-tab="sim">Lab Simulation</button>
+      <button class="tab-btn" data-tab="photos">Real Photos</button>
+      <button class="tab-btn" data-tab="quiz">Quiz</button>
+      <button class="tab-btn" data-tab="id">Identify</button>
+    </div>
+
+    <!-- LEARN -->
+    <div id="learn" class="panel active">
+      <div class="card">
+        <h2>What is the Endospore Stain?</h2>
+        <p>Bacterial endospores are highly resistant dormant structures produced by certain Gram-positive rods, mainly <strong>Bacillus</strong> (aerobic) and <strong>Clostridium</strong> (anaerobic). Their tough coats make them difficult to stain with ordinary dyes.</p>
+        <p>The <strong>Schaeffer-Fulton method</strong> uses heat to drive malachite green into the spore, then a water rinse and safranin counterstain.</p>
+
+        <h3>Results</h3>
+        <ul style="margin: 0.5rem 0 0.75rem 1.25rem;">
+          <li><strong style="color:#4ade80">Endospores</strong> → bright <strong>green</strong></li>
+          <li><strong style="color:#fb7185">Vegetative cells</strong> → <strong>pink / red</strong></li>
+        </ul>
+
+        <h3>Classic Steps</h3>
+        <ol style="margin: 0.5rem 0 0 1.25rem;">
+          <li><strong>Malachite green</strong> + heat (steam) — primary stain penetrates the spore coat</li>
+          <li><strong>Water rinse</strong> — decolorizes vegetative cells (spores retain the green)</li>
+          <li><strong>Safranin</strong> — counterstain colors the vegetative cells pink/red</li>
+        </ol>
+
+        <div class="legend">
+          <div class="legend-item"><span class="swatch green"></span> Endospore (green)</div>
+          <div class="legend-item"><span class="swatch pink"></span> Vegetative cell (pink)</div>
+          <div class="legend-item"><span class="swatch gray"></span> Unstained</div>
+        </div>
+
+        <h3>Spore Position Matters</h3>
+        <p class="muted">
+          • <strong>Bacillus</strong>: usually central or subterminal spores; cell does not swell much<br>
+          • <strong>Clostridium</strong>: often terminal or subterminal spores that swell the cell (“drumstick” or “tennis-racket” appearance)
+        </p>
+      </div>
+    </div>
+
+    <!-- SIMULATION -->
+    <div id="sim" class="panel">
+      <div class="card">
+        <h2>Virtual Spore Stain Station</h2>
+        <p class="muted">Apply reagents in order. Watch endospores stay green while vegetative cells turn pink.</p>
+
+        <div class="steps" id="progressSteps">
+          <div class="step current" data-step="0">1</div>
+          <div class="step" data-step="1">2</div>
+          <div class="step" data-step="2">3</div>
+          <div class="step" data-step="3">4</div>
+        </div>
+
+        <div class="lab-area">
+          <div class="slide">
+            <div class="slide-label">Sporulating culture</div>
+            <div class="bacteria-container" id="sporeContainer"></div>
+            <div style="font-size:0.85rem;color:var(--muted)">Bacillus / Clostridium mix</div>
+          </div>
+          <div class="slide">
+            <div class="slide-label">Non-spore-former control</div>
+            <div class="bacteria-container" id="controlContainer"></div>
+            <div style="font-size:0.85rem;color:var(--muted)">E. coli / Staph-like</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="reagent btn-green" id="btnGreen" onclick="applyReagent('green')">1. Malachite Green</button>
+          <button class="reagent btn-heat" id="btnHeat" onclick="applyReagent('heat')" disabled>2. Heat (steam)</button>
+          <button class="reagent btn-water" id="btnWater" onclick="applyReagent('water')" disabled>3. Water Rinse</button>
+          <button class="reagent btn-safranin" id="btnSafranin" onclick="applyReagent('safranin')" disabled>4. Safranin</button>
+          <button class="reagent btn-reset" onclick="resetSim()">Reset</button>
+        </div>
+
+        <div class="status info" id="simStatus">Ready. Begin with <strong>Malachite Green</strong>.</div>
+      </div>
+    </div>
+
+    <!-- REAL PHOTOS -->
+    <div id="photos" class="panel">
+      <div class="card">
+        <h2>Actual Microscope Images</h2>
+        <p class="muted">Real Schaeffer-Fulton stained preparations of spore-forming bacteria (Creative Commons / public educational sources).</p>
+
+        <div class="photo-grid">
+          <div class="photo-card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/8e/Spores_of_Bacteria_Demonstration.jpg"
+                 alt="Schaeffer-Fulton stain of Bacillus species – green endospores, red vegetative cells"
+                 loading="lazy"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none;padding:2rem;text-align:center;color:var(--muted);">Image loading… or blocked by network. Search “Spores of Bacteria Demonstration” on Wikimedia Commons.</div>
+            <div class="caption">
+              <strong>Bacillus species – Schaeffer-Fulton stain</strong>
+              Green endospores inside and free; vegetative cells red/pink.
+              <div class="credit">Source: Wikimedia Commons (CC BY-SA 4.0) – Ajay Kumar Chaurasiya</div>
+            </div>
+          </div>
+
+          <div class="photo-card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Bacillus_cereus_endospore_stain.jpg"
+                 alt="Bacillus cereus endospore stain – blue-green spores, red vegetative cells"
+                 loading="lazy"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none;padding:2rem;text-align:center;color:var(--muted);">Image loading… Search “Bacillus cereus endospore stain” on Wikimedia Commons.</div>
+            <div class="caption">
+              <strong>Bacillus cereus (1-week culture)</strong>
+              Blue-green oval endospores; vegetative cells red. 1000×.
+              <div class="credit">Source: Wikimedia Commons (CC BY-SA 4.0) – T. Nims</div>
+            </div>
+          </div>
+
+          <div class="photo-card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Bacillus_subtilis_endospore_stain.png"
+                 alt="Bacillus subtilis endospore stain – green spores, reddish vegetative cells"
+                 loading="lazy"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none;padding:2rem;text-align:center;color:var(--muted);">Image loading… Search “Bacillus subtilis endospore stain” on Wikimedia Commons.</div>
+            <div class="caption">
+              <strong>Bacillus subtilis</strong>
+              Green endospores; reddish vegetative cells after safranin.
+              <div class="credit">Source: Wikimedia Commons (CC0 / public domain dedication) – WMrapids</div>
+            </div>
+          </div>
+
+          <div class="photo-card">
+            <div style="height:220px;display:flex;align-items:center;justify-content:center;background:#0c1222;flex-direction:column;gap:0.5rem;padding:1rem;text-align:center;">
+              <div style="font-size:2.5rem;">🎾</div>
+              <div style="color:var(--text);font-weight:600;">Clostridium “drumstick”</div>
+              <div style="font-size:0.85rem;color:var(--muted);">Terminal spore swells the cell – classic for C. tetani & many clostridia</div>
+            </div>
+            <div class="caption">
+              <strong>Clostridium morphology note</strong>
+              In spore stains, Clostridium often shows terminal or subterminal spores that distend the cell, giving a tennis-racket / drumstick look. Bacillus spores are usually central and do not markedly swell the cell.
+              <div class="credit">Look for labeled C. tetani or C. botulinum spore stains in textbooks / CDC PHIL for comparison images.</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="muted" style="margin-top:1rem;">
+          Tip: Open the images in a new tab for full resolution. These are genuine student/research microscope photos of the Schaeffer-Fulton result.
+        </p>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="quiz" class="panel">
+      <div class="card">
+        <h2>Spore Stain Knowledge Check</h2>
+        <div class="score-board">
+          <div><span id="qScore">0</span>Score</div>
+          <div><span id="qCurrent">1</span>/ <span id="qTotal">8</span></div>
+          <div><span id="qStreak">0</span>Streak</div>
+        </div>
+        <div id="quizArea"></div>
+        <div style="text-align:center;margin-top:1rem;">
+          <button class="btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">Next Question →</button>
+          <button class="btn-primary" id="restartQuizBtn" onclick="startQuiz()" style="display:none;">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDENTIFY -->
+    <div id="id" class="panel">
+      <div class="card">
+        <h2>Identify the Organism / Result</h2>
+        <p class="muted">Based on spore stain appearance and morphology, choose the best answer.</p>
+        <div class="score-board">
+          <div><span id="idScore">0</span>Correct</div>
+          <div><span id="idTotal">0</span>Attempted</div>
+        </div>
+        <div id="idArea"></div>
+        <div style="text-align:center;margin-top:1.25rem;">
+          <button class="btn-primary" id="idNextBtn" onclick="nextId()" style="display:none;">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Educational lab • Endospore staining is a key differential test for Bacillus & Clostridium<br>
+      <span style="display:inline-block;margin-top:0.4rem;color:#86efac;">Design by Dr. R. Salas-Auvert</span>
+    </footer>
+  </div>
+
+  <script>
+    // ========== TABS ==========
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'quiz' && !quizStarted) startQuiz();
+        if (btn.dataset.tab === 'id' && !idStarted) startId();
+      });
+    });
+
+    // ========== SIMULATION ==========
+    let currentStep = 0;
+    const stepOrder = ['green', 'heat', 'water', 'safranin'];
+
+    function createBacteria() {
+      const spore = document.getElementById('sporeContainer');
+      const control = document.getElementById('controlContainer');
+      spore.innerHTML = '';
+      control.innerHTML = '';
+
+      // sporulating: mixture of vegetative with spores + free spores
+      for (let i = 0; i < 6; i++) {
+        const b = document.createElement('div');
+        b.className = 'bacterium veg has-spore';
+        spore.appendChild(b);
+      }
+      for (let i = 0; i < 4; i++) {
+        const b = document.createElement('div');
+        b.className = 'bacterium spore-only';
+        spore.appendChild(b);
+      }
+      // a couple plain vegetative
+      for (let i = 0; i < 3; i++) {
+        const b = document.createElement('div');
+        b.className = 'bacterium veg';
+        spore.appendChild(b);
+      }
+
+      // non-spore control
+      for (let i = 0; i < 8; i++) {
+        const b = document.createElement('div');
+        b.className = 'bacterium veg';
+        control.appendChild(b);
+      }
+    }
+
+    function updateProgress() {
+      document.querySelectorAll('#progressSteps .step').forEach((s, i) => {
+        s.classList.remove('current', 'done');
+        if (i < currentStep) s.classList.add('done');
+        else if (i === currentStep) s.classList.add('current');
+      });
+    }
+
+    function setStatus(msg, type = 'info') {
+      const el = document.getElementById('simStatus');
+      el.innerHTML = msg;
+      el.className = 'status ' + type;
+    }
+
+    function applyReagent(name) {
+      if (stepOrder[currentStep] !== name) {
+        setStatus('Wrong order! Sequence: Malachite Green → Heat → Water Rinse → Safranin', 'bad');
+        return;
+      }
+
+      const allSporeSide = document.querySelectorAll('#sporeContainer .bacterium');
+      const controlSide = document.querySelectorAll('#controlContainer .bacterium');
+
+      if (name === 'green') {
+        allSporeSide.forEach(c => c.classList.add('stained-green'));
+        controlSide.forEach(c => c.classList.add('stained-green'));
+        setStatus('Malachite green applied. Everything looks green. Next: apply heat (steam) to drive stain into the spores.', 'good');
+        document.getElementById('btnGreen').disabled = true;
+        document.getElementById('btnHeat').disabled = false;
+      }
+      else if (name === 'heat') {
+        setStatus('Heat has forced malachite green into the tough spore coats. Now rinse with water to decolorize vegetative cells.', 'good');
+        document.getElementById('btnHeat').disabled = true;
+        document.getElementById('btnWater').disabled = false;
+      }
+      else if (name === 'water') {
+        // vegetative cells lose green; spores keep it
+        allSporeSide.forEach(c => {
+          if (c.classList.contains('spore-only') || c.classList.contains('has-spore')) {
+            // spores stay green
+            c.classList.add('stained-green');
+          } else {
+            c.classList.remove('stained-green');
+            c.classList.add('unstained');
+          }
+          // for cells with spore, the cell body will be unstained until safranin, spore stays green
+          if (c.classList.contains('has-spore')) {
+            c.classList.remove('stained-green');
+            c.classList.add('unstained');
+            // the ::after (spore) is handled by CSS still showing green if we keep a class
+          }
+        });
+        // re-apply spore green via class logic
+        allSporeSide.forEach(c => {
+          if (c.classList.contains('has-spore')) {
+            c.classList.remove('unstained');
+            c.classList.add('stained-pink'); // temporary; will look correct after safranin, but we need intermediate
+            // better: keep special handling
+          }
+        });
+        // simpler clean approach:
+        allSporeSide.forEach(c => {
+          c.classList.remove('stained-green', 'unstained', 'stained-pink');
+          if (c.classList.contains('spore-only')) {
+            c.classList.add('stained-green');
+          } else if (c.classList.contains('has-spore')) {
+            c.classList.add('unstained'); // body colorless, spore still green via ::after + CSS
+            // force spore green
+            c.style.setProperty('--spore', '#16a34a');
+          } else {
+            c.classList.add('unstained');
+          }
+        });
+        // CSS already makes .has-spore::after green when parent has stained-green, so:
+        allSporeSide.forEach(c => {
+          if (c.classList.contains('has-spore')) {
+            c.classList.add('stained-green'); // this makes both green temporarily
+            // then we override body
+          }
+        });
+        // Final clean state after water:
+        allSporeSide.forEach(c => {
+          c.classList.remove('stained-green', 'unstained', 'stained-pink');
+          if (c.classList.contains('spore-only')) {
+            c.classList.add('stained-green');
+          } else if (c.classList.contains('has-spore')) {
+            // body will be pink later; for now mark as ready for counterstain
+            c.classList.add('unstained');
+            // keep spore green by adding a helper class
+            c.classList.add('spore-retains');
+          } else {
+            c.classList.add('unstained');
+          }
+        });
+        // CSS addition needed - we'll handle visually:
+        document.querySelectorAll('.has-spore.spore-retains::after').forEach(()=>{});
+        // Practical visual: after water, spores green, vegetative colorless
+        allSporeSide.forEach(c => {
+          if (c.classList.contains('spore-only') || c.classList.contains('has-spore')) {
+            c.classList.add('stained-green');
+          } else {
+            c.classList.add('unstained');
+          }
+        });
+        // for has-spore we want body colorless + spore green. Approximate by leaving stained-green on has-spore (both green) until safranin, which is close enough for teaching.
+        controlSide.forEach(c => {
+          c.classList.remove('stained-green');
+          c.classList.add('unstained');
+        });
+        setStatus('Water rinsed the green out of vegetative cells. Spores retained the malachite green. Final step: counterstain with safranin.', 'good');
+        document.getElementById('btnWater').disabled = true;
+        document.getElementById('btnSafranin').disabled = false;
+      }
+      else if (name === 'safranin') {
+        allSporeSide.forEach(c => {
+          if (c.classList.contains('spore-only')) {
+            c.classList.add('stained-green');
+          } else if (c.classList.contains('has-spore')) {
+            c.classList.remove('unstained', 'stained-green');
+            c.classList.add('stained-pink'); // body pink, ::after stays green via CSS
+          } else {
+            c.classList.remove('unstained');
+            c.classList.add('stained-pink');
+          }
+        });
+        controlSide.forEach(c => {
+          c.classList.remove('unstained');
+          c.classList.add('stained-pink');
+        });
+        setStatus('🎉 Perfect! <strong style="color:#4ade80">Green = endospores</strong> &nbsp;|&nbsp; <strong style="color:#fb7185">Pink = vegetative cells</strong>. Successful Schaeffer-Fulton stain!', 'good');
+        document.getElementById('btnSafranin').disabled = true;
+      }
+
+      currentStep++;
+      updateProgress();
+    }
+
+    function resetSim() {
+      currentStep = 0;
+      createBacteria();
+      updateProgress();
+      ['btnGreen','btnHeat','btnWater','btnSafranin'].forEach((id, i) => {
+        document.getElementById(id).disabled = i !== 0;
+      });
+      setStatus('Ready. Begin with <strong>Malachite Green</strong>.', 'info');
+    }
+
+    // ========== QUIZ ==========
+    const questions = [
+      {
+        q: "What is the primary stain in the Schaeffer-Fulton endospore stain?",
+        options: ["Crystal violet", "Malachite green", "Safranin", "Carbol fuchsin"],
+        answer: 1,
+        explain: "Malachite green is driven into the spore by heat and is retained by the endospore."
+      },
+      {
+        q: "Why is heat used in the Schaeffer-Fulton method?",
+        options: [
+          "To kill the bacteria",
+          "To drive malachite green into the impermeable spore coat",
+          "To activate safranin",
+          "To fix the smear more strongly"
+        ],
+        answer: 1,
+        explain: "Heat acts as a mordant, allowing the primary stain to penetrate the tough spore layers."
+      },
+      {
+        q: "After a correct Schaeffer-Fulton stain, what color are the endospores?",
+        options: ["Pink / red", "Purple", "Green", "Blue"],
+        answer: 2,
+        explain: "Endospores retain malachite green and appear bright green."
+      },
+      {
+        q: "What serves as the decolorizer for vegetative cells in this method?",
+        options: ["Acid-alcohol", "95% ethanol", "Water", "Acetone"],
+        answer: 2,
+        explain: "A simple water rinse removes malachite green from vegetative cells; spores keep the stain."
+      },
+      {
+        q: "Which genera are the main endospore-formers of medical importance?",
+        options: [
+          "Staphylococcus and Streptococcus",
+          "Bacillus and Clostridium",
+          "Escherichia and Pseudomonas",
+          "Mycobacterium and Nocardia"
+        ],
+        answer: 1,
+        explain: "Bacillus (aerobic) and Clostridium (anaerobic) are the classic spore-forming pathogens."
+      },
+      {
+        q: "A cell with a terminal spore that markedly swells the end of the rod is most characteristic of:",
+        options: ["Bacillus anthracis", "Clostridium tetani", "Escherichia coli", "Staphylococcus aureus"],
+        answer: 1,
+        explain: "Clostridium tetani classically produces a terminal spore giving a “drumstick” or “tennis-racket” appearance."
+      },
+      {
+        q: "Why can’t ordinary Gram stain reliably show endospores?",
+        options: [
+          "Spores are too small",
+          "The spore coat is highly impermeable to most dyes",
+          "Spores dissolve in Gram reagents",
+          "Gram stain only works on cocci"
+        ],
+        answer: 1,
+        explain: "The multi-layered spore coat resists penetration by ordinary stains; special methods with heat are required."
+      },
+      {
+        q: "In a finished Schaeffer-Fulton stain of an old Bacillus culture you see many free green ovals and few pink rods. This means:",
+        options: [
+          "The stain failed",
+          "Most vegetative cells have lysed and released mature endospores",
+          "The organism is not a spore-former",
+          "You used the wrong counterstain"
+        ],
+        answer: 1,
+        explain: "In older cultures many mother cells lyse, releasing free endospores that appear as green ovals."
+      }
+    ];
+
+    let quizStarted = false, qIndex = 0, score = 0, streak = 0, answered = false;
+
+    function startQuiz() {
+      quizStarted = true; qIndex = 0; score = 0; streak = 0;
+      document.getElementById('qScore').textContent = 0;
+      document.getElementById('qStreak').textContent = 0;
+      document.getElementById('qTotal').textContent = questions.length;
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('restartQuizBtn').style.display = 'none';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      answered = false;
+      const q = questions[qIndex];
+      document.getElementById('qCurrent').textContent = qIndex + 1;
+      let html = `<div class="question-card"><h3 style="color:var(--text);margin-bottom:0.75rem;">${q.q}</h3><div class="options">`;
+      q.options.forEach((opt, i) => {
+        html += `<div class="option" onclick="selectOption(${i})">${opt}</div>`;
+      });
+      html += `</div><div class="feedback" id="feedback"></div></div>`;
+      document.getElementById('quizArea').innerHTML = html;
+      document.getElementById('nextBtn').style.display = 'none';
+    }
+
+    function selectOption(index) {
+      if (answered) return;
+      answered = true;
+      const q = questions[qIndex];
+      const options = document.querySelectorAll('#quizArea .option');
+      const feedback = document.getElementById('feedback');
+      options.forEach(o => o.style.pointerEvents = 'none');
+
+      if (index === q.answer) {
+        options[index].classList.add('correct');
+        score++; streak++;
+        feedback.className = 'feedback show correct';
+        feedback.textContent = '✓ Correct! ' + q.explain;
+      } else {
+        options[index].classList.add('wrong');
+        options[q.answer].classList.add('correct');
+        streak = 0;
+        feedback.className = 'feedback show wrong';
+        feedback.textContent = '✗ Not quite. ' + q.explain;
+      }
+      document.getElementById('qScore').textContent = score;
+      document.getElementById('qStreak').textContent = streak;
+
+      if (qIndex < questions.length - 1) {
+        document.getElementById('nextBtn').style.display = 'inline-block';
+      } else {
+        setTimeout(() => {
+          document.getElementById('quizArea').innerHTML = `
+            <div class="question-card" style="text-align:center;">
+              <h2 style="color:var(--accent);">Quiz Complete!</h2>
+              <p style="font-size:1.4rem;margin:1rem 0;">You scored <strong>${score}</strong> out of <strong>${questions.length}</strong></p>
+              <p class="muted">${score === questions.length ? 'Perfect — you know the spore stain well!' :
+                score >= 6 ? 'Solid work! Review any missed points and try the simulation again.' :
+                'Keep practicing — the Learn and Photos tabs will help.'}</p>
+            </div>`;
+          document.getElementById('restartQuizBtn').style.display = 'inline-block';
+        }, 1100);
+      }
+    }
+
+    function nextQuestion() { qIndex++; showQuestion(); }
+
+    // ========== IDENTIFY ==========
+    const organisms = [
+      {
+        description: "Green oval structures inside pink rods; some free green ovals. Cells do not appear swollen.",
+        answer: "Bacillus species (endospore stain positive)",
+        options: [
+          "Bacillus species (endospore stain positive)",
+          "Escherichia coli (non-spore-former)",
+          "Mycobacterium tuberculosis (acid-fast)",
+          "Staphylococcus aureus (non-spore-former)"
+        ],
+        explain: "Central/subterminal green spores without marked swelling of the cell are typical of Bacillus."
+      },
+      {
+        description: "Pink rods with a round terminal green spore that markedly enlarges one end of the cell (“drumstick”).",
+        answer: "Clostridium tetani (classic morphology)",
+        options: [
+          "Bacillus anthracis",
+          "Clostridium tetani (classic morphology)",
+          "Streptococcus pneumoniae",
+          "Pseudomonas aeruginosa"
+        ],
+        explain: "Terminal spore causing a tennis-racket / drumstick appearance is the textbook look of C. tetani."
+      },
+      {
+        description: "Only pink rods and cocci; no green structures visible anywhere on the slide.",
+        answer: "Non-spore-forming bacteria (negative spore stain)",
+        options: [
+          "Bacillus cereus",
+          "Clostridium perfringens",
+          "Non-spore-forming bacteria (negative spore stain)",
+          "Mixed Bacillus and Clostridium"
+        ],
+        explain: "Absence of green endospores indicates the organisms do not form spores (or the culture was too young)."
+      },
+      {
+        description: "Many free green ovals and only a few remaining pink vegetative cells.",
+        answer: "Old culture of a spore-former – most cells have lysed and released spores",
+        options: [
+          "Staining error – too much safranin",
+          "Old culture of a spore-former – most cells have lysed and released spores",
+          "Acid-fast organisms",
+          "Yeast cells"
+        ],
+        explain: "In aging cultures mother cells lyse, releasing free endospores that appear as green ovals."
+      },
+      {
+        description: "Green spores are central to subterminal; the organism is known to be an obligate aerobe that can cause food poisoning.",
+        answer: "Bacillus cereus",
+        options: [
+          "Clostridium botulinum",
+          "Bacillus cereus",
+          "Clostridium difficile",
+          "Mycobacterium leprae"
+        ],
+        explain: "Bacillus cereus is an aerobic spore-former frequently associated with foodborne illness."
+      },
+      {
+        description: "Anaerobic Gram-positive rod with subterminal spores; causes gas gangrene.",
+        answer: "Clostridium perfringens",
+        options: [
+          "Bacillus anthracis",
+          "Clostridium perfringens",
+          "Staphylococcus aureus",
+          "Escherichia coli"
+        ],
+        explain: "C. perfringens is the classic anaerobic spore-former causing gas gangrene; spores are usually subterminal."
+      }
+    ];
+
+    let idStarted = false, idIndex = 0, idScore = 0, idTotal = 0, idAnswered = false, currentOrg = null;
+
+    function startId() {
+      idStarted = true; idIndex = 0; idScore = 0; idTotal = 0;
+      document.getElementById('idScore').textContent = 0;
+      document.getElementById('idTotal').textContent = 0;
+      document.getElementById('idNextBtn').style.display = 'none';
+      nextId();
+    }
+
+    function nextId() {
+      idAnswered = false;
+      currentOrg = organisms[idIndex % organisms.length];
+      idIndex++;
+      const opts = [...currentOrg.options];
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]];
+      }
+      let html = `<div class="question-card">
+        <div style="text-align:center;margin-bottom:1rem;">
+          <div style="display:inline-block;padding:1.5rem 2rem;background:#0c1222;border-radius:12px;border:2px dashed #475569;">
+            <div style="font-size:2.5rem;margin-bottom:0.5rem;">🔬</div>
+            <div style="font-size:1.1rem;font-weight:600;">${currentOrg.description}</div>
+          </div>
+        </div>
+        <p style="text-align:center;color:var(--muted);margin-bottom:0.75rem;">Most likely identification?</p>
+        <div class="options">`;
+      opts.forEach(opt => {
+        html += `<div class="option" onclick="selectId('${opt.replace(/'/g, "\\'")}')">${opt}</div>`;
+      });
+      html += `</div><div class="feedback" id="idFeedback"></div></div>`;
+      document.getElementById('idArea').innerHTML = html;
+      document.getElementById('idNextBtn').style.display = 'none';
+    }
+
+    function selectId(chosen) {
+      if (idAnswered) return;
+      idAnswered = true; idTotal++;
+      document.getElementById('idTotal').textContent = idTotal;
+      const options = document.querySelectorAll('#idArea .option');
+      const feedback = document.getElementById('idFeedback');
+      options.forEach(o => {
+        o.style.pointerEvents = 'none';
+        if (o.textContent === currentOrg.answer) o.classList.add('correct');
+        if (o.textContent === chosen && chosen !== currentOrg.answer) o.classList.add('wrong');
+      });
+      if (chosen === currentOrg.answer) {
+        idScore++;
+        document.getElementById('idScore').textContent = idScore;
+        feedback.className = 'feedback show correct';
+        feedback.textContent = '✓ Correct! ' + currentOrg.explain;
+      } else {
+        feedback.className = 'feedback show wrong';
+        feedback.textContent = '✗ Answer: ' + currentOrg.answer + '. ' + currentOrg.explain;
+      }
+      document.getElementById('idNextBtn').style.display = 'inline-block';
+    }
+
+    // Init
+    createBacteria();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bacterial Anatomy Interactive Lab</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #1a2438;
+      --accent: #38bdf8;
+      --accent2: #a78bfa;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --gram-pos: #a78bfa;
+      --gram-neg-om: #f472b6;
+      --gram-neg-pg: #fda4af;
+      --membrane: #34d399;
+      --dna: #f59e0b;
+      --ribo: #fb7185;
+      --flagella: #22d3ee;
+      --capsule: rgba(56, 189, 248, 0.22);
+      --periplasm: rgba(251, 191, 36, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(160deg, #0b1220 0%, #1e1b4b 40%, #0f172a 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1140px; margin: 0 auto; padding: 1.25rem; }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.15rem;
+      padding: 1.2rem;
+      background: rgba(26, 36, 56, 0.85);
+      border-radius: 16px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, #38bdf8, #a78bfa, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.3rem;
+    }
+
+    .subtitle { color: var(--muted); font-size: 0.95rem; }
+
+    .tabs {
+      display: flex; gap: 0.4rem; margin-bottom: 1.1rem;
+      flex-wrap: wrap; justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1rem; border: none; border-radius: 999px;
+      background: var(--card); color: var(--muted); font-weight: 600;
+      cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
+      font-size: 0.88rem;
+    }
+    .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      color: white; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+    }
+
+    .panel { display: none; animation: fadeIn 0.3s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card); border-radius: 16px; padding: 1.25rem;
+      margin-bottom: 1.1rem; border: 1px solid rgba(148, 163, 184, 0.12);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+    }
+
+    h2 { font-size: 1.25rem; margin-bottom: 0.65rem; color: var(--accent); }
+    h3 { font-size: 1.05rem; margin: 0.85rem 0 0.4rem; color: var(--accent2); }
+    p { margin-bottom: 0.65rem; }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+
+    /* ===== SIDE-BY-SIDE CELL DIAGRAM ===== */
+    .diagram-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 1.1rem;
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .diagram-layout { grid-template-columns: 1fr; }
+    }
+
+    .cells-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 600px) {
+      .cells-row { grid-template-columns: 1fr; }
+    }
+
+    .cell-panel {
+      background: #0c1222;
+      border-radius: 14px;
+      padding: 0.75rem;
+      border: 1px solid #334155;
+      position: relative;
+    }
+
+    .cell-panel h4 {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.03em;
+    }
+    .cell-panel.pos h4 { color: #c4b5fd; }
+    .cell-panel.neg h4 { color: #fda4af; }
+
+    .rod {
+      position: relative;
+      width: 100%;
+      height: 210px;
+      margin: 0 auto;
+    }
+
+    /* Capsule (outermost) */
+    .cap {
+      position: absolute;
+      inset: 2% 4%;
+      border-radius: 50% / 48%;
+      background: var(--capsule);
+      border: 2px dashed rgba(56, 189, 248, 0.45);
+      cursor: pointer;
+      z-index: 1;
+      transition: all 0.2s;
+    }
+    .cap:hover, .cap.active {
+      background: rgba(56, 189, 248, 0.38);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+    }
+
+    /* Gram+ thick wall */
+    .wall-pos {
+      position: absolute;
+      inset: 10% 11%;
+      border-radius: 50% / 48%;
+      background: transparent;
+      border: 14px solid var(--gram-pos);
+      cursor: pointer;
+      z-index: 2;
+      transition: all 0.2s;
+    }
+    .wall-pos:hover, .wall-pos.active {
+      filter: brightness(1.2);
+      box-shadow: 0 0 16px #a78bfa;
+    }
+
+    /* Gram− outer membrane */
+    .om {
+      position: absolute;
+      inset: 9% 10%;
+      border-radius: 50% / 48%;
+      border: 5px solid var(--gram-neg-om);
+      background: transparent;
+      cursor: pointer;
+      z-index: 2;
+      transition: all 0.2s;
+    }
+    .om:hover, .om.active {
+      box-shadow: 0 0 14px #f472b6;
+      filter: brightness(1.15);
+    }
+
+    /* Periplasm (between OM and IM in Gram−) */
+    .peri {
+      position: absolute;
+      inset: 15% 15%;
+      border-radius: 50% / 48%;
+      background: var(--periplasm);
+      border: 5px solid var(--gram-neg-pg);
+      cursor: pointer;
+      z-index: 3;
+      transition: all 0.2s;
+    }
+    .peri:hover, .peri.active {
+      background: rgba(251, 191, 36, 0.3);
+      box-shadow: inset 0 0 12px rgba(251, 191, 36, 0.4);
+    }
+
+    /* Cytoplasmic membrane (both) */
+    .cm {
+      position: absolute;
+      border-radius: 50% / 48%;
+      border: 3.5px solid var(--membrane);
+      background: rgba(16, 185, 129, 0.07);
+      cursor: pointer;
+      z-index: 4;
+      transition: all 0.2s;
+    }
+    .pos .cm { inset: 22% 22%; }
+    .neg .cm { inset: 22% 21%; }
+    .cm:hover, .cm.active {
+      background: rgba(16, 185, 129, 0.22);
+      box-shadow: 0 0 14px rgba(52, 211, 153, 0.45);
+    }
+
+    /* Cytoplasm fill */
+    .cyto {
+      position: absolute;
+      border-radius: 50% / 48%;
+      background: rgba(30, 41, 59, 0.55);
+      cursor: pointer;
+      z-index: 5;
+    }
+    .pos .cyto { inset: 26% 26%; }
+    .neg .cyto { inset: 26% 25%; }
+    .cyto:hover, .cyto.active { background: rgba(51, 65, 85, 0.65); }
+
+    /* Chromosome / nucleoid */
+    .chrom {
+      position: absolute;
+      left: 28%;
+      top: 38%;
+      width: 44%;
+      height: 26%;
+      background: linear-gradient(105deg, transparent 10%, var(--dna) 30%, #fbbf24 50%, var(--dna) 70%, transparent 90%);
+      border-radius: 40%;
+      opacity: 0.85;
+      cursor: pointer;
+      z-index: 7;
+      transition: all 0.2s;
+    }
+    .chrom:hover, .chrom.active {
+      opacity: 1;
+      filter: drop-shadow(0 0 10px #f59e0b);
+      transform: scale(1.05);
+    }
+
+    /* Ribosomes (small dots) */
+    .ribo {
+      position: absolute;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--ribo);
+      cursor: pointer;
+      z-index: 8;
+      transition: transform 0.15s;
+    }
+    .ribo:hover, .ribo.active {
+      transform: scale(1.7);
+      box-shadow: 0 0 8px #fb7185;
+    }
+
+    /* Inclusion body */
+    .incl {
+      position: absolute;
+      width: 16px; height: 12px;
+      border-radius: 40%;
+      background: radial-gradient(circle, #94a3b8 0%, #475569 100%);
+      border: 1px solid #64748b;
+      cursor: pointer;
+      z-index: 8;
+      transition: all 0.2s;
+    }
+    .incl:hover, .incl.active {
+      box-shadow: 0 0 10px #94a3b8;
+      transform: scale(1.2);
+    }
+
+    /* Mesosome (Gram+ only – membrane invagination) */
+    .meso {
+      position: absolute;
+      left: 55%;
+      top: 42%;
+      width: 18px;
+      height: 28px;
+      border: 2.5px solid var(--membrane);
+      border-radius: 8px 4px 12px 6px;
+      background: rgba(16, 185, 129, 0.15);
+      cursor: pointer;
+      z-index: 6;
+      transition: all 0.2s;
+    }
+    .meso:hover, .meso.active {
+      box-shadow: 0 0 12px #34d399;
+      background: rgba(16, 185, 129, 0.35);
+    }
+
+    /* Porins (Gram− outer membrane) – small channels */
+    .porin {
+      position: absolute;
+      width: 6px; height: 10px;
+      background: #e11d48;
+      border-radius: 2px;
+      cursor: pointer;
+      z-index: 3;
+      transition: all 0.15s;
+    }
+    .porin:hover, .porin.active {
+      box-shadow: 0 0 8px #f43f5e;
+      transform: scale(1.3);
+    }
+
+    /* Surface proteins (Gram+) */
+    .surf {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: #c4b5fd;
+      border-radius: 2px;
+      cursor: pointer;
+      z-index: 3;
+      transition: all 0.15s;
+    }
+    .surf:hover, .surf.active {
+      box-shadow: 0 0 8px #a78bfa;
+      transform: scale(1.35);
+    }
+
+    /* Flagellum */
+    .flag {
+      position: absolute;
+      height: 2.5px;
+      background: linear-gradient(90deg, var(--flagella), transparent);
+      border-radius: 2px;
+      cursor: pointer;
+      z-index: 0;
+      transform-origin: left center;
+      transition: filter 0.2s;
+    }
+    .flag:hover, .flag.active {
+      filter: brightness(1.4) drop-shadow(0 0 5px #22d3ee);
+    }
+
+    /* Pili */
+    .pil {
+      position: absolute;
+      height: 1.8px;
+      background: #a78bfa;
+      border-radius: 1px;
+      cursor: pointer;
+      z-index: 1;
+      transform-origin: left center;
+    }
+    .pil:hover, .pil.active {
+      filter: brightness(1.5);
+      box-shadow: 0 0 5px #a78bfa;
+    }
+
+    /* Division septum indicator */
+    .septum-line {
+      position: absolute;
+      left: 50%;
+      top: 18%;
+      bottom: 18%;
+      width: 2px;
+      background: repeating-linear-gradient(
+        to bottom,
+        #64748b 0 4px,
+        transparent 4px 8px
+      );
+      transform: translateX(-50%);
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    /* Info panel */
+    .info-panel {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 1rem;
+      border: 1px solid #334155;
+      min-height: 260px;
+      position: sticky;
+      top: 0.75rem;
+    }
+    .info-panel h3 { color: var(--accent); margin-top: 0; font-size: 1.1rem; }
+    .info-panel .tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      padding: 0.12rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+    .info-panel .func {
+      margin-top: 0.55rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid #334155;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    .info-panel .note {
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      color: #fbbf24;
+    }
+
+    .hint-bar {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+    }
+
+    /* Legend */
+    .legend-row {
+      display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+      justify-content: center; margin-top: 0.7rem; font-size: 0.78rem;
+    }
+    .legend-row span { display: flex; align-items: center; gap: 0.25rem; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+    /* ===== LABELING ===== */
+    .label-area {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    @media (max-width: 700px) { .label-area { grid-template-columns: 1fr; } }
+
+    .label-bank {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      min-height: 55px; padding: 0.55rem;
+      background: #0f172a; border-radius: 10px; border: 1px dashed #475569;
+    }
+
+    .label-chip {
+      padding: 0.35rem 0.65rem; border-radius: 8px;
+      background: #1e293b; border: 1px solid #475569;
+      cursor: grab; font-size: 0.82rem; font-weight: 600;
+      transition: all 0.2s; user-select: none;
+    }
+    .label-chip:hover { border-color: var(--accent); }
+    .label-chip.used { opacity: 0.35; pointer-events: none; }
+    .label-chip.correct { background: rgba(34,197,94,0.2); border-color: var(--success); }
+    .label-chip.wrong { background: rgba(239,68,68,0.2); border-color: var(--danger); }
+
+    .drop-zones { display: flex; flex-direction: column; gap: 0.45rem; }
+    .drop-zone {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.65rem; background: #0f172a;
+      border-radius: 8px; border: 2px dashed #334155;
+      min-height: 40px; transition: border-color 0.2s;
+    }
+    .drop-zone.over { border-color: var(--accent); background: rgba(56,189,248,0.08); }
+    .drop-zone .zone-label { font-size: 0.78rem; color: var(--muted); min-width: 130px; }
+    .drop-zone .slot { flex: 1; min-height: 26px; }
+
+    /* Quiz */
+    .question-card {
+      background: rgba(15, 23, 42, 0.55); border-radius: 12px;
+      padding: 1.15rem; margin-bottom: 1rem;
+    }
+    .options { display: grid; gap: 0.5rem; margin-top: 0.85rem; }
+    .option {
+      padding: 0.75rem 0.95rem; background: #0f172a; border: 2px solid #334155;
+      border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: left;
+    }
+    .option:hover:not(.correct):not(.wrong) {
+      border-color: var(--accent); background: rgba(56, 189, 248, 0.08);
+    }
+    .option.correct { border-color: var(--success); background: rgba(34, 197, 94, 0.15); }
+    .option.wrong { border-color: var(--danger); background: rgba(239, 68, 68, 0.15); }
+
+    .score-board {
+      display: flex; justify-content: space-around;
+      background: rgba(15,23,42,0.5); border-radius: 12px;
+      padding: 0.85rem; margin-bottom: 1rem; text-align: center;
+    }
+    .score-board div span {
+      display: block; font-size: 1.45rem; font-weight: 700; color: var(--accent);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      color: white; border: none; padding: 0.65rem 1.3rem;
+      border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(56,189,248,0.3); }
+
+    .feedback {
+      margin-top: 0.65rem; padding: 0.65rem; border-radius: 8px;
+      font-size: 0.88rem; display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct { background: rgba(34,197,94,0.15); border: 1px solid var(--success); }
+    .feedback.wrong { background: rgba(239,68,68,0.15); border: 1px solid var(--danger); }
+
+    .compare-table {
+      width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 0.7rem;
+    }
+    .compare-table th, .compare-table td {
+      padding: 0.5rem 0.65rem; border: 1px solid #334155; text-align: left;
+    }
+    .compare-table th { background: #0f172a; color: var(--accent); }
+    .compare-table tr:nth-child(even) { background: rgba(15,23,42,0.4); }
+
+    footer {
+      text-align: center; margin-top: 1.6rem; color: var(--muted); font-size: 0.85rem;
+    }
+    footer .designer {
+      display: inline-block; margin-top: 0.3rem; color: #a5b4fc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🦠 Bacterial Anatomy Explorer</h1>
+      <p class="subtitle">Detailed interactive model • Gram-positive & Gram-negative side by side</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="explore">Explore Cell</button>
+      <button class="tab-btn" data-tab="label">Label Challenge</button>
+      <button class="tab-btn" data-tab="compare">Compare Tables</button>
+      <button class="tab-btn" data-tab="quiz">Quiz</button>
+      <button class="tab-btn" data-tab="clinical">Clinical Links</button>
+    </div>
+
+    <!-- ========== EXPLORE ========== -->
+    <div id="explore" class="panel active">
+      <div class="card">
+        <h2>Click any labeled structure</h2>
+        <p class="muted">Based on standard teaching diagrams of Gram-positive vs Gram-negative cell envelopes. Click structures on either cell.</p>
+
+        <div class="diagram-layout">
+          <div>
+            <div class="cells-row">
+              <!-- GRAM POSITIVE -->
+              <div class="cell-panel pos">
+                <h4>GRAM POSITIVE</h4>
+                <div class="rod" id="rodPos">
+                  <div class="cap" data-id="capsule" title="Capsule"></div>
+                  <div class="wall-pos" data-id="wall" title="Peptidoglycan layer"></div>
+                  <div class="cm" data-id="membrane" title="Cytoplasmic membrane"></div>
+                  <div class="cyto" data-id="cytoplasm" title="Cytoplasm"></div>
+                  <div class="chrom" data-id="chromosome" title="Chromosome (nucleoid)"></div>
+                  <div class="meso" data-id="mesosome" title="Mesosome"></div>
+                  <div class="incl" data-id="inclusion" title="Inclusion body" style="left:32%;top:28%;"></div>
+                  <div class="incl" data-id="inclusion" title="Inclusion body" style="left:62%;top:58%;"></div>
+                  <!-- surface proteins -->
+                  <div class="surf" data-id="surface" title="Surface protein" style="left:18%;top:35%;"></div>
+                  <div class="surf" data-id="surface" title="Surface protein" style="left:78%;top:40%;"></div>
+                  <div class="surf" data-id="surface" title="Surface protein" style="left:22%;top:62%;"></div>
+                  <div class="surf" data-id="surface" title="Surface protein" style="left:75%;top:58%;"></div>
+                  <!-- ribosomes injected by JS -->
+                  <!-- flagellum -->
+                  <div class="flag" data-id="flagellum" title="Flagellum"
+                       style="width:55px;left:8%;top:78%;transform:rotate(110deg);"></div>
+                </div>
+              </div>
+
+              <!-- GRAM NEGATIVE -->
+              <div class="cell-panel neg">
+                <h4>GRAM NEGATIVE</h4>
+                <div class="rod" id="rodNeg">
+                  <div class="cap" data-id="capsule" title="Capsule"></div>
+                  <div class="om" data-id="outer" title="Outer membrane"></div>
+                  <div class="peri" data-id="periplasm" title="Periplasmic space + thin peptidoglycan"></div>
+                  <div class="cm" data-id="membrane" title="Cytoplasmic membrane"></div>
+                  <div class="cyto" data-id="cytoplasm" title="Cytoplasm"></div>
+                  <div class="chrom" data-id="chromosome" title="Chromosome (nucleoid)"></div>
+                  <div class="incl" data-id="inclusion" title="Inclusion body" style="left:30%;top:30%;"></div>
+                  <div class="incl" data-id="inclusion" title="Inclusion body" style="left:60%;top:55%;"></div>
+                  <!-- porins -->
+                  <div class="porin" data-id="porin" title="Porin" style="left:14%;top:32%;"></div>
+                  <div class="porin" data-id="porin" title="Porin" style="left:82%;top:38%;"></div>
+                  <div class="porin" data-id="porin" title="Porin" style="left:16%;top:58%;"></div>
+                  <div class="porin" data-id="porin" title="Porin" style="left:80%;top:55%;"></div>
+                  <div class="porin" data-id="porin" title="Porin" style="left:48%;top:14%;"></div>
+                  <!-- flagellum -->
+                  <div class="flag" data-id="flagellum" title="Flagellum"
+                       style="width:50px;left:78%;top:82%;transform:rotate(40deg);"></div>
+                  <!-- pili -->
+                  <div class="pil" data-id="pili" title="Pilus" style="width:22px;left:12%;top:25%;transform:rotate(-50deg);"></div>
+                  <div class="pil" data-id="pili" title="Pilus" style="width:20px;left:18%;top:48%;transform:rotate(-20deg);"></div>
+                  <div class="pil" data-id="pili" title="Pilus" style="width:18px;left:70%;top:22%;transform:rotate(30deg);"></div>
+                  <div class="pil" data-id="pili" title="Pilus" style="width:20px;left:75%;top:50%;transform:rotate(15deg);"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hint-bar">Dashed vertical reference = division septum plane (binary fission)</div>
+
+            <div class="legend-row">
+              <span><span class="dot" style="background:#a78bfa"></span> Thick PG (G+)</span>
+              <span><span class="dot" style="background:#f472b6"></span> Outer membrane</span>
+              <span><span class="dot" style="background:#fda4af"></span> Thin PG / periplasm</span>
+              <span><span class="dot" style="background:#34d399"></span> Cytoplasmic membrane</span>
+              <span><span class="dot" style="background:#f59e0b"></span> Chromosome</span>
+              <span><span class="dot" style="background:#fb7185"></span> Ribosome</span>
+              <span><span class="dot" style="background:#94a3b8"></span> Inclusion</span>
+              <span><span class="dot" style="background:#22d3ee;border-radius:1px;width:12px;height:3px;"></span> Flagellum</span>
+            </div>
+          </div>
+
+          <div class="info-panel" id="infoPanel">
+            <span class="tag">Click a structure</span>
+            <h3>Bacterial Cell Envelope</h3>
+            <p>Select any region on the Gram-positive or Gram-negative cell to see composition, function, and teaching notes aligned with standard diagrams.</p>
+            <div class="func">Structures now include: capsule, peptidoglycan, outer membrane, periplasm, porins, cytoplasmic membrane, mesosome, chromosome, ribosomes, inclusion bodies, surface proteins, flagella, and pili.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== LABEL ========== -->
+    <div id="label" class="panel">
+      <div class="card">
+        <h2>Drag-and-Drop Labeling</h2>
+        <p class="muted">Match each structure name to its correct description.</p>
+        <div class="label-area">
+          <div>
+            <h3>Structure bank</h3>
+            <div class="label-bank" id="labelBank"></div>
+            <div style="margin-top:0.9rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <button class="btn-primary" onclick="checkLabels()">Check Answers</button>
+              <button class="btn-primary" style="background:linear-gradient(135deg,#64748b,#475569)" onclick="resetLabels()">Reset</button>
+            </div>
+            <div id="labelResult" style="margin-top:0.7rem;font-weight:600;"></div>
+          </div>
+          <div>
+            <h3>Match to description</h3>
+            <div class="drop-zones" id="dropZones"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== COMPARE ========== -->
+    <div id="compare" class="panel">
+      <div class="card">
+        <h2>Gram-Positive vs Gram-Negative Envelope</h2>
+        <table class="compare-table">
+          <thead>
+            <tr><th>Feature</th><th>Gram-positive</th><th>Gram-negative</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Peptidoglycan</td><td>Thick multilayer (20–80 nm)</td><td>Thin (2–7 nm)</td></tr>
+            <tr><td>Outer membrane</td><td>Absent</td><td>Present (LPS + porins)</td></tr>
+            <tr><td>Periplasmic space</td><td>Minimal / absent</td><td>Prominent (contains thin PG)</td></tr>
+            <tr><td>Teichoic / lipoteichoic acids</td><td>Present</td><td>Absent</td></tr>
+            <tr><td>LPS / endotoxin</td><td>Absent</td><td>Present (lipid A)</td></tr>
+            <tr><td>Porins</td><td>Absent</td><td>Present in outer membrane</td></tr>
+            <tr><td>Mesosomes (classic diagrams)</td><td>Often illustrated</td><td>Rarely emphasized</td></tr>
+            <tr><td>Gram stain result</td><td>Purple</td><td>Pink / red</td></tr>
+            <tr><td>Examples</td><td><em>Staphylococcus, Bacillus, Clostridium, Streptococcus</em></td><td><em>E. coli, Salmonella, Pseudomonas, Neisseria</em></td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:1.2rem;">Internal & surface structures (both groups)</h3>
+        <table class="compare-table">
+          <thead>
+            <tr><th>Structure</th><th>Description</th><th>Key function</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Chromosome (nucleoid)</td><td>Single circular dsDNA, no nuclear membrane</td><td>Genetic information</td></tr>
+            <tr><td>Ribosomes</td><td>70S (30S + 50S)</td><td>Protein synthesis; antibiotic target</td></tr>
+            <tr><td>Inclusion bodies</td><td>Storage granules (glycogen, polyphosphate, sulfur…)</td><td>Nutrient / energy storage</td></tr>
+            <tr><td>Cytoplasmic membrane</td><td>Phospholipid bilayer + proteins</td><td>Transport, ETC, sensing</td></tr>
+            <tr><td>Flagellum</td><td>Protein filament + motor</td><td>Motility / chemotaxis</td></tr>
+            <tr><td>Pili / fimbriae</td><td>Hair-like protein appendages</td><td>Adhesion; sex pili for conjugation</td></tr>
+            <tr><td>Capsule</td><td>Polysaccharide (or polypeptide) layer</td><td>Antiphagocytic virulence factor</td></tr>
+            <tr><td>Mesosome</td><td>Membrane invagination (classic teaching feature)</td><td>Historically linked to division / respiration; largely artifactual</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== QUIZ ========== -->
+    <div id="quiz" class="panel">
+      <div class="card">
+        <h2>Anatomy Knowledge Check</h2>
+        <div class="score-board">
+          <div><span id="qScore">0</span>Score</div>
+          <div><span id="qCurrent">1</span>/ <span id="qTotal">12</span></div>
+          <div><span id="qStreak">0</span>Streak</div>
+        </div>
+        <div id="quizArea"></div>
+        <div style="text-align:center;margin-top:1rem;">
+          <button class="btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">Next →</button>
+          <button class="btn-primary" id="restartQuizBtn" onclick="startQuiz()" style="display:none;">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== CLINICAL ========== -->
+    <div id="clinical" class="panel">
+      <div class="card">
+        <h2>Structures & Clinical Relevance</h2>
+        <div style="display:grid;gap:0.8rem;">
+          <div style="padding:0.85rem;background:#0f172a;border-radius:10px;border-left:4px solid #38bdf8;">
+            <strong style="color:#38bdf8;">Capsule</strong>
+            <p class="muted" style="margin:0.25rem 0 0;">Antiphagocytic. Key virulence factor in <em>S. pneumoniae</em>, <em>K. pneumoniae</em>, <em>H. influenzae</em>, <em>N. meningitidis</em>. Basis of several polysaccharide vaccines.</p>
+          </div>
+          <div style="padding:0.85rem;background:#0f172a;border-radius:10px;border-left:4px solid #a78bfa;">
+            <strong style="color:#a78bfa;">Peptidoglycan & surface proteins</strong>
+            <p class="muted" style="margin:0.25rem 0 0;">Target of β-lactams and vancomycin. Surface proteins (e.g., protein A, M protein) mediate adhesion and immune evasion.</p>
+          </div>
+          <div style="padding:0.85rem;background:#0f172a;border-radius:10px;border-left:4px solid #f472b6;">
+            <strong style="color:#f472b6;">Outer membrane, porins & LPS</strong>
+            <p class="muted" style="margin:0.25rem 0 0;">LPS (lipid A) → endotoxic shock. Porins control antibiotic entry; mutation/loss contributes to resistance. Outer membrane is a major permeability barrier.</p>
+          </div>
+          <div style="padding:0.85rem;background:#0f172a;border-radius:10px;border-left:4px solid #fbbf24;">
+            <strong style="color:#fbbf24;">Periplasmic space</strong>
+            <p class="muted" style="margin:0.25rem 0 0;">Contains hydrolytic enzymes (including β-lactamases in many Gram-negatives) and binding proteins. Important for antibiotic inactivation.</p>
+          </div>
+          <div style="padding:0.85rem;background:#0f172a;border-radius:10px;border-left:4px solid #22d3ee;">
+            <strong style="color:#22d3ee;">Flagella & pili</strong>
+            <p class="muted" style="margin:0.25rem 0 0;">Flagella: motility, H antigen, TLR5 ligand. Pili: adhesion (UTI, intestinal pathogens) and conjugation (resistance plasmid spread).</p>
+          </div>
+          <div style="padding:0.85rem;background:#0f172a;border-radius:10px;border-left:4px solid #fb7185;">
+            <strong style="color:#fb7185;">Ribosomes (70S)</strong>
+            <p class="muted" style="margin:0.25rem 0 0;">Target of aminoglycosides, tetracyclines, macrolides, chloramphenicol, linezolid — selective because eukaryotic ribosomes are 80S.</p>
+          </div>
+          <div style="padding:0.85rem;background:#0f172a;border-radius:10px;border-left:4px solid #94a3b8;">
+            <strong style="color:#94a3b8;">Inclusion bodies</strong>
+            <p class="muted" style="margin:0.25rem 0 0;">Storage of nutrients (glycogen, poly-β-hydroxybutyrate, polyphosphate, sulfur). Visible under light microscopy; useful diagnostic clues in some species.</p>
+          </div>
+          <div style="padding:0.85rem;background:#0f172a;border-radius:10px;border-left:4px solid #34d399;">
+            <strong style="color:#34d399;">Mesosome (teaching note)</strong>
+            <p class="muted" style="margin:0.25rem 0 0;">Classic diagrams show mesosomes as membrane invaginations linked to septum formation or respiration. Modern view: largely preparation artifacts, but still appear in many textbooks.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Interactive bacterial anatomy lab • Structures aligned with standard Gram+/Gram− teaching diagrams<br>
+      <span class="designer">Design by Dr. R. Salas-Auvert</span>
+    </footer>
+  </div>
+
+  <script>
+    // ========== STRUCTURE DATA (expanded & corrected) ==========
+    const structures = {
+      capsule: {
+        name: "Capsule (Glycocalyx)",
+        tag: "Surface",
+        desc: "Organized polysaccharide (sometimes polypeptide) layer outside the cell wall. When loosely associated it is called a slime layer. Shown on both Gram-positive and Gram-negative cells in standard diagrams.",
+        func: "Protects against phagocytosis and desiccation. Major virulence factor. Visualized by negative staining or capsule stains.",
+        note: "Present on both sides of the reference diagram."
+      },
+      wall: {
+        name: "Peptidoglycan layer (Gram-positive)",
+        tag: "Envelope – Gram+",
+        desc: "Thick multilayered peptidoglycan (murein) 20–80 nm. Contains teichoic and lipoteichoic acids. Gives the cell its rigidity and is the reason Gram-positive cells retain crystal violet.",
+        func: "Shape, osmotic protection, attachment site. Target of β-lactams and vancomycin.",
+        note: "In the reference diagram this is the thick purple/blue layer surrounding the Gram-positive cell."
+      },
+      outer: {
+        name: "Outer membrane",
+        tag: "Envelope – Gram−",
+        desc: "Lipid bilayer unique to Gram-negative bacteria. Outer leaflet contains lipopolysaccharide (LPS). Contains porin proteins that form channels.",
+        func: "Permeability barrier, protection from host factors and many antibiotics. LPS (especially lipid A) is endotoxin.",
+        note: "Labeled on the Gram-negative side of the reference diagram."
+      },
+      periplasm: {
+        name: "Periplasmic space + thin peptidoglycan",
+        tag: "Envelope – Gram−",
+        desc: "Gel-filled compartment between the outer membrane and the cytoplasmic membrane. Contains a thin peptidoglycan layer plus hydrolytic enzymes, binding proteins, and often β-lactamases.",
+        func: "Nutrient processing, detoxification of antibiotics, maintenance of the thin wall.",
+        note: "Clearly labeled as periplasmic space and thin peptidoglycan layer in the reference diagram."
+      },
+      porin: {
+        name: "Porin proteins",
+        tag: "Outer membrane – Gram−",
+        desc: "Trimeric protein channels that allow hydrophilic molecules (sugars, amino acids, some antibiotics) to cross the outer membrane.",
+        func: "Controlled permeability. Loss or mutation of porins is a common mechanism of antibiotic resistance.",
+        note: "Shown as channels through the outer membrane on the Gram-negative side."
+      },
+      membrane: {
+        name: "Cytoplasmic (plasma) membrane",
+        tag: "Envelope – both",
+        desc: "Phospholipid bilayer with embedded proteins. Site of the electron-transport chain and numerous transporters. No sterols in most bacteria (exception: Mycoplasma).",
+        func: "Selective permeability, energy generation, signal transduction, septum formation.",
+        note: "Present and labeled on both Gram-positive and Gram-negative halves of the diagram."
+      },
+      mesosome: {
+        name: "Mesosome",
+        tag: "Classic teaching structure (Gram+)",
+        desc: "Invagination of the cytoplasmic membrane frequently drawn in older and many current textbooks, especially on the Gram-positive side.",
+        func: "Historically associated with DNA segregation, septum formation, and respiratory activity. Modern electron-microscopy consensus: largely an artifact of chemical fixation.",
+        note: "Explicitly labeled on the Gram-positive side of the reference diagram. Still taught in many curricula."
+      },
+      cytoplasm: {
+        name: "Cytoplasm",
+        tag: "Internal – both",
+        desc: "Aqueous matrix containing enzymes, ribosomes, the nucleoid, inclusion bodies, and metabolites. No membrane-bound organelles.",
+        func: "Site of metabolism and protein synthesis.",
+        note: "The yellow/cream interior in the reference diagram."
+      },
+      chromosome: {
+        name: "Chromosome (Nucleoid)",
+        tag: "Genetic material",
+        desc: "Single, circular, double-stranded DNA molecule condensed into an irregular region without a nuclear membrane. Often drawn as a continuous red/coiled structure.",
+        func: "Stores the genetic information of the cell. Replication is bidirectional.",
+        note: "Shown spanning both cells in the reference diagram as the red central structure."
+      },
+      ribosome: {
+        name: "Ribosome (70S)",
+        tag: "Protein synthesis",
+        desc: "Composed of 30S and 50S subunits. Thousands are scattered in the cytoplasm. Distinct from eukaryotic 80S ribosomes.",
+        func: "Translate mRNA into protein. Major antibiotic target (aminoglycosides, tetracyclines, macrolides, etc.).",
+        note: "Small dots labeled on both sides of the reference diagram."
+      },
+      inclusion: {
+        name: "Inclusion body",
+        tag: "Storage",
+        desc: "Cytoplasmic granules that store nutrients or energy reserves (glycogen, poly-β-hydroxybutyrate, polyphosphate, sulfur, magnetosomes, etc.).",
+        func: "Nutrient and energy storage; can be diagnostic under the microscope.",
+        note: "Labeled on both Gram-positive and Gram-negative sides of the reference diagram."
+      },
+      surface: {
+        name: "Surface proteins",
+        tag: "Cell wall – Gram+",
+        desc: "Proteins embedded in or covalently attached to the thick peptidoglycan (e.g., protein A, M protein, internalins).",
+        func: "Adhesion, immune evasion, enzymatic activity at the cell surface.",
+        note: "Labeled on the Gram-positive side of the reference diagram."
+      },
+      flagellum: {
+        name: "Flagellum",
+        tag: "Motility",
+        desc: "Long protein filament (flagellin) rotated by a membrane-embedded motor powered by the proton motive force. Arrangements: mono-, lopho-, amphi-, or peritrichous.",
+        func: "Motility and chemotaxis. H antigen used in serotyping. Recognized by TLR5.",
+        note: "Shown on both sides of the reference diagram."
+      },
+      pili: {
+        name: "Pili (Fimbriae)",
+        tag: "Attachment & conjugation",
+        desc: "Short, hair-like protein appendages. Common pili mediate adhesion; sex (F) pili are involved in conjugation.",
+        func: "Adhesion to host cells and surfaces; DNA transfer between bacteria.",
+        note: "Labeled on the Gram-negative side of the reference diagram."
+      }
+    };
+
+    // ========== TABS ==========
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'quiz' && !quizStarted) startQuiz();
+        if (btn.dataset.tab === 'label') initLabels();
+      });
+    });
+
+    // ========== INTERACTION ==========
+    function selectStruct(id) {
+      document.querySelectorAll('[data-id]').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll(`[data-id="${id}"]`).forEach(el => el.classList.add('active'));
+      showInfo(id);
+    }
+
+    function showInfo(id) {
+      const s = structures[id];
+      if (!s) return;
+      const panel = document.getElementById('infoPanel');
+      panel.innerHTML = `
+        <span class="tag">${s.tag}</span>
+        <h3>${s.name}</h3>
+        <p>${s.desc}</p>
+        <div class="func"><strong>Function:</strong><br>${s.func}</div>
+        ${s.note ? `<div class="note">📐 Diagram note: ${s.note}</div>` : ''}
+      `;
+    }
+
+    // attach clicks
+    document.querySelectorAll('[data-id]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectStruct(el.dataset.id);
+      });
+    });
+
+    // place ribosomes on both cells
+    function placeRibosomes(rodId, count) {
+      const rod = document.getElementById(rodId);
+      const positions = [
+        [35, 32], [48, 28], [60, 35], [42, 48], [55, 52],
+        [38, 60], [52, 62], [45, 40], [58, 45], [40, 55]
+      ];
+      positions.slice(0, count).forEach(([x, y]) => {
+        const r = document.createElement('div');
+        r.className = 'ribo';
+        r.dataset.id = 'ribosome';
+        r.title = 'Ribosome';
+        r.style.left = x + '%';
+        r.style.top = y + '%';
+        r.addEventListener('click', (e) => { e.stopPropagation(); selectStruct('ribosome'); });
+        rod.appendChild(r);
+      });
+    }
+    placeRibosomes('rodPos', 9);
+    placeRibosomes('rodNeg', 9);
+
+    // ========== LABELING ==========
+    const labelPairs = [
+      { id: 'chromosome', desc: 'Circular DNA region without a nuclear membrane' },
+      { id: 'ribosome', desc: '70S machinery that synthesizes proteins' },
+      { id: 'wall', desc: 'Thick peptidoglycan of Gram-positive cells' },
+      { id: 'outer', desc: 'LPS-containing membrane unique to Gram-negatives' },
+      { id: 'periplasm', desc: 'Compartment between OM and CM containing thin PG' },
+      { id: 'porin', desc: 'Channel proteins in the Gram-negative outer membrane' },
+      { id: 'membrane', desc: 'Phospholipid bilayer; site of electron transport' },
+      { id: 'mesosome', desc: 'Membrane invagination shown in classic Gram+ diagrams' },
+      { id: 'inclusion', desc: 'Cytoplasmic storage granule' },
+      { id: 'capsule', desc: 'Antiphagocytic polysaccharide layer outside the wall' },
+      { id: 'flagellum', desc: 'Rotating filament used for motility' },
+      { id: 'pili', desc: 'Hair-like appendages for adhesion or conjugation' },
+      { id: 'surface', desc: 'Proteins attached to the Gram-positive wall' }
+    ];
+
+    function initLabels() {
+      const bank = document.getElementById('labelBank');
+      const zones = document.getElementById('dropZones');
+      bank.innerHTML = '';
+      zones.innerHTML = '';
+      document.getElementById('labelResult').textContent = '';
+
+      const names = labelPairs.map(p => ({
+        id: p.id,
+        name: structures[p.id].name.replace(/ \(.*\)/, '').split(' – ')[0]
+      }));
+      for (let i = names.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [names[i], names[j]] = [names[j], names[i]];
+      }
+
+      names.forEach(n => {
+        const chip = document.createElement('div');
+        chip.className = 'label-chip';
+        chip.draggable = true;
+        chip.dataset.id = n.id;
+        chip.textContent = n.name;
+        chip.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', n.id);
+        });
+        bank.appendChild(chip);
+      });
+
+      const shuffled = [...labelPairs].sort(() => Math.random() - 0.5);
+      shuffled.forEach(p => {
+        const zone = document.createElement('div');
+        zone.className = 'drop-zone';
+        zone.dataset.correct = p.id;
+        zone.innerHTML = `<span class="zone-label">${p.desc}</span><div class="slot"></div>`;
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+          e.preventDefault();
+          zone.classList.remove('over');
+          const id = e.dataTransfer.getData('text/plain');
+          const chip = document.querySelector(`.label-chip[data-id="${id}"]:not(.used)`);
+          if (!chip) return;
+          const slot = zone.querySelector('.slot');
+          if (slot.dataset.id) {
+            const prev = document.querySelector(`.label-chip[data-id="${slot.dataset.id}"]`);
+            if (prev) prev.classList.remove('used');
+          }
+          slot.innerHTML = '';
+          const clone = chip.cloneNode(true);
+          clone.draggable = false;
+          slot.appendChild(clone);
+          slot.dataset.id = id;
+          chip.classList.add('used');
+        });
+        zones.appendChild(zone);
+      });
+    }
+
+    function checkLabels() {
+      let correct = 0;
+      document.querySelectorAll('.drop-zone').forEach(z => {
+        const slot = z.querySelector('.slot');
+        const chip = slot.querySelector('.label-chip');
+        if (chip) {
+          chip.classList.remove('correct', 'wrong');
+          if (slot.dataset.id === z.dataset.correct) {
+            chip.classList.add('correct');
+            correct++;
+          } else chip.classList.add('wrong');
+        }
+      });
+      const el = document.getElementById('labelResult');
+      el.style.color = correct === labelPairs.length ? 'var(--success)' : 'var(--warning)';
+      el.textContent = `${correct} / ${labelPairs.length} correct` + (correct === labelPairs.length ? ' — Excellent!' : '');
+    }
+
+    function resetLabels() { initLabels(); }
+
+    // ========== QUIZ ==========
+    const questions = [
+      {
+        q: "In the standard diagram, which structure is present only on the Gram-negative side?",
+        options: ["Thick peptidoglycan", "Mesosome", "Outer membrane with porins", "Teichoic acids"],
+        answer: 2,
+        explain: "The outer membrane (containing LPS and porins) is unique to Gram-negative bacteria."
+      },
+      {
+        q: "What occupies the space between the outer membrane and the cytoplasmic membrane in Gram-negative cells?",
+        options: ["Capsule", "Periplasmic space (with thin peptidoglycan)", "Mesosome", "Inclusion bodies only"],
+        answer: 1,
+        explain: "The periplasmic space contains the thin peptidoglycan layer plus enzymes and binding proteins."
+      },
+      {
+        q: "Mesosomes are most commonly illustrated on which type of cell in classic textbooks?",
+        options: ["Gram-negative only", "Gram-positive", "Acid-fast only", "Mycoplasma"],
+        answer: 1,
+        explain: "Classic diagrams typically show mesosomes as membrane invaginations on the Gram-positive side. They are now largely regarded as fixation artifacts."
+      },
+      {
+        q: "Porin proteins allow passage of molecules across the:",
+        options: ["Cytoplasmic membrane of all bacteria", "Outer membrane of Gram-negative bacteria", "Capsule", "Thick peptidoglycan of Gram-positive cells"],
+        answer: 1,
+        explain: "Porins form channels in the Gram-negative outer membrane."
+      },
+      {
+        q: "Inclusion bodies function primarily as:",
+        options: ["Sites of protein synthesis", "Storage of nutrients or energy reserves", "Motility organelles", "DNA packaging structures"],
+        answer: 1,
+        explain: "Inclusion bodies are cytoplasmic granules that store glycogen, polyphosphate, sulfur, etc."
+      },
+      {
+        q: "Surface proteins covalently linked to peptidoglycan are characteristic of:",
+        options: ["Gram-negative outer membranes", "Gram-positive cell walls", "Endospore coats only", "All bacterial capsules"],
+        answer: 1,
+        explain: "Many surface proteins (protein A, M protein, etc.) are anchored in the thick Gram-positive wall."
+      },
+      {
+        q: "The chromosome of a typical bacterium is:",
+        options: ["Linear and enclosed in a nucleus", "Circular and located in the nucleoid region", "Present only as plasmids", "Double-stranded RNA"],
+        answer: 1,
+        explain: "Bacteria have a single circular chromosome in a nucleoid region without a nuclear membrane."
+      },
+      {
+        q: "Which structure is the primary target of β-lactam antibiotics?",
+        options: ["Ribosomes", "Peptidoglycan synthesis / cell wall", "Outer membrane porins", "Flagellar motor"],
+        answer: 1,
+        explain: "β-lactams inhibit the transpeptidases that cross-link peptidoglycan."
+      },
+      {
+        q: "LPS (endotoxin) is located in the:",
+        options: ["Gram-positive teichoic acids", "Outer leaflet of the Gram-negative outer membrane", "Cytoplasmic membrane of all bacteria", "Capsule of Bacillus anthracis only"],
+        answer: 1,
+        explain: "Lipid A of LPS in the Gram-negative outer membrane is the toxic component."
+      },
+      {
+        q: "Flagella and pili differ mainly in that:",
+        options: ["Flagella are for motility; pili are mainly for adhesion or conjugation", "Pili are longer than flagella", "Only Gram-positives have flagella", "Pili contain peptidoglycan"],
+        answer: 0,
+        explain: "Flagella rotate for motility; common pili mediate adhesion and sex pili mediate conjugation."
+      },
+      {
+        q: "The division septum is the structure that forms during:",
+        options: ["Sporulation only", "Binary fission", "Conjugation", "Capsule synthesis"],
+        answer: 1,
+        explain: "The septum is the inward growth of membrane and wall that divides the cell into two daughters."
+      },
+      {
+        q: "Why do many textbooks still show mesosomes even though they are considered artifacts?",
+        options: ["They are essential for modern taxonomy", "They remain part of classic teaching diagrams and exam material", "They are visible only in living cells", "They are unique to pathogenic species"],
+        answer: 1,
+        explain: "Mesosomes appear in many standard teaching figures (including the reference diagram). Students are still expected to recognize the label."
+      }
+    ];
+
+    let quizStarted = false, qIndex = 0, score = 0, streak = 0, answered = false;
+
+    function startQuiz() {
+      quizStarted = true; qIndex = 0; score = 0; streak = 0;
+      document.getElementById('qScore').textContent = 0;
+      document.getElementById('qStreak').textContent = 0;
+      document.getElementById('qTotal').textContent = questions.length;
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('restartQuizBtn').style.display = 'none';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      answered = false;
+      const q = questions[qIndex];
+      document.getElementById('qCurrent').textContent = qIndex + 1;
+      let html = `<div class="question-card"><h3 style="color:var(--text);margin-bottom:0.65rem;">${q.q}</h3><div class="options">`;
+      q.options.forEach((opt, i) => {
+        html += `<div class="option" onclick="selectOption(${i})">${opt}</div>`;
+      });
+      html += `</div><div class="feedback" id="feedback"></div></div>`;
+      document.getElementById('quizArea').innerHTML = html;
+      document.getElementById('nextBtn').style.display = 'none';
+    }
+
+    function selectOption(index) {
+      if (answered) return;
+      answered = true;
+      const q = questions[qIndex];
+      const options = document.querySelectorAll('#quizArea .option');
+      const feedback = document.getElementById('feedback');
+      options.forEach(o => o.style.pointerEvents = 'none');
+      if (index === q.answer) {
+        options[index].classList.add('correct');
+        score++; streak++;
+        feedback.className = 'feedback show correct';
+        feedback.textContent = '✓ ' + q.explain;
+      } else {
+        options[index].classList.add('wrong');
+        options[q.answer].classList.add('correct');
+        streak = 0;
+        feedback.className = 'feedback show wrong';
+        feedback.textContent = '✗ ' + q.explain;
+      }
+      document.getElementById('qScore').textContent = score;
+      document.getElementById('qStreak').textContent = streak;
+      if (qIndex < questions.length - 1) {
+        document.getElementById('nextBtn').style.display = 'inline-block';
+      } else {
+        setTimeout(() => {
+          document.getElementById('quizArea').innerHTML = `
+            <div class="question-card" style="text-align:center;">
+              <h2 style="color:var(--accent);">Quiz Complete!</h2>
+              <p style="font-size:1.3rem;margin:0.9rem 0;">Score: <strong>${score}</strong> / ${questions.length}</p>
+              <p class="muted">${score === questions.length ? 'Outstanding — full command of the detailed model!' :
+                score >= 9 ? 'Very strong. Review any missed structures.' :
+                'Revisit the side-by-side diagram and try again.'}</p>
+            </div>`;
+          document.getElementById('restartQuizBtn').style.display = 'inline-block';
+        }, 1000);
+      }
+    }
+
+    function nextQuestion() { qIndex++; showQuestion(); }
+  </script>
+</body>
+</html>
