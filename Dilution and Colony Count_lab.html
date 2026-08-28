@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Dilution Bench — Serial Dilutions &amp; Plate Counts</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* dark "instrument" tokens — used inside panels/cards */
+    --bg:#101718;
+    --panel:#182123;
+    --panel-2:#1e292c;
+    --line: rgba(244,241,232,0.10);
+    --line-strong: rgba(244,241,232,0.22);
+    --text:#f2ede1;
+    --text-dim:#9db0ad;
+
+    /* light "bench top" tokens — used directly on the page */
+    --paper:#EEE7D2;
+    --paper-2:#E7E0C9;
+    --ink:#20302c;
+    --ink-dim:#5c6e68;
+    --line-ink: rgba(32,48,44,0.14);
+    --line-ink-strong: rgba(32,48,44,0.28);
+
+    /* shared accents */
+    --agar:#e2a44d;
+    --agar-ink:#a8641d;
+    --colony:#8fbf6f;
+    --colony-ink:#3c7a3f;
+    --teal:#4fa8a0;
+    --teal-ink:#136f68;
+    --danger:#d6614b;
+    --danger-ink:#a83a2a;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 12% -8%, rgba(19,111,104,0.14), transparent 60%),
+      radial-gradient(ellipse 800px 550px at 100% 4%, rgba(168,100,29,0.12), transparent 55%),
+      linear-gradient(180deg, var(--paper), var(--paper-2) 60%, var(--paper));
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding: 0 20px 100px;}
+  h1,h2,h3{font-family:'Fraunces', serif; font-weight:700; margin:0;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:var(--teal-ink);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding: 56px 0 30px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; letter-spacing:.14em; text-transform:uppercase;
+    font-size:12px; color:var(--teal-ink); margin-bottom:14px; font-weight:600;
+  }
+  .hero h1{ font-size: clamp(34px, 6vw, 58px); line-height:1.05; max-width:780px; color:var(--ink);}
+  .hero h1 em{ font-style:italic; color:var(--agar-ink); }
+  .hero p.sub{ color:var(--ink-dim); max-width:580px; margin-top:16px; font-size:16.5px;}
+  .score-pill{
+    margin-top:24px; display:inline-flex; align-items:center; gap:10px;
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:999px;
+    padding:8px 18px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-dim);
+  }
+  #scoreVal{ color:var(--colony); font-weight:600; font-size:15px;}
+  .hero-dish{ margin-top: 30px; }
+  .dish-svg{ filter: drop-shadow(0 18px 34px rgba(32,48,44,0.28)); }
+
+  /* ---------- INTRO / SCOPE ---------- */
+  .intro{ margin-top: 44px; text-align:center; }
+  .intro p{ max-width:660px; margin: 0 auto; color:var(--ink-dim); font-size:15.5px; }
+  .scope-row{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:22px; }
+  .scope-chip{
+    display:flex; align-items:center; gap:9px; background:#fff9ea; border:1px solid var(--line-ink-strong);
+    border-radius:11px; padding:11px 16px; font-size:13.5px; color:var(--ink); font-weight:500;
+  }
+  .scope-chip .dot{ width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+
+  /* ---------- SECTION SHELL ---------- */
+  section.block{ margin-top: 66px; }
+  .sec-head{ display:flex; align-items:baseline; gap:14px; margin-bottom: 8px; }
+  .sec-num{ font-family:'IBM Plex Mono', monospace; color:var(--ink-dim); font-size:13px; border:1px solid var(--line-ink-strong); padding:2px 9px; border-radius:20px;}
+  .sec-head h2{ font-size: clamp(22px,3.4vw,30px); color:var(--ink); }
+  .sec-intro{ color:var(--ink-dim); max-width:660px; margin: 10px 0 26px; font-size:15px;}
+
+  .panel{
+    background: linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line); border-radius: var(--radius);
+    padding: 26px; color:var(--text);
+    box-shadow: 0 14px 30px rgba(32,48,44,0.14);
+  }
+
+  /* ---------- HOW DILUTION WORKS (ladder) ---------- */
+  .explain-grid{ display:grid; grid-template-columns: 1.1fr 1fr; gap:26px; align-items:center; }
+  @media (max-width:760px){ .explain-grid{ grid-template-columns:1fr; } }
+  .explain-copy p{ margin:0 0 12px; font-size:14.5px; color:var(--text-dim); }
+  .explain-copy .formula-mini{
+    font-family:'IBM Plex Mono',monospace; background:var(--bg); border:1px solid var(--line-strong);
+    border-radius:10px; padding:12px 14px; font-size:13.5px; color:var(--text); margin: 14px 0;
+  }
+  .ladder{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .ladder-card{ width:100px; text-align:center; }
+  .ladder-svg-box{ width:100px; height:100px; background:var(--bg); border:1px solid var(--line-strong); border-radius:10px; overflow:hidden; }
+  .ladder-label{ margin-top:8px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim); }
+  .ladder-label b{ display:block; color:var(--agar); font-size:13.5px; }
+
+  /* ---------- CONTROLS ---------- */
+  .controls-row{ display:flex; flex-wrap:wrap; gap:22px; margin-bottom: 22px; }
+  .ctrl{ flex:1 1 160px; min-width:150px;}
+  .ctrl label{ display:block; font-size:12.5px; color:var(--text-dim); margin-bottom:8px; font-family:'IBM Plex Mono',monospace; letter-spacing:.02em;}
+  .ctrl .val{ color:var(--agar); font-weight:600;}
+  input[type=range]{
+    width:100%; -webkit-appearance:none; appearance:none; height:5px; border-radius:4px;
+    background: var(--line-strong); outline:none; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:17px; height:17px; border-radius:50%;
+    background: var(--agar); border:3px solid #101718; cursor:pointer; margin-top:-1px;
+  }
+  input[type=number], select{
+    width:100%; background:var(--bg); border:1px solid var(--line-strong); color:var(--text);
+    padding:9px 11px; border-radius:8px; font-family:'IBM Plex Mono',monospace; font-size:14px;
+  }
+  button{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
+    border-radius:9px; border:1px solid var(--line-strong); background:var(--panel-2); color:var(--text);
+    padding:10px 16px; transition: all .15s ease;
+  }
+  button:hover{ border-color:var(--teal); color:var(--teal); }
+  button.primary{ background:var(--agar); color:#1a1206; border-color:var(--agar); }
+  button.primary:hover{ filter:brightness(1.08); color:#1a1206; }
+
+  /* ---------- TUBE TRAIN ---------- */
+  .tube-train{ display:flex; gap:16px; overflow-x:auto; padding: 10px 4px 18px; }
+  .tube-unit{ display:flex; flex-direction:column; align-items:center; flex: 0 0 auto; width: 112px;}
+  .tube-shape{
+    width:46px; height:104px; border-radius: 0 0 20px 20px; border:2px solid var(--line-strong);
+    border-top:none; position:relative; overflow:hidden; background: rgba(244,241,232,0.03);
+  }
+  .tube-liquid{ position:absolute; bottom:0; left:0; right:0; height:78%; border-radius: 0 0 18px 18px; transition: background .3s ease;}
+  .tube-cap{ width:52px; height:8px; background:var(--line-strong); border-radius:3px 3px 0 0;}
+  .source-shape{ width:58px; height:106px; border-radius: 12px 12px 28px 28px; border:2px solid var(--teal); border-top:none; }
+  .source-cap{ width:64px; background: var(--teal); }
+  .source-vial .t-name{ color: var(--teal); font-weight:600; }
+  .tube-label{ margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; text-align:center; color:var(--text-dim); }
+  .tube-label .t-name{ display:block; color:var(--text-dim); }
+  .tube-label .t-line{ display:block; margin-top:5px; padding-top:5px; border-top:1px dotted var(--line); }
+  .tube-label .t-line .tag{ display:block; font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); opacity:0.75; }
+  .tube-label .t-individual b{ color:var(--teal); font-size:12.5px; }
+  .tube-label .t-cumulative b{ color:var(--agar); font-size:13px; }
+
+  .reset-btn{
+    margin-top:24px; display:inline-flex; align-items:center; gap:8px;
+    background:transparent; border:1px solid var(--line-ink-strong); color:var(--ink-dim);
+    border-radius:999px; padding:8px 16px; font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+    cursor:pointer; transition: all .15s ease;
+  }
+  .reset-btn:hover{ border-color:var(--danger-ink); color:var(--danger-ink); }
+  .hero-actions{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center; }
+  .arrow{ align-self:center; color:var(--text-dim); font-size:13px; margin-top:44px; flex:0 0 auto; }
+  .total-dilution{
+    margin-top: 10px; text-align:center; font-family:'IBM Plex Mono',monospace;
+    background: var(--bg); border:1px dashed var(--line-strong); border-radius:10px; padding:16px;
+  }
+  .total-dilution .big{ font-size: 22px; color:var(--agar); font-weight:600; }
+
+  /* ---------- PLATE GAME ---------- */
+  .plate-row{ display:flex; gap:18px; flex-wrap:wrap; justify-content:center; margin-bottom: 18px;}
+  .plate-card{
+    width: 160px; background:var(--bg); border:2px solid var(--line-strong); border-radius:14px;
+    padding:14px 10px 12px; text-align:center; cursor:pointer; transition: all .15s ease; position:relative;
+  }
+  .plate-card:hover{ border-color: var(--teal); transform: translateY(-2px); }
+  .plate-card.correct{ border-color: var(--colony); box-shadow: 0 0 0 3px rgba(143,191,111,0.25); }
+  .plate-card.wrong{ border-color: var(--danger); box-shadow: 0 0 0 3px rgba(214,97,75,0.2); }
+  .plate-card.disabled{ pointer-events:none; opacity:0.55; }
+  .dish-mini{ width:118px; height:118px; margin: 0 auto 10px; }
+  .plate-count{ font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--text-dim);}
+  .plate-count b{ color:var(--text); font-size:16px;}
+  .plate-tag{ font-size:11px; color:var(--text-dim); margin-top:4px; font-family:'IBM Plex Mono',monospace;}
+  .feedback-box{
+    text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; min-height:26px;
+    color: var(--text-dim); margin-bottom: 6px;
+  }
+  .feedback-box.good{ color: var(--colony); }
+  .feedback-box.bad{ color: var(--danger); }
+
+  /* ---------- CALCULATOR ---------- */
+  .calc-grid{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:20px;}
+  @media (max-width:640px){ .calc-grid{ grid-template-columns:1fr; } }
+  .formula-box{
+    background:var(--bg); border:1px solid var(--line-strong); border-radius:12px; padding:20px;
+    font-family:'IBM Plex Mono',monospace; text-align:center;
+  }
+  .frac{ display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 6px;}
+  .frac .num{ padding-bottom:4px; border-bottom:1.5px solid var(--text); }
+  .frac .den{ padding-top:4px; }
+  .result-line{ margin-top:16px; font-size: 24px; color: var(--agar); font-weight:600; }
+  .step-list{ margin-top:14px; font-size:13px; color:var(--text-dim); text-align:left; }
+  .step-list div{ padding:4px 0; border-top:1px dotted var(--line);}
+  .step-list div:first-child{ border-top:none; }
+
+  /* ---------- APPLIED CHALLENGES ---------- */
+  .field-note{
+    display:flex; gap:10px; align-items:flex-start; background:#fff9ea; border:1px solid var(--line-ink-strong);
+    border-radius:10px; padding:14px 16px; margin-bottom:22px; font-size:13.5px; color:var(--ink-dim);
+  }
+  .field-note b{ color:var(--ink); }
+  .challenge{
+    background: linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid var(--line);
+    border-radius: var(--radius); padding:24px; margin-bottom: 22px; color:var(--text);
+    box-shadow: 0 14px 30px rgba(32,48,44,0.14);
+  }
+  .challenge-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;}
+  .challenge-head h3{ font-size:19px;}
+  .field-badge{ font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; font-weight:600;}
+  .field-badge.medical{ background:rgba(214,97,75,0.18); color:#ef9080; }
+  .field-badge.food{ background:rgba(226,164,77,0.2); color:var(--agar); }
+  .field-badge.env{ background:rgba(79,168,160,0.2); color:var(--teal); }
+  .challenge-desc{ color:var(--text-dim); font-size:14px; margin-bottom:18px; }
+  .subsample{ margin-bottom:18px; }
+  .subsample-label{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--agar); margin-bottom:8px; text-transform:uppercase; letter-spacing:.04em;}
+  .chip-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
+  .chip{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; padding:9px 14px; border-radius:9px;
+    border:1.5px solid var(--line-strong); background:var(--bg); cursor:pointer; color:var(--text);
+  }
+  .chip:hover{ border-color:var(--teal); }
+  .chip.sel-correct{ border-color:var(--colony); background: rgba(143,191,111,0.12); }
+  .chip.sel-wrong{ border-color:var(--danger); background: rgba(214,97,75,0.12); }
+  .chip.disabled{ pointer-events:none; }
+  .answer-reveal{
+    margin-top:10px; padding:14px 16px; border-radius:10px; background:var(--bg); border:1px solid var(--line-strong);
+    font-family:'IBM Plex Mono',monospace; font-size:13.5px; display:none;
+  }
+  .answer-reveal.show{ display:block; }
+  .answer-reveal .ans-val{ color:var(--agar); font-size:17px; font-weight:600; }
+  .takeaway{
+    margin-top:16px; padding-top:16px; border-top:1px solid var(--line); font-size:13.5px; color:var(--text-dim);
+    display:none;
+  }
+  .takeaway.show{ display:block; }
+  .takeaway b{ color:var(--text); }
+
+  /* ---------- CHEAT SHEET ---------- */
+  .cheat-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:14px; }
+  @media (max-width:640px){ .cheat-grid{ grid-template-columns:1fr; } }
+  .cheat-card{ background:var(--bg); border:1px solid var(--line-strong); border-radius:10px; padding:16px 18px;}
+  .cheat-card h4{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--teal); margin:0 0 8px; text-transform:uppercase; letter-spacing:.06em;}
+  .cheat-card p{ margin:0; font-size:13.5px; color:var(--text-dim); }
+
+  /* ---------- POUR VS SPREAD PLATE ---------- */
+  .method-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:700px){ .method-grid{ grid-template-columns:1fr; } }
+  .method-card{ background:var(--bg); border:1px solid var(--line-strong); border-radius:12px; padding:20px; text-align:center; }
+  .method-icon{ margin-bottom:8px; }
+  .method-card h3{ color:var(--text); font-size:18px; margin-bottom:12px; }
+  .method-steps{ text-align:left; font-size:13.5px; color:var(--text-dim); }
+  .method-steps div{ display:flex; gap:10px; padding:7px 0; border-top:1px dotted var(--line); }
+  .method-steps div:first-child{ border-top:none; }
+  .method-steps span{
+    flex:0 0 auto; width:19px; height:19px; border-radius:50%; background:var(--panel-2); border:1px solid var(--line-strong);
+    display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--agar);
+  }
+  .method-steps b{ color:var(--text); }
+  .method-note{ margin-top:14px; padding-top:14px; border-top:1px solid var(--line); font-size:12.5px; color:var(--text-dim); text-align:left; }
+  .method-footer{ margin-top:18px; text-align:center; font-size:13px; color:var(--text-dim); }
+
+  /* ---------- WHAT IS A COLONY ---------- */
+  .colony-grid{ display:grid; grid-template-columns: 1fr 1.2fr; gap:28px; align-items:center; }
+  @media (max-width:760px){ .colony-grid{ grid-template-columns:1fr; } }
+  .colony-visual{ display:flex; justify-content:center; }
+  .colony-copy p{ font-size:14.5px; color:var(--text-dim); margin:0 0 12px; }
+  .colony-copy b{ color:var(--text); }
+  .cfu-callout{
+    font-family:'IBM Plex Mono',monospace; background:var(--bg); border:1px solid var(--line-strong);
+    border-radius:10px; padding:14px 16px; font-size:13px; color:var(--text); margin-top:14px;
+  }
+
+  footer{ text-align:center; margin-top:70px; color:var(--ink-dim); font-size:12.5px; font-family:'IBM Plex Mono',monospace;}
+  footer .credit{ display:block; margin-bottom:6px; color:var(--ink); font-weight:600; letter-spacing:.02em; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="eyebrow">Microbiology · Quantitative Bench Skills</div>
+    <h1>The Dilution Bench<br><em>count colonies. trust the math.</em></h1>
+    <p class="sub">A hands-on lab for serial dilutions, the 30–300 countable-plate rule, and the CFU formula — build tubes, pick the right plate, and crunch the numbers yourself.</p>
+    <div class="hero-actions">
+      <div class="score-pill">🧫 Lab Score: <span id="scoreVal">0</span></div>
+      <button class="reset-btn" id="resetLabBtn">↺ Reset lab</button>
+    </div>
+    <div class="hero-dish" id="heroDish"></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro">
+    <p>Counting bacteria only works if the plate you count is trustworthy — and most real samples are far too concentrated to plate directly. <b style="color:var(--ink)">Serial dilution</b> is how labs bring a sample down into a countable range, and the same handful of formulas underneath it show up everywhere a bacterial count decides something important:</p>
+    <div class="scope-row">
+      <div class="scope-chip"><span class="dot" style="background:var(--danger-ink)"></span>Medicine — is an infection clearing with treatment?</div>
+      <div class="scope-chip"><span class="dot" style="background:var(--agar-ink)"></span>Food safety — is this batch within a safe microbial load?</div>
+      <div class="scope-chip"><span class="dot" style="background:var(--teal-ink)"></span>Environment — is the water safe to swim in today?</div>
+    </div>
+  </div>
+
+  <!-- SECTION 01: HOW DILUTION WORKS -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">01</span><h2>How a dilution actually works</h2></div>
+    <p class="sec-intro">Before building a series, get the core idea: you're mixing a small volume of <b style="color:var(--ink)">sample</b> — containing an unknown number of <b style="color:var(--ink)">live bacteria</b> — into a larger volume of <b style="color:var(--ink)">diluent</b> (e.g. sterile saline, water, or broth). Each step reduces the concentration, or bacterial number expressed as <b class="mono" style="color:var(--ink)">CFU/mL</b> (Colony-Forming Units per volume), by a fixed, predictable factor.</p>
+
+    <div class="panel">
+      <div class="explain-grid">
+        <div class="explain-copy">
+          <p><b style="color:var(--text)">One tube.</b> Add 1 mL of sample to 9 mL of diluent and you have 10 mL total, with the original bugs spread through 10× the volume — a <b style="color:var(--agar)">1:10 dilution (10⁻¹)</b>.</p>
+          <div class="formula-mini">dilution factor = sample volume ÷ (sample + diluent)<br>1 mL ÷ (1 mL + 9 mL) = 1/10</div>
+          <p><b style="color:var(--text)">Chain it — that's "serial."</b> Take 1 mL out of that tube and repeat into a fresh 9 mL blank, and you multiply factors: 1/10 × 1/10 = <b style="color:var(--agar)">1:100 (10⁻²)</b>. One more identical step gives <b style="color:var(--agar)">1:1,000 (10⁻³)</b>, and so on — always in clean powers of ten.</p>
+          <div class="formula-mini">total dilution = previous tube's dilution × next tube's own factor</div>
+          <p>Each additional tube in the chain buys you one more order of magnitude of dilution — which is exactly what's needed to bring an impossibly dense sample down into a plate you can actually count.</p>
+        </div>
+        <div class="ladder" id="dilutionLadder"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 02: BUILD A DILUTION SERIES -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Build a serial dilution</h2></div>
+    <p class="sec-intro">Now try it yourself. Drag the sliders to change the transfer volume and the diluent volume, and watch the total dilution factor compound — and the color fade — from the original sample down the tube train.</p>
+
+    <div class="panel">
+      <div class="controls-row">
+        <div class="ctrl">
+          <label>Number of tubes: <span class="val" id="numTubesVal">4</span></label>
+          <input type="range" id="numTubes" min="2" max="6" value="4">
+        </div>
+        <div class="ctrl">
+          <label>Transfer volume: <span class="val" id="transferVal">1</span> mL</label>
+          <input type="range" id="transferVol" min="1" max="5" value="1">
+        </div>
+        <div class="ctrl">
+          <label>Diluent per tube: <span class="val" id="diluentVal">9</span> mL</label>
+          <input type="range" id="diluentVol" min="1" max="99" value="9">
+        </div>
+      </div>
+      <div class="tube-train" id="tubeTrain"></div>
+      <div class="total-dilution" id="totalDilutionBox"></div>
+    </div>
+  </section>
+
+  <!-- SECTION 03: DILUTION TO PLATE -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">03</span><h2>From dilution tube to plate</h2></div>
+    <p class="sec-intro">A dilution tube is invisible until a measured volume is grown out on agar. There are two standard ways to get it there — and they change how and where the colonies end up.</p>
+
+    <div class="panel">
+      <div class="method-grid">
+        <div class="method-card">
+          <div class="method-icon">
+            <svg viewBox="0 0 100 100" width="72" height="72">
+              <ellipse cx="50" cy="78" rx="34" ry="10" fill="none" stroke="#4fa8a0" stroke-width="2.5"/>
+              <ellipse cx="50" cy="78" rx="34" ry="10" fill="rgba(79,168,160,0.15)"/>
+              <path d="M50 12 L50 50" stroke="#e2a44d" stroke-width="2.5" fill="none"/>
+              <path d="M42 12 L58 12 L50 26 Z" fill="#e2a44d"/>
+              <path d="M40 52 Q50 62 60 52" stroke="#e2a44d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Pour plate</h3>
+          <div class="method-steps">
+            <div><span>1</span>Pipette the diluted sample straight into an <b>empty sterile dish</b>.</div>
+            <div><span>2</span>Pour in agar cooled to ~45–50°C and swirl to mix.</div>
+            <div><span>3</span>Let it solidify — cells are now locked <b>throughout the agar</b>, not just on top.</div>
+          </div>
+          <div class="method-note">Good for handling denser samples; colonies grow in 3D, so some form small and embedded. The warm agar can stress heat-sensitive organisms.</div>
+        </div>
+
+        <div class="method-card">
+          <div class="method-icon">
+            <svg viewBox="0 0 100 100" width="72" height="72">
+              <ellipse cx="50" cy="78" rx="34" ry="10" fill="none" stroke="#4fa8a0" stroke-width="2.5"/>
+              <ellipse cx="50" cy="78" rx="34" ry="10" fill="rgba(226,164,77,0.15)"/>
+              <circle cx="50" cy="78" r="26" fill="none" stroke="#8fbf6f" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6"/>
+              <path d="M28 40 L50 68" stroke="#8fbf6f" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M20 34 L34 46" stroke="#8fbf6f" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Spread plate</h3>
+          <div class="method-steps">
+            <div><span>1</span>Pipette a small volume (often 0.1 mL) onto a dish of <b>already-solid agar</b>.</div>
+            <div><span>2</span>Drag a sterile spreader (or sterile beads) across the surface until evenly distributed.</div>
+            <div><span>3</span>Cells sit <b>only on the surface</b>, exposed to air.</div>
+          </div>
+          <div class="method-note">Colonies stay separate and easy to pick for further testing. Volume is limited so the liquid doesn't run — usually a smaller fraction of the tube.</div>
+        </div>
+      </div>
+      <div class="method-footer">Either way, the plate is incubated (commonly ~24–48 h at 35–37°C for many bacteria) before the colonies are counted — which is exactly what the next steps below do.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 04: SPOT THE COUNTABLE PLATE -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Spot the countable plate</h2></div>
+    <p class="sec-intro">Only plates with <b class="mono" style="color:var(--ink)">30–300 colonies</b> give a reliable count. Too few and random error dominates; too many and colonies merge and miscount. Click the one plate you'd actually use.</p>
+
+    <div class="panel">
+      <div class="plate-row" id="plateRow"></div>
+      <div class="feedback-box" id="plateFeedback">Pick the plate you'd count.</div>
+      <div style="text-align:center;"><button id="newPlatesBtn">🔄 New set of plates</button></div>
+    </div>
+  </section>
+
+
+  <!-- SECTION 04: CFU CALCULATOR -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">05</span><h2>The CFU calculator</h2></div>
+    <p class="sec-intro">Plug in a colony count, the total dilution of the tube it came from, and the volume plated. This is the standard formula worked out live, in proper scientific notation.</p>
+
+    <div class="panel">
+      <div class="calc-grid">
+        <div class="ctrl">
+          <label>Colony count</label>
+          <input type="number" id="calcCount" value="71" min="0">
+        </div>
+        <div class="ctrl">
+          <label>Total dilution (10^-x) — enter x</label>
+          <input type="number" id="calcDilExp" value="3" min="0" max="12">
+        </div>
+        <div class="ctrl">
+          <label>Amount plated (mL)</label>
+          <input type="number" id="calcPlated" value="1" min="0.01" step="0.01">
+        </div>
+      </div>
+      <div class="formula-box" id="formulaBox"></div>
+    </div>
+  </section>
+
+  <!-- SECTION 05: APPLIED CHALLENGES -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">06</span><h2>From the bench to the real world</h2></div>
+    <p class="sec-intro">Three applied scenarios — one clinical, one food, one environmental — each solved with the exact same dilution math.</p>
+    <div class="field-note"><span>🧪</span><div><b>Teaching scenarios, not protocols.</b> Real labs often use different techniques (calibrated urine loops, membrane filtration for water) and jurisdiction-specific standards. These examples keep the classroom dilution method so you can practice the same calculation across fields.</div></div>
+
+    <div id="challengeContainer"></div>
+  </section>
+
+  <!-- CHEAT SHEET -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">07</span><h2>Quick reference</h2></div>
+    <div class="panel">
+      <div class="cheat-grid">
+        <div class="cheat-card">
+          <h4>Dilution factor / tube</h4>
+          <p>amount of sample ÷ (amount of sample + amount of diluent)</p>
+        </div>
+        <div class="cheat-card">
+          <h4>Total dilution</h4>
+          <p>previous tube's total dilution × next tube's own dilution factor</p>
+        </div>
+        <div class="cheat-card">
+          <h4>Standard formula</h4>
+          <p>colony count ÷ (total dilution of that tube × amount plated)</p>
+        </div>
+        <div class="cheat-card">
+          <h4>Countable window</h4>
+          <p>30–300 colonies per plate. Below 30: too little to be reliable. Above 300: TNTC / overlapping.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 08: WHAT IS A COLONY -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">08</span><h2>So — what exactly is a colony?</h2></div>
+    <p class="sec-intro">One last idea ties the whole worksheet together: why counting colonies is a way of counting cells.</p>
+
+    <div class="panel">
+      <div class="colony-grid">
+        <div class="colony-visual" id="colonyCloseupBox"></div>
+        <div class="colony-copy">
+          <p>A <b>colony</b> is a visible, dome-shaped mound of bacteria on a plate — but it doesn't start that way. It starts as a <b>single bacterial cell</b> that landed on (or in) the agar, found nutrients, and began dividing by binary fission: one cell becomes two, two become four, four become eight...</p>
+          <p>Doubling every 20–30 minutes for many species, that single cell needs roughly <b>25–30 generations</b> — around a day of growth for many bacteria — to build a mound of <b>tens of millions to billions of cells</b>, large enough to see with the naked eye. Every colony on a plate, however different in size, traces back to just one founding cell (or occasionally a small clump of cells that landed together).</p>
+          <div class="cfu-callout">That's exactly why colony counts are reported in <b style="color:var(--agar)">CFU — Colony-Forming Units</b> — each colony represents one original viable cell (or clump) capable of forming a colony, not the trillions of cells inside it. Count the colonies, and you're counting how many original live cells were in your plated volume.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer><span class="credit">Design by Dr. R. Salas-Auvert</span>Core worksheet content based on Jackie Reynolds' Dilution Worksheet &amp; Problems (Richland College, CC BY-NC-SA 4.0) · Applied scenarios are simplified for teaching purposes</footer>
+</div>
+
+<script>
+/* ============ UTILITIES ============ */
+function toSci(num){
+  if (num === 0) return "0";
+  const exp = Math.floor(Math.log10(Math.abs(num)));
+  const coeff = num / Math.pow(10, exp);
+  return `${coeff.toFixed(2)} × 10<sup>${exp}</sup>`;
+}
+function addScore(n){
+  const el = document.getElementById('scoreVal');
+  el.textContent = (parseInt(el.textContent) + n);
+  el.parentElement.style.transform = 'scale(1.08)';
+  setTimeout(()=> el.parentElement.style.transform = 'scale(1)', 150);
+}
+function mulberry32(a) {
+  return function() {
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+function makeDish(count, size, seed){
+  const displayCount = Math.min(count, 260);
+  const r = size/2;
+  let dots = '';
+  let rand = mulberry32(seed || 1);
+  for(let i=0;i<displayCount;i++){
+    const ang = rand()*Math.PI*2;
+    const rad = Math.sqrt(rand()) * (r-10);
+    const cx = r + Math.cos(ang)*rad;
+    const cy = r + Math.sin(ang)*rad;
+    const cr = 2 + rand()*2.2;
+    const hue = 92 + rand()*20;
+    dots += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${cr.toFixed(1)}" fill="hsl(${hue},38%,${45+rand()*15}%)" opacity="${0.75+rand()*0.25}"/>`;
+  }
+  let overlay = '';
+  if(count > 260){
+    overlay = `<text x="${r}" y="${r+5}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#d6614b" font-weight="600">TNTC</text>`;
+  }
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <circle cx="${r}" cy="${r}" r="${r-3}" fill="#1b2426" stroke="#3a4548" stroke-width="2"/>
+    <circle cx="${r}" cy="${r}" r="${r-10}" fill="#22302f" stroke="#3d5049" stroke-width="1.5" opacity="0.7"/>
+    ${dots}
+    ${overlay}
+  </svg>`;
+}
+
+/* ============ HERO DISH ============ */
+document.getElementById('heroDish').innerHTML =
+  `<div class="dish-svg">${makeDish(140, 220, 42)}</div>`;
+
+/* ============ SECTION 01: BASE-10 LADDER ============ */
+function renderLadder(){
+  const steps = [
+    {label:'Undiluted', sub:'sample', count:150, seed:11},
+    {label:'1 : 10', sub:'10⁻¹', count:16, seed:22},
+    {label:'1 : 100', sub:'10⁻²', count:3, seed:33},
+    {label:'1 : 1,000', sub:'10⁻³', count:1, seed:44},
+  ];
+  const ladder = document.getElementById('dilutionLadder');
+  ladder.innerHTML = '';
+  steps.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'ladder-card';
+    card.innerHTML = `
+      <div class="ladder-svg-box">${makeDish(s.count, 100, s.seed)}</div>
+      <div class="ladder-label">${s.label}<b>${s.sub}</b></div>
+    `;
+    ladder.appendChild(card);
+  });
+}
+renderLadder();
+
+/* ============ SECTION 02: TUBE TRAIN ============ */
+const numTubesEl = document.getElementById('numTubes');
+const transferVolEl = document.getElementById('transferVol');
+const diluentVolEl = document.getElementById('diluentVol');
+
+function renderTubeTrain(){
+  const n = parseInt(numTubesEl.value);
+  const t = parseFloat(transferVolEl.value);
+  const d = parseFloat(diluentVolEl.value);
+  document.getElementById('numTubesVal').textContent = n;
+  document.getElementById('transferVal').textContent = t;
+  document.getElementById('diluentVal').textContent = d;
+
+  const perTubeFactor = t / (t + d);
+  const perTubeRatio = Math.round(1/perTubeFactor);
+  const train = document.getElementById('tubeTrain');
+  train.innerHTML = '';
+
+  // Original sample vial — the undiluted source everything else is drawn from
+  const vial = document.createElement('div');
+  vial.className = 'tube-unit source-vial';
+  vial.innerHTML = `
+    <div class="tube-cap source-cap"></div>
+    <div class="tube-shape source-shape">
+      <div class="tube-liquid" style="background: rgba(196,224,64,1); box-shadow: inset 0 0 8px rgba(140,190,30,0.7); height:88%;"></div>
+    </div>
+    <div class="tube-label">
+      <span class="t-name">Original sample</span>
+      <span class="t-line t-individual"><span class="tag">Concentration</span><b>Undiluted (10⁰)</b></span>
+    </div>
+  `;
+  train.appendChild(vial);
+  const vialArrow = document.createElement('div');
+  vialArrow.className = 'arrow';
+  vialArrow.textContent = `${t}mL →`;
+  train.appendChild(vialArrow);
+
+  let totalDilution = 1;
+  for(let i=1;i<=n;i++){
+    totalDilution *= perTubeFactor;
+    const opacity = Math.max(0.06, Math.pow(perTubeFactor, i) * 3);
+    const unit = document.createElement('div');
+    unit.className = 'tube-unit';
+    unit.innerHTML = `
+      <div class="tube-cap"></div>
+      <div class="tube-shape">
+        <div class="tube-liquid" style="background: rgba(196,224,64,${opacity.toFixed(3)}); box-shadow: inset 0 0 6px rgba(140,190,30,${(opacity*0.6).toFixed(3)});"></div>
+      </div>
+      <div class="tube-label">
+        <span class="t-name">Tube ${i}</span>
+        <span class="t-line t-individual"><span class="tag">This tube</span><b>1:${perTubeRatio} (${toSci(perTubeFactor)})</b></span>
+        <span class="t-line t-cumulative"><span class="tag">Cumulative</span><b>${toSci(totalDilution)}</b></span>
+      </div>
+    `;
+    train.appendChild(unit);
+    if(i < n){
+      const arrow = document.createElement('div');
+      arrow.className = 'arrow';
+      arrow.textContent = `${t}mL →`;
+      train.appendChild(arrow);
+    }
+  }
+  const box = document.getElementById('totalDilutionBox');
+  box.innerHTML = `Final total dilution after ${n} tubes: <span class="big">${toSci(totalDilution)}</span>
+    &nbsp; <span style="color:var(--text-dim)">(i.e. 1 mL of that tube = ${(totalDilution).toExponential(2)} mL of original sample)</span>`;
+}
+[numTubesEl, transferVolEl, diluentVolEl].forEach(el => el.addEventListener('input', renderTubeTrain));
+renderTubeTrain();
+
+/* ============ SECTION 03: PLATE GAME ============ */
+function generatePlateSet(){
+  const counts = [];
+  counts.push(Math.floor(30 + Math.random()*270));
+  counts.push(Math.floor(Math.random()*25));
+  counts.push(Math.floor(340 + Math.random()*450));
+  counts.push(Math.random() < 0.5 ? Math.floor(Math.random()*10) : Math.floor(320+Math.random()*300));
+  for(let i=counts.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [counts[i],counts[j]]=[counts[j],counts[i]];
+  }
+  return counts;
+}
+let currentPlateCounts = [];
+function renderPlates(){
+  currentPlateCounts = generatePlateSet();
+  const row = document.getElementById('plateRow');
+  row.innerHTML = '';
+  document.getElementById('plateFeedback').textContent = "Pick the plate you'd count.";
+  document.getElementById('plateFeedback').className = 'feedback-box';
+  currentPlateCounts.forEach((count, idx) => {
+    const card = document.createElement('div');
+    card.className = 'plate-card';
+    const inRange = count >= 30 && count <= 300;
+    card.innerHTML = `
+      <div class="dish-mini">${makeDish(count, 118, idx*7+Date.now()%1000)}</div>
+      <div class="plate-count"><b>${count > 260 ? 'TNTC' : count}</b> colonies</div>
+      <div class="plate-tag">Plate ${idx+1}</div>
+    `;
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.plate-card').forEach(c => c.classList.add('disabled'));
+      const fb = document.getElementById('plateFeedback');
+      if(inRange){
+        card.classList.add('correct');
+        fb.textContent = `✓ Correct — ${count} colonies falls in the 30–300 countable window.`;
+        fb.className = 'feedback-box good';
+        addScore(10);
+      } else {
+        card.classList.add('wrong');
+        const reason = count < 30 ? 'too few — small-number error is high.' : 'too many — colonies likely overlap and miscount.';
+        fb.textContent = `✗ Not quite — ${count > 260 ? 'TNTC' : count} colonies is ${reason}`;
+        fb.className = 'feedback-box bad';
+        document.querySelectorAll('.plate-card').forEach((c,i2)=>{
+          if(currentPlateCounts[i2] >= 30 && currentPlateCounts[i2] <= 300) c.classList.add('correct');
+        });
+      }
+    });
+    row.appendChild(card);
+  });
+}
+document.getElementById('newPlatesBtn').addEventListener('click', renderPlates);
+renderPlates();
+
+/* ============ SECTION 04: CALCULATOR ============ */
+function renderFormula(){
+  const count = parseFloat(document.getElementById('calcCount').value) || 0;
+  const exp = parseFloat(document.getElementById('calcDilExp').value) || 0;
+  const plated = parseFloat(document.getElementById('calcPlated').value) || 0.0001;
+  const dilution = Math.pow(10, -exp);
+  const denom = dilution * plated;
+  const result = denom > 0 ? count / denom : 0;
+
+  document.getElementById('formulaBox').innerHTML = `
+    <div>
+      <span class="frac"><span class="num">${count} colonies</span><span class="den">10<sup>-${exp}</sup> × ${plated} mL</span></span>
+      = <span class="result-line">${toSci(result)} CFU/mL</span>
+    </div>
+    <div class="step-list">
+      <div>Total dilution of source tube: 10<sup>-${exp}</sup> = ${dilution.toExponential(2)}</div>
+      <div>Denominator = dilution × amount plated = ${dilution.toExponential(2)} × ${plated} = ${denom.toExponential(3)}</div>
+      <div>CFU/mL = ${count} ÷ ${denom.toExponential(3)} = ${result.toExponential(3)} → written as ${toSci(result)}</div>
+    </div>
+  `;
+}
+['calcCount','calcDilExp','calcPlated'].forEach(id => document.getElementById(id).addEventListener('input', renderFormula));
+renderFormula();
+
+/* ============ SECTION 05: APPLIED CHALLENGES ============ */
+function countVal(c){
+  if(c === 'TNTC') return 9999;
+  if(c === '>500') return 501;
+  return c;
+}
+function calcCfu(tube){
+  const dilution = Math.pow(10, -tube.dilExp);
+  const denom = dilution * tube.plated;
+  return countVal(tube.count) / denom;
+}
+function findCorrectIdx(tubes){
+  return tubes.findIndex(t => { const v = countVal(t.count); return v>=30 && v<=300; });
+}
+
+const challenges = [
+  {
+    field: 'medical',
+    fieldLabel: 'Medical · Urology',
+    title: "Cystitis with urethritis — tracking therapy response",
+    desc: "A patient presents with dysuria and urgency consistent with cystitis/urethritis. A midstream urine sample is serially diluted (1 mL → 9 mL saline, repeated) and 0.1 mL of each dilution is plated — first at diagnosis, then again after a course of antibiotics, to see whether the bacterial count is actually falling.",
+    subsamples: [
+      { label: 'Day 0 · before treatment', tubes: [
+        {label:'Tube 1 · 10⁻¹ · 0.1 mL plated', dilExp:1, plated:0.1, count:'TNTC'},
+        {label:'Tube 2 · 10⁻² · 0.1 mL plated', dilExp:2, plated:0.1, count:210},
+        {label:'Tube 3 · 10⁻³ · 0.1 mL plated', dilExp:3, plated:0.1, count:18},
+      ]},
+      { label: 'Day 5 · after antibiotic course', tubes: [
+        {label:'Tube 1 · 10⁻¹ · 0.1 mL plated', dilExp:1, plated:0.1, count:45},
+        {label:'Tube 2 · 10⁻² · 0.1 mL plated', dilExp:2, plated:0.1, count:3},
+      ]},
+    ],
+    unit: 'CFU/mL',
+    takeaway: (results) => {
+      const logDrop = Math.log10(results[0]/results[1]);
+      return `Colony count dropped from ${toSci(results[0])} to ${toSci(results[1])} CFU/mL — a <b>${logDrop.toFixed(2)}-log reduction</b>, consistent with a response to therapy. (Historically, ≥10⁵ CFU/mL midstream is often cited as "clinically significant" bacteriuria; symptomatic patients may be treated at lower counts — this is a teaching simplification, not diagnostic guidance.)`;
+    }
+  },
+  {
+    field: 'food',
+    fieldLabel: 'Food Safety · Dairy',
+    title: "Raw milk — standard plate count",
+    desc: "A dairy quality lab runs a standard plate count on a raw milk sample to check the total bacterial load before it clears for processing. 1 mL of milk is serially diluted 1:10 into saline, and 1 mL of each dilution is plated on standard plate count agar.",
+    subsamples: [
+      { label: 'Bulk tank sample', tubes: [
+        {label:'Tube 1 · 10⁻¹ · 1 mL plated', dilExp:1, plated:1, count:'TNTC'},
+        {label:'Tube 2 · 10⁻² · 1 mL plated', dilExp:2, plated:1, count:185},
+        {label:'Tube 3 · 10⁻³ · 1 mL plated', dilExp:3, plated:1, count:14},
+      ]},
+    ],
+    unit: 'CFU/mL',
+    takeaway: (results) => {
+      return `This sample comes out to ${toSci(results[0])} CFU/mL. Many dairy quality standards (e.g. the U.S. Grade "A" Pasteurized Milk Ordinance) use a commonly cited raw-milk benchmark around 10⁵ CFU/mL — always confirm the exact figure for your jurisdiction and product class.`;
+    }
+  },
+  {
+    field: 'env',
+    fieldLabel: 'Environmental · Recreational Water',
+    title: "Lake water — fecal indicator bacteria check",
+    desc: "Before posting a swim advisory, an environmental lab needs a bacterial count from a beach water sample. 1 mL of water is serially diluted and 1 mL of each dilution is plated to detect fecal-indicator bacteria (e.g. E. coli or Enterococcus).",
+    subsamples: [
+      { label: 'Beach sample', tubes: [
+        {label:'Tube 1 · 10⁻¹ · 1 mL plated', dilExp:1, plated:1, count:95},
+        {label:'Tube 2 · 10⁻² · 1 mL plated', dilExp:2, plated:1, count:4},
+      ]},
+    ],
+    unit: 'CFU/mL',
+    takeaway: (results) => {
+      const per100 = results[0] * 100;
+      return `That's ${toSci(results[0])} CFU/mL — reported in water-quality work as <b>${toSci(per100)} CFU/100 mL</b>. Environmental programs compare this figure against a jurisdiction-specific action level to decide whether to post an advisory; real testing typically filters a full 100 mL sample directly rather than diluting it.`;
+    }
+  }
+];
+
+function renderChallenges(){
+  const container = document.getElementById('challengeContainer');
+  container.innerHTML = '';
+  challenges.forEach((ch, ci) => {
+    const div = document.createElement('div');
+    div.className = 'challenge';
+
+    let subsHtml = '';
+    ch.subsamples.forEach((sub, si) => {
+      let chips = '';
+      sub.tubes.forEach((t, ti) => {
+        chips += `<div class="chip" data-ci="${ci}" data-si="${si}" data-ti="${ti}">${t.label}<br><span style="color:var(--text-dim)">${t.count} colonies</span></div>`;
+      });
+      subsHtml += `
+        <div class="subsample">
+          <div class="subsample-label">${sub.label}</div>
+          <div class="chip-row">${chips}</div>
+          <div class="answer-reveal" id="reveal-${ci}-${si}"></div>
+        </div>
+      `;
+    });
+
+    div.innerHTML = `
+      <div class="challenge-head"><h3>${ch.title}</h3><span class="field-badge ${ch.field}">${ch.fieldLabel}</span></div>
+      <div class="challenge-desc">${ch.desc}</div>
+      ${subsHtml}
+      <div class="takeaway" id="takeaway-${ci}"></div>
+    `;
+    container.appendChild(div);
+  });
+
+  container.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const ci = parseInt(chip.dataset.ci);
+      const si = parseInt(chip.dataset.si);
+      const ti = parseInt(chip.dataset.ti);
+      const ch = challenges[ci];
+      const sub = ch.subsamples[si];
+      const chosen = sub.tubes[ti];
+      const cv = countVal(chosen.count);
+      const inRange = cv >= 30 && cv <= 300;
+      const correctIdx = findCorrectIdx(sub.tubes);
+
+      const groupChips = document.querySelectorAll(`.chip[data-ci="${ci}"][data-si="${si}"]`);
+      groupChips.forEach(c => c.classList.add('disabled'));
+
+      if(inRange){
+        chip.classList.add('sel-correct');
+      } else {
+        chip.classList.add('sel-wrong');
+        groupChips[correctIdx].classList.add('sel-correct');
+      }
+
+      const correctTube = sub.tubes[correctIdx];
+      const result = calcCfu(correctTube);
+
+      const reveal = document.getElementById(`reveal-${ci}-${si}`);
+      reveal.classList.add('show');
+      reveal.innerHTML = `
+        Correct plate: <b>${correctTube.label.split(' · ')[0]}</b> (${correctTube.count} colonies — inside the 30–300 window)<br>
+        ${correctTube.count} ÷ (10<sup>-${correctTube.dilExp}</sup> × ${correctTube.plated} mL)
+        = <span class="ans-val">${toSci(result)} ${ch.unit}</span>
+      `;
+
+      addScore(inRange ? 15 : 2);
+
+      // if all subsamples for this challenge are answered, show the takeaway
+      const allDone = ch.subsamples.every((s, sidx) => {
+        return document.getElementById(`reveal-${ci}-${sidx}`).classList.contains('show');
+      });
+      if(allDone){
+        const results = ch.subsamples.map(s => calcCfu(s.tubes[findCorrectIdx(s.tubes)]));
+        const tk = document.getElementById(`takeaway-${ci}`);
+        tk.classList.add('show');
+        tk.innerHTML = `🔎 ${ch.takeaway(results)}`;
+      }
+    });
+  });
+}
+renderChallenges();
+
+/* ============ SECTION 08: COLONY CLOSE-UP ============ */
+function renderColonyCloseup(){
+  const box = document.getElementById('colonyCloseupBox');
+  box.innerHTML = `
+    <svg viewBox="0 0 260 200" width="260" height="200">
+      <ellipse cx="130" cy="178" rx="120" ry="14" fill="rgba(143,191,111,0.08)"/>
+      <circle cx="60" cy="150" r="5" fill="#8fbf6f"/>
+      <text x="60" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#9db0ad">1 cell</text>
+      <path d="M75 148 L110 130" stroke="#5c6e68" stroke-width="1" stroke-dasharray="2 3"/>
+      <ellipse cx="150" cy="140" rx="20" ry="14" fill="#4f6b45" opacity="0.6"/>
+      <text x="150" y="112" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#9db0ad">~25–30 divisions</text>
+      <path d="M172 132 L205 112" stroke="#5c6e68" stroke-width="1" stroke-dasharray="2 3"/>
+      <ellipse cx="205" cy="150" rx="42" ry="30" fill="#8fbf6f"/>
+      <ellipse cx="205" cy="150" rx="42" ry="30" fill="url(#colonyGrad)"/>
+      <ellipse cx="192" cy="138" rx="14" ry="9" fill="#ffffff" opacity="0.18"/>
+      <text x="205" y="196" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#f2ede1" font-weight="600">1 visible colony</text>
+      <defs>
+        <radialGradient id="colonyGrad" cx="40%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#b7d99a"/>
+          <stop offset="100%" stop-color="#5f8f52"/>
+        </radialGradient>
+      </defs>
+    </svg>
+  `;
+}
+renderColonyCloseup();
+
+
+document.getElementById('resetLabBtn').addEventListener('click', () => {
+  // score
+  document.getElementById('scoreVal').textContent = '0';
+
+  // dilution builder back to defaults
+  numTubesEl.value = 4;
+  transferVolEl.value = 1;
+  diluentVolEl.value = 9;
+  renderTubeTrain();
+
+  // fresh plate game
+  renderPlates();
+
+  // calculator back to defaults
+  document.getElementById('calcCount').value = 71;
+  document.getElementById('calcDilExp').value = 3;
+  document.getElementById('calcPlated').value = 1;
+  renderFormula();
+
+  // applied challenges cleared
+  renderChallenges();
+
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+</script>
+
+</body>
+</html>
