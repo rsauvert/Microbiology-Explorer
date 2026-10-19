@@ -288,9 +288,52 @@
 
   footer{ text-align:center; margin-top:70px; color:var(--ink-dim); font-size:12.5px; font-family:'IBM Plex Mono',monospace;}
   footer .credit{ display:block; margin-bottom:6px; color:var(--ink); font-weight:600; letter-spacing:.02em; }
+
+  /* Microbiology Explorer hub navigation */
+  .hub-return-btn{
+    position:fixed;
+    top:14px;
+    left:14px;
+    z-index:99999;
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    padding:.62rem .9rem;
+    border-radius:999px;
+    text-decoration:none;
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    font-size:.86rem;
+    font-weight:700;
+    line-height:1;
+    color:#ffffff;
+    background:rgba(8,40,88,.94);
+    border:1px solid rgba(255,255,255,.24);
+    box-shadow:0 6px 18px rgba(0,0,0,.28);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .hub-return-btn:hover,
+  .hub-return-btn:focus{
+    transform:translateY(-1px);
+    background:rgba(13,62,126,.98);
+    box-shadow:0 8px 22px rgba(0,0,0,.34);
+    outline:none;
+  }
+  @media (max-width:600px){
+    .hub-return-btn{
+      top:8px;
+      left:8px;
+      padding:.55rem .72rem;
+      font-size:.76rem;
+    }
+  }
+
 </style>
 </head>
 <body>
+<a class="hub-return-btn" href="index.html" aria-label="Return to Microbiology Explorer Hub">← Microbiology Explorer Hub</a>
+
 
 <div class="wrap">
 
@@ -929,5 +972,48 @@ document.getElementById('resetLabBtn').addEventListener('click', () => {
 });
 </script>
 
+<!-- ===== Instructions + disclaimer (Microbiology Explorer) ===== -->
+<style id="mxh-style">
+.mxh-btn{position:fixed;right:16px;bottom:16px;z-index:9998;display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;border:1.5px solid rgba(251,191,36,.7);background:#111827;color:#fde68a;font:700 14px/1 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform .15s}
+.mxh-btn:hover{transform:translateY(-2px)}
+.mxh-btn:focus-visible,.mxh-x:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.mxh-ov{position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,.66);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+.mxh-ov.open{display:flex}
+.mxh-panel{width:min(720px,100%);background:#111827;color:#e5e7eb;border:1px solid #334155;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);font:15px/1.55 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;text-align:left;animation:mxhIn .2s ease}
+@keyframes mxhIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mxh-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #334155}
+.mxh-head h2{margin:0;font-size:19px;color:#fde68a;font-weight:800;letter-spacing:0;text-transform:none;background:none;-webkit-text-fill-color:currentColor}
+.mxh-x{border:1px solid #475569;background:#1f2937;color:#e5e7eb;border-radius:10px;width:36px;height:36px;font-size:20px;line-height:1;cursor:pointer;flex:none}
+.mxh-body{padding:16px 20px 8px}
+.mxh-sum{background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.45);border-left:5px solid #2dd4bf;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.mxh-sum b{color:#5eead4}
+.mxh-sec{margin:12px 0}
+.mxh-sec h3{margin:0 0 6px;font-size:15px;color:#c4b5fd;font-weight:800;text-transform:none;letter-spacing:0;background:none;-webkit-text-fill-color:currentColor}
+.mxh-sec ol,.mxh-sec ul{margin:0 0 0 20px;padding:0}
+.mxh-sec li{margin:4px 0;color:#d1d5db}
+.mxh-sec li b{color:#f9fafb}
+.mxh-foot{padding:12px 20px 16px;border-top:1px solid #334155;font-size:12.5px;color:#9ca3af}
+.mxh-disc{text-align:center;font:12.5px/1.5 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;color:#8a94a6;padding:14px 16px 76px;max-width:900px;margin:0 auto}
+@media print{.mxh-btn,.mxh-ov{display:none!important}}
+</style>
+<button class="mxh-btn" id="mxhOpen" type="button" aria-haspopup="dialog" aria-controls="mxhOv">ℹ️ Instructions</button>
+<div class="mxh-ov" id="mxhOv" role="dialog" aria-modal="true" aria-labelledby="mxhTitle">
+  <div class="mxh-panel">
+    <div class="mxh-head"><h2 id="mxhTitle">How to use: The Dilution Bench</h2><button class="mxh-x" id="mxhClose" type="button" aria-label="Close instructions">×</button></div>
+    <div class="mxh-body"><div class="mxh-sum"><b>In brief:</b> Practice serial dilutions, choose the countable plate (30–300 colonies), and calculate CFU/mL in clinical, food and environmental scenarios.</div><div class="mxh-sec"><h3>Step by step (scroll through sections 01–08)</h3><ol><li><b>01 How a dilution works:</b> read the concept and the formula.</li><li><b>02 Build a serial dilution:</b> move the sliders (number of tubes, transfer volume, diluent) and watch the dilution factor compound.</li><li><b>03 Dilution to plate:</b> compare the pour plate and spread plate methods.</li><li><b>04 Spot the countable plate:</b> click the one plate with 30–300 colonies (+10 points). <b>New set of plates</b> gives another round.</li><li><b>05 CFU calculator:</b> enter the colony count, dilution exponent and volume plated to see the worked calculation.</li><li><b>06 Real-world challenges:</b> for each sample, click the countable tube to reveal the CFU result and the takeaway (+15 if correct).</li><li><b>07–08:</b> quick-reference formulas and what a colony represents.</li></ol></div><div class="mxh-sec"><h3>Key formula</h3><ul><li>CFU/mL = colonies ÷ (dilution × volume plated in mL)</li><li><b>Reset lab</b> (top) clears your Lab Score and all sections.</li></ul></div></div>
+    <div class="mxh-foot">Content and availability of these activities are subject to change without notice. For educational purposes only.</div>
+  </div>
+</div>
+<div class="mxh-disc">Content and availability of these activities are subject to change without notice. For educational purposes only.</div>
+<script>
+(function(){
+  var ov=document.getElementById('mxhOv'), op=document.getElementById('mxhOpen'), cl=document.getElementById('mxhClose');
+  function show(){ ov.classList.add('open'); cl.focus(); }
+  function hide(){ ov.classList.remove('open'); op.focus(); }
+  op.addEventListener('click', show); cl.addEventListener('click', hide);
+  ov.addEventListener('click', function(e){ if(e.target===ov) hide(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && ov.classList.contains('open')) hide(); });
+})();
+</script>
 </body>
 </html>

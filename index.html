@@ -48,7 +48,7 @@
       transform:translateY(-5px); border-color:rgba(56,189,248,.65);
       box-shadow:0 20px 45px rgba(0,0,0,.32); outline:none;
     }
-    .card:last-child { grid-column:1/-1; }
+    .card:last-child:nth-child(odd) { grid-column:1/-1; }
     .icon {
       width:52px; height:52px; display:grid; place-items:center; border-radius:15px;
       font-size:1.7rem; margin-bottom:18px; background:rgba(255,255,255,.08);
@@ -57,15 +57,17 @@
     .card p { margin:0; color:var(--muted); line-height:1.55; flex:1; }
     .open { margin-top:20px; font-weight:750; color:#8bdcff; }
     .c2 .open { color:#c4b5fd; } .c3 .open { color:#86efac; }
-    .c4 .open { color:#f9a8d4; } .c5 .open { color:#fde68a; }
+    .c4 .open { color:#f9a8d4; } .c5 .open { color:#fde68a; } .c6 .open { color:#86efac; } .c7 .open { color:#c4b5fd; } .c8 .open { color:#5eead4; }
     footer {
       text-align:center; color:#8fa4bf; font-size:.88rem; margin-top:30px;
       padding-top:20px; border-top:1px solid rgba(174,189,209,.12);
     }
+    footer .designer { display:block; margin-top:6px; color:#fde68a; font-weight:700; letter-spacing:.02em; }
+    footer .disc { display:block; margin-top:8px; font-size:.8rem; color:#8fa4bf; }
     @media (max-width:720px) {
       .wrap { padding-top:28px; }
       .grid { grid-template-columns:1fr; }
-      .card:last-child { grid-column:auto; }
+      .card:last-child:nth-child(odd) { grid-column:auto; }
       .card { min-height:205px; }
     }
   </style>
@@ -119,10 +121,25 @@
   <p>Practice serial dilutions, plate counts, colony enumeration, and calculation of microbial concentration using CFU/mL.</p>
   <div class="open">Open activity →</div>
 </a>
+      <a class="card c7" href="PCR_Interactive.html">
+        <div class="icon">🧬</div>
+        <h2>PCR Training Lab</h2>
+        <p>Build a master mix, program the thermocycler, design primers, read real-time qPCR curves, and troubleshoot failed runs. Then send your reactions to the gel.</p>
+        <div class="open">Open activity →</div>
+      </a>
+
+      <a class="card c8" href="Electrophoresis_Interactive.html">
+        <div class="icon">⚡</div>
+        <h2>Gel Electrophoresis</h2>
+        <p>Run agarose, native PAGE, and SDS-PAGE gels for nucleic acids and proteins. Load the wells, run and stain the gel, size unknowns from a standard curve, and interpret real-world cases.</p>
+        <div class="open">Open activity →</div>
+      </a>
     </section>
 
     <footer>
       Microbiology Explorer · Interactive educational resources
+      <span class="designer">Designed by Dr. R. Salas-Auvert</span>
+      <span class="disc">Content and availability of these activities are subject to change without notice. For educational purposes only.</span>
     </footer>
   </main>
 </body>

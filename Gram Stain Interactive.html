@@ -955,5 +955,48 @@
     // Initialize simulation
     createBacteria();
   </script>
+<!-- ===== Instructions + disclaimer (Microbiology Explorer) ===== -->
+<style id="mxh-style">
+.mxh-btn{position:fixed;right:16px;bottom:16px;z-index:9998;display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;border:1.5px solid rgba(251,191,36,.7);background:#111827;color:#fde68a;font:700 14px/1 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform .15s}
+.mxh-btn:hover{transform:translateY(-2px)}
+.mxh-btn:focus-visible,.mxh-x:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.mxh-ov{position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,.66);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+.mxh-ov.open{display:flex}
+.mxh-panel{width:min(720px,100%);background:#111827;color:#e5e7eb;border:1px solid #334155;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);font:15px/1.55 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;text-align:left;animation:mxhIn .2s ease}
+@keyframes mxhIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mxh-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #334155}
+.mxh-head h2{margin:0;font-size:19px;color:#fde68a;font-weight:800;letter-spacing:0;text-transform:none;background:none;-webkit-text-fill-color:currentColor}
+.mxh-x{border:1px solid #475569;background:#1f2937;color:#e5e7eb;border-radius:10px;width:36px;height:36px;font-size:20px;line-height:1;cursor:pointer;flex:none}
+.mxh-body{padding:16px 20px 8px}
+.mxh-sum{background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.45);border-left:5px solid #2dd4bf;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.mxh-sum b{color:#5eead4}
+.mxh-sec{margin:12px 0}
+.mxh-sec h3{margin:0 0 6px;font-size:15px;color:#c4b5fd;font-weight:800;text-transform:none;letter-spacing:0;background:none;-webkit-text-fill-color:currentColor}
+.mxh-sec ol,.mxh-sec ul{margin:0 0 0 20px;padding:0}
+.mxh-sec li{margin:4px 0;color:#d1d5db}
+.mxh-sec li b{color:#f9fafb}
+.mxh-foot{padding:12px 20px 16px;border-top:1px solid #334155;font-size:12.5px;color:#9ca3af}
+.mxh-disc{text-align:center;font:12.5px/1.5 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;color:#8a94a6;padding:14px 16px 76px;max-width:900px;margin:0 auto}
+@media print{.mxh-btn,.mxh-ov{display:none!important}}
+</style>
+<button class="mxh-btn" id="mxhOpen" type="button" aria-haspopup="dialog" aria-controls="mxhOv">ℹ️ Instructions</button>
+<div class="mxh-ov" id="mxhOv" role="dialog" aria-modal="true" aria-labelledby="mxhTitle">
+  <div class="mxh-panel">
+    <div class="mxh-head"><h2 id="mxhTitle">How to use: Gram Stain Interactive Lab</h2><button class="mxh-x" id="mxhClose" type="button" aria-label="Close instructions">×</button></div>
+    <div class="mxh-body"><div class="mxh-sum"><b>In brief:</b> Learn the four Gram-stain reagents, perform a virtual stain, then test yourself with a quiz and an organism-identification challenge.</div><div class="mxh-sec"><h3>Step by step</h3><ol><li><b>Learn:</b> read the principle and the four steps.</li><li><b>Lab Simulation:</b> apply the reagents in order: <b>Crystal Violet → Iodine → Alcohol → Safranin</b>. Watch the Gram-positive cocci and Gram-negative rods change color. A wrong order triggers a warning; <b>Reset</b> starts again.</li><li><b>Quiz Challenge:</b> answer 8 questions; score and streak are tracked. <b>Play Again</b> restarts.</li><li><b>Identify Bacteria:</b> read the Gram reaction and morphology, choose the most likely organism, then press <b>Next Organism</b>.</li></ol></div><div class="mxh-sec"><h3>Tips</h3><ul><li>The decolorizer (alcohol) is the critical differential step: watch which cells lose the purple.</li><li>Purple = Gram-positive; pink/red = Gram-negative.</li></ul></div></div>
+    <div class="mxh-foot">Content and availability of these activities are subject to change without notice. For educational purposes only.</div>
+  </div>
+</div>
+<div class="mxh-disc">Content and availability of these activities are subject to change without notice. For educational purposes only.</div>
+<script>
+(function(){
+  var ov=document.getElementById('mxhOv'), op=document.getElementById('mxhOpen'), cl=document.getElementById('mxhClose');
+  function show(){ ov.classList.add('open'); cl.focus(); }
+  function hide(){ ov.classList.remove('open'); op.focus(); }
+  op.addEventListener('click', show); cl.addEventListener('click', hide);
+  ov.addEventListener('click', function(e){ if(e.target===ov) hide(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && ov.classList.contains('open')) hide(); });
+})();
+</script>
 </body>
 </html>

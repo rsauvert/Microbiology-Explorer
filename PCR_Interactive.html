@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCR Training Lab</title>
+<style>
+:root{
+  --bg:#0a0f1a; --card:#141c2e; --card2:#0d1424; --line:#2a3650; --text:#e6edf7; --muted:#93a2bb;
+  --teal:#2dd4bf; --amber:#fbbf24; --violet:#a78bfa; --sky:#38bdf8; --pink:#f472b6; --red:#ef4444;
+  --good:#22c55e; --bad:#ef4444; --warn:#f59e0b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--text);line-height:1.5;min-height:100vh;
+  background:radial-gradient(ellipse 900px 500px at 10% -10%,rgba(167,139,250,.13),transparent 60%),
+             radial-gradient(ellipse 800px 500px at 100% 0%,rgba(45,212,191,.09),transparent 55%),
+             linear-gradient(170deg,#0a0f1a,#131a30 55%,#0a0f1a);}
+.container{max-width:1180px;margin:0 auto;padding:1.2rem 16px 2rem}
+.topnav{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.7rem;font-size:.85rem}
+.topnav a{color:var(--muted);text-decoration:none;border:1px solid var(--line);padding:.3rem .75rem;border-radius:999px;background:rgba(20,28,46,.7)}
+.topnav a:hover{color:var(--text);border-color:var(--teal)}
+header{text-align:center;padding:1.4rem 1rem 1.1rem;margin-bottom:1rem;border-radius:18px;background:rgba(20,28,46,.85);border:1px solid rgba(167,139,250,.25)}
+.eyebrow{display:inline-block;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);font-weight:700;border:1px solid rgba(167,139,250,.4);padding:3px 11px;border-radius:999px;margin-bottom:.5rem}
+h1{font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.15;background:linear-gradient(90deg,#c4b5fd,#5eead4,#fbbf24);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:var(--muted);max-width:740px;margin:.4rem auto 0}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;margin-bottom:1rem}
+.tab-btn{padding:.5rem 1.05rem;border-radius:999px;border:1px solid transparent;background:var(--card);color:var(--muted);font-weight:650;cursor:pointer;font-size:.9rem}
+.tab-btn:hover{color:var(--text);border-color:var(--violet)}
+.tab-btn.active{background:linear-gradient(135deg,#7c3aed,#0d9488);color:#fff;box-shadow:0 4px 16px rgba(167,139,250,.25)}
+.panel{display:none;animation:fade .3s ease}.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:16px;padding:1.25rem;margin-bottom:1rem;border:1px solid rgba(147,162,187,.13);box-shadow:0 8px 28px rgba(0,0,0,.3)}
+h2{font-size:1.3rem;color:var(--violet);margin-bottom:.55rem}
+h3{font-size:1.05rem;color:var(--amber);margin:.9rem 0 .4rem}
+h4{font-size:.82rem;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.45rem}
+p{margin-bottom:.6rem}
+.muted{color:var(--muted);font-size:.92rem}
+.tiny{font-size:.8rem;color:var(--muted)}
+ul.clean{margin:.3rem 0 .6rem 1.15rem}ul.clean li{margin:.2rem 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+.mini{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:.9rem}
+.mini b{color:var(--text)}
+.mini.teal{border-left:4px solid var(--teal)}.mini.amber{border-left:4px solid var(--amber)}.mini.violet{border-left:4px solid var(--violet)}.mini.red{border-left:4px solid var(--red)}.mini.pink{border-left:4px solid var(--pink)}
+table.cmp{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:.5rem}
+table.cmp th,table.cmp td{border:1px solid var(--line);padding:.45rem .6rem;text-align:left;vertical-align:top}
+table.cmp th{background:var(--card2);color:var(--teal)}
+table.cmp tr:nth-child(even) td{background:rgba(13,20,36,.5)}
+.tbl-wrap{overflow-x:auto}
+.diagram{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:.6rem;margin:.6rem 0}
+.diagram svg{width:100%;height:auto;display:block}
+.seg{display:flex;flex-wrap:wrap;gap:.35rem}
+.seg button,.chip{border:1.5px solid var(--line);background:#101a2e;color:var(--text);border-radius:9px;padding:.42rem .65rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;text-align:left}
+.seg button:hover,.chip:hover{border-color:var(--violet)}
+.seg button.active,.chip.active{border-color:var(--violet);background:rgba(167,139,250,.16);color:#ddd6fe}
+.seg.full button{flex:1 1 100%}
+.btn{border:none;border-radius:10px;padding:.6rem 1rem;font-weight:700;cursor:pointer;font-size:.88rem;color:#fff;background:linear-gradient(135deg,#7c3aed,#5b21b6);transition:transform .15s,filter .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.1)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.amber{background:linear-gradient(135deg,#d97706,#b45309)}
+.btn.teal{background:linear-gradient(135deg,#0d9488,#0f766e)}
+.btn.grey{background:linear-gradient(135deg,#475569,#334155)}
+.btn.small{padding:.4rem .7rem;font-size:.8rem}
+.btn-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.55rem;align-items:center}
+.steps{display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0 1rem}
+.step{flex:1 1 120px;display:flex;align-items:center;gap:.45rem;padding:.45rem .6rem;border-radius:10px;background:var(--card2);border:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+.step .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#24304a;font-weight:700;font-size:.75rem;flex:none}
+.step.done{color:#bbf7d0;border-color:rgba(34,197,94,.45)}.step.done .n{background:var(--good);color:#052e16}
+.step.current{color:var(--text);border-color:var(--amber);box-shadow:0 0 0 3px rgba(251,191,36,.15)}.step.current .n{background:var(--amber);color:#3b2604}
+.ctl{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:.85rem;margin-bottom:.7rem}
+.bench-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:1rem;align-items:start}
+@media(max-width:940px){.bench-grid{grid-template-columns:1fr}}
+table.mix{width:100%;border-collapse:collapse;font-size:.84rem}
+table.mix th,table.mix td{padding:.35rem .4rem;border-bottom:1px solid var(--line);text-align:left}
+table.mix th{color:var(--teal);font-weight:650;font-size:.78rem}
+table.mix td.num{font-family:ui-monospace,Consolas,monospace;text-align:right;white-space:nowrap}
+table.mix input{width:72px;background:#101a2e;color:var(--text);border:1.5px solid var(--line);border-radius:7px;padding:.3rem .4rem;font-size:.88rem;text-align:right}
+table.mix input:focus{outline:none;border-color:var(--amber)}
+.target{color:#64748b;font-size:.76rem}
+.check{display:flex;gap:.5rem;align-items:flex-start;font-size:.86rem;margin:.35rem 0;cursor:pointer}
+.check input{margin-top:.25rem;accent-color:var(--violet)}
+.slider label{display:flex;justify-content:space-between;font-size:.84rem;color:var(--muted);margin:.5rem 0 .15rem}
+.slider label b{color:var(--amber)}
+input[type=range]{width:100%;accent-color:var(--amber)}
+.readout{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;color:var(--muted);margin-top:.35rem}
+.caption{text-align:center;font-size:.88rem;color:var(--muted);margin:.5rem 0;min-height:1.3em}
+.caption.bad{color:#fca5a5}.caption.good{color:#86efac}
+.svgbox{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:.4rem}
+.svgbox svg{width:100%;height:auto;display:block}
+.report ul{list-style:none}
+.report li{display:flex;gap:.55rem;padding:.4rem 0;border-top:1px dashed var(--line);font-size:.86rem}
+.report li:first-child{border-top:none}
+.report .ic{flex:none;width:1.3rem;text-align:center}
+.score-line{font-weight:700;margin-top:.4rem}
+table.res{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:.4rem}
+table.res th,table.res td{padding:.4rem .45rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.res th{color:var(--teal);font-size:.78rem}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.74rem;font-weight:700}
+.pill.pos{background:rgba(34,197,94,.18);color:#86efac}.pill.neg{background:rgba(148,163,184,.18);color:#cbd5e1}.pill.warn{background:rgba(245,158,11,.18);color:#fcd34d}.pill.bad{background:rgba(239,68,68,.18);color:#fca5a5}
+.gel-cta{margin-top:.8rem;padding:.85rem;border-radius:12px;border:1.5px dashed rgba(45,212,191,.5);background:rgba(45,212,191,.06);display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+.gel-cta p{margin:0;flex:1 1 240px;font-size:.88rem;color:var(--muted)}
+.score-board{display:flex;justify-content:space-around;background:var(--card2);border-radius:12px;padding:.8rem;margin-bottom:1rem;text-align:center;font-size:.85rem;color:var(--muted)}
+.score-board span{display:block;font-size:1.45rem;font-weight:800;color:var(--amber)}
+.seq{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;line-height:1.75;background:#0b1220;border:1px solid var(--line);border-radius:10px;padding:.7rem;overflow-x:auto;white-space:pre}
+.seq .n{color:#475569}
+.seq .f{background:rgba(34,197,94,.35);color:#fff;border-radius:2px}
+.seq .r{background:rgba(244,114,182,.4);color:#fff;border-radius:2px}
+.seq .p{text-decoration:underline;text-decoration-color:#fbbf24;text-underline-offset:3px}
+.primer-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:760px){.primer-grid{grid-template-columns:1fr}}
+.primer-opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:#101a2e;color:var(--text);border-radius:10px;padding:.5rem .65rem;margin-bottom:.4rem;cursor:pointer;font-family:ui-monospace,Consolas,monospace;font-size:.82rem}
+.primer-opt small{display:block;font-family:'Segoe UI',sans-serif;color:var(--muted);font-size:.74rem}
+.primer-opt:hover{border-color:var(--violet)}
+.primer-opt.active{border-color:var(--amber);background:rgba(251,191,36,.1)}
+.feedback{margin-top:.6rem;padding:.65rem .8rem;border-radius:9px;font-size:.88rem;display:none}
+.feedback.show{display:block}
+.feedback.correct{background:rgba(34,197,94,.13);border:1px solid var(--good)}
+.feedback.wrong{background:rgba(239,68,68,.13);border:1px solid var(--bad)}
+.feedback.info{background:rgba(56,189,248,.1);border:1px solid var(--sky)}
+.question-card{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:1rem;margin-bottom:.8rem}
+.question-card h3{color:var(--text);margin:0 0 .5rem;font-size:1rem}
+.options{display:grid;gap:.45rem}
+.option{padding:.62rem .85rem;background:#0b1220;border:2px solid var(--line);border-radius:10px;cursor:pointer;font-size:.9rem;transition:all .15s}
+.option:hover:not(.locked){border-color:var(--violet);background:rgba(167,139,250,.07)}
+.option.correct{border-color:var(--good);background:rgba(34,197,94,.14)}
+.option.wrong{border-color:var(--bad);background:rgba(239,68,68,.14)}
+.option.locked{cursor:default}
+.q-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1rem;align-items:start}
+@media(max-width:900px){.q-grid{grid-template-columns:1fr}}
+.legend-chips{display:flex;flex-wrap:wrap;gap:.3rem;margin:.4rem 0}
+.legend-chips button{border:1.5px solid var(--line);background:#101a2e;color:var(--text);border-radius:999px;padding:.2rem .6rem;font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:.3rem}
+.legend-chips button i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.legend-chips button.off{opacity:.35}
+table.ct{width:100%;border-collapse:collapse;font-size:.82rem;font-family:ui-monospace,Consolas,monospace}
+table.ct td,table.ct th{padding:.28rem .45rem;border-bottom:1px solid var(--line);text-align:right}
+table.ct th{color:var(--teal);font-family:'Segoe UI',sans-serif}
+table.ct td:first-child,table.ct th:first-child{text-align:left}
+.case-list{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.case-btn{border:1.5px solid var(--line);background:var(--card2);color:var(--muted);border-radius:10px;padding:.5rem .75rem;font-size:.83rem;font-weight:650;cursor:pointer}
+.case-btn:hover{border-color:var(--violet);color:var(--text)}
+.case-btn.active{border-color:var(--amber);color:#fde68a;background:rgba(251,191,36,.1)}
+.case-btn .ok{color:var(--good)}
+.lane-key{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.2rem .8rem;font-size:.8rem;color:var(--muted);margin-top:.5rem}
+.lane-key b{color:var(--text)}
+footer{text-align:center;margin-top:1.6rem;color:var(--muted);font-size:.85rem}
+footer .designer{display:inline-block;margin-top:.3rem;color:#fcd34d;font-weight:600}
+</style>
+</head>
+<body>
+<div class="container">
+  <nav class="topnav">
+    <a href="index.html">← Microbiology Explorer</a>
+    <a href="Electrophoresis_Interactive.html">Gel Electrophoresis Lab →</a>
+  </nav>
+  <header>
+    <div class="eyebrow">Molecular Diagnostics</div>
+    <h1>🧬 PCR Training Lab</h1>
+    <p class="subtitle">Build the master mix, program the thermocycler, design primers, read real-time qPCR curves, and troubleshoot failed runs. Then send your reactions to the gel.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="learn">Learn</button>
+    <button class="tab-btn" data-tab="bench">PCR Bench</button>
+    <button class="tab-btn" data-tab="primers">Primer Design</button>
+    <button class="tab-btn" data-tab="qpcr">Real-time qPCR</button>
+    <button class="tab-btn" data-tab="trouble">Troubleshooting</button>
+    <button class="tab-btn" data-tab="quiz">Quiz</button>
+  </nav>
+
+  <!-- ================= LEARN ================= -->
+  <section id="learn" class="panel active">
+    <div class="card">
+      <h2>What PCR does</h2>
+      <p>The polymerase chain reaction copies one chosen stretch of DNA, defined by two primers, over and over. Each cycle roughly <b>doubles</b> the number of copies, so after 30 cycles a few molecules become billions: enough to see on a gel or to detect with a fluorescent dye.</p>
+      <div class="diagram">
+        <svg viewBox="0 0 680 250" role="img" aria-label="Thermal profile of one PCR cycle: denaturation at 95 °C, annealing at about 55–65 °C, extension at 72 °C">
+          <defs><marker id="arA" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8z" fill="#fbbf24"/></marker></defs>
+          <line x1="50" y1="200" x2="660" y2="200" stroke="#2a3650"/><line x1="50" y1="20" x2="50" y2="200" stroke="#2a3650"/>
+          <text x="20" y="44" fill="#93a2bb" font-size="11">95°</text><text x="20" y="112" fill="#93a2bb" font-size="11">60°</text><text x="20" y="84" fill="#93a2bb" font-size="11">72°</text>
+          <path d="M50 190 L70 40 L230 40 L250 108 L400 108 L415 80 L590 80 L605 40 L660 40" fill="none" stroke="#f472b6" stroke-width="3"/>
+          <text x="150" y="30" text-anchor="middle" fill="#f9a8d4" font-size="13" font-weight="700">1 · Denaturation</text>
+          <text x="325" y="98" text-anchor="middle" fill="#c4b5fd" font-size="13" font-weight="700">2 · Annealing</text>
+          <text x="502" y="70" text-anchor="middle" fill="#5eead4" font-size="13" font-weight="700">3 · Extension</text>
+          <!-- strands -->
+          <g stroke-width="4" stroke-linecap="round">
+            <line x1="100" y1="140" x2="200" y2="140" stroke="#38bdf8"/><line x1="100" y1="170" x2="200" y2="170" stroke="#fbbf24"/>
+            <line x1="270" y1="140" x2="380" y2="140" stroke="#38bdf8"/><line x1="350" y1="152" x2="380" y2="152" stroke="#22c55e"/>
+            <line x1="270" y1="182" x2="380" y2="182" stroke="#fbbf24"/><line x1="270" y1="170" x2="300" y2="170" stroke="#f472b6"/>
+            <line x1="440" y1="140" x2="570" y2="140" stroke="#38bdf8"/><line x1="440" y1="152" x2="570" y2="152" stroke="#22c55e"/>
+            <line x1="440" y1="170" x2="570" y2="170" stroke="#f472b6"/><line x1="440" y1="182" x2="570" y2="182" stroke="#fbbf24"/>
+          </g>
+          <path d="M360 160 L345 160" stroke="#fbbf24" stroke-width="2" marker-end="url(#arA)"/><path d="M292 162 L312 162" stroke="#fbbf24" stroke-width="2" marker-end="url(#arA)"/>
+          <text x="150" y="222" text-anchor="middle" fill="#93a2bb" font-size="11">strands separate (~95 °C)</text>
+          <text x="325" y="222" text-anchor="middle" fill="#93a2bb" font-size="11">primers bind (Tm − 3 to 5 °C)</text>
+          <text x="505" y="222" text-anchor="middle" fill="#93a2bb" font-size="11">Taq copies the template (72 °C, ~1 kb/min)</text>
+          <text x="625" y="236" text-anchor="end" fill="#fde68a" font-size="12">× 25–35 cycles → copies ≈ N₀ × 2ⁿ</text>
+        </svg>
+      </div>
+      <div class="grid3">
+        <div class="mini pink"><b>A microbiology story</b><br><span class="muted"><i>Taq</i> polymerase comes from <i>Thermus aquaticus</i>, a thermophilic bacterium isolated from a Yellowstone hot spring (Brock, 1969). Its heat stability made automated PCR possible (Mullis, 1983).</span></div>
+        <div class="mini violet"><b>Exponential growth</b><br><span class="muted">Copies = N₀ × (1 + E)ⁿ, where E is the efficiency (ideal 1.0 = perfect doubling). Growth slows into a <b>plateau</b> as primers and dNTPs run out and the polymerase tires.</span></div>
+        <div class="mini teal"><b>Specificity</b><br><span class="muted">Primers set where copying starts and stops. The annealing temperature, Mg²⁺ and primer design decide whether only the target is amplified.</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>The master mix: reagents &amp; target ranges</h2>
+      <p class="muted">Typical final concentrations for a 25 µL reaction. You will need these numbers on the PCR Bench.</p>
+      <div class="tbl-wrap">
+      <table class="cmp">
+        <thead><tr><th>Reagent</th><th>Role</th><th>Typical final</th><th>Too little</th><th>Too much</th></tr></thead>
+        <tbody>
+          <tr><td>10× buffer</td><td>pH, salt (K⁺/Tris)</td><td>1×</td><td>Poor enzyme activity</td><td>Lower specificity, lower yield</td></tr>
+          <tr><td>MgCl₂</td><td>Cofactor for Taq; stabilizes primer binding</td><td>1.5–2.5 mM</td><td>Weak or no product</td><td>Non-specific bands</td></tr>
+          <tr><td>dNTPs</td><td>Building blocks (dATP, dCTP, dGTP, dTTP)</td><td>~200 µM each</td><td>Low yield</td><td>Chelate Mg²⁺, lower fidelity</td></tr>
+          <tr><td>Forward + reverse primers</td><td>Define the target's ends</td><td>0.2–0.5 µM each</td><td>Low yield</td><td>Primer-dimer, non-specific bands</td></tr>
+          <tr><td>Taq polymerase</td><td>Heat-stable DNA synthesis, 5'→3'</td><td>0.5–1.5 U / 25 µL</td><td>Low yield</td><td>Non-specific products</td></tr>
+          <tr><td>Template</td><td>The sample DNA</td><td>1–5 µL (ng range)</td><td>Late or no product</td><td>Inhibitors carried over; smears</td></tr>
+          <tr><td>Nuclease-free water</td><td>Brings volume to 25 µL</td><td>to volume</td><td colspan="2">Dilution formula: C₁V₁ = C₂V₂ → V₁ = C₂ × V₂ / C₁</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>PCR, RT-PCR and real-time qPCR</h2>
+      <div class="tbl-wrap">
+      <table class="cmp">
+        <thead><tr><th></th><th>Conventional (end-point) PCR</th><th>RT-PCR</th><th>Real-time qPCR</th></tr></thead>
+        <tbody>
+          <tr><td>Starts from</td><td>DNA</td><td>RNA → cDNA by reverse transcriptase</td><td>DNA or cDNA (RT-qPCR)</td></tr>
+          <tr><td>Read-out</td><td>Gel electrophoresis after the run</td><td>Gel or real-time</td><td>Fluorescence measured every cycle</td></tr>
+          <tr><td>Result</td><td>Present/absent + size</td><td>Detects RNA (RNA viruses, gene expression)</td><td>Ct value → quantity (viral load)</td></tr>
+          <tr><td>Chemistry</td><td>—</td><td>—</td><td>SYBR Green (binds any dsDNA, needs melt curve) or TaqMan probe (sequence-specific)</td></tr>
+          <tr><td>Examples</td><td><i>mecA</i>, 16S rRNA sequencing template</td><td>SARS-CoV-2, influenza, HIV, HCV</td><td>CMV/EBV/HBV viral loads, rapid multiplex panels</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="card grid2">
+      <div>
+        <h3 style="margin-top:0">Controls you always run</h3>
+        <ul class="clean muted">
+          <li><b>Positive control</b>: known target. Proves the reaction can work.</li>
+          <li><b>No-template control (NTC)</b>: water instead of sample. Must stay negative; a target band means contamination.</li>
+          <li><b>Internal/extraction control</b>: a spiked or housekeeping target in every sample. If it fails, the sample may contain <b>inhibitors</b> (heme, heparin, bile salts…), so a negative result is invalid.</li>
+          <li><b>Ladder</b> on the gel to confirm product size.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Contamination control</h3>
+        <ul class="clean muted">
+          <li>Aerosol-barrier (filter) tips.</li>
+          <li>Separate pre-PCR (clean) and post-PCR (amplified product) areas, with one-way workflow.</li>
+          <li>Never open amplified tubes in the clean area: a single tube holds ~10¹² copies.</li>
+          <li>dUTP/UNG systems destroy carry-over products in many clinical assays.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BENCH ================= -->
+  <section id="bench" class="panel">
+    <div class="card">
+      <h2>PCR Bench</h2>
+      <p class="muted">Choose an assay, calculate the master mix for a 25 µL reaction, program the thermocycler, and run. Then send the tubes to the gel to see your result.</p>
+      <div class="steps" id="benchSteps"></div>
+      <div class="bench-grid">
+        <div>
+          <div class="ctl">
+            <h4>1 · Choose the assay</h4>
+            <div class="seg full" id="targetSeg"></div>
+            <p class="tiny" id="targetInfo" style="margin-top:.45rem"></p>
+          </div>
+          <div class="ctl">
+            <h4>2 · Master mix <span style="text-transform:none">(per 25 µL reaction)</span></h4>
+            <div class="tbl-wrap">
+              <table class="mix" id="mixTable"></table>
+            </div>
+            <label class="check" style="margin-top:.5rem"><input type="checkbox" id="showRanges"> <span>Show target ranges (hint)</span></label>
+            <div class="readout" id="mixReadout"></div>
+            <details style="margin-top:.5rem"><summary class="tiny" style="cursor:pointer">Master mix for all tubes (n + 1 extra)</summary><div id="mmTable" class="tiny" style="margin-top:.4rem"></div></details>
+          </div>
+          <div class="ctl">
+            <h4>3 · Bench hygiene</h4>
+            <label class="check"><input type="checkbox" id="hyTips"> <span>Use aerosol-barrier (filter) tips</span></label>
+            <label class="check"><input type="checkbox" id="hyArea"> <span>Set up in the clean pre-PCR area; amplified products stay in the post-PCR room</span></label>
+          </div>
+        </div>
+        <div>
+          <div class="ctl">
+            <h4>4 · Program the thermocycler</h4>
+            <p class="tiny" id="tmInfo"></p>
+            <div class="slider"><label>Denaturation temperature <b id="denV"></b></label><input type="range" id="denS" min="85" max="99" step="1"></div>
+            <div class="slider"><label>Annealing temperature <b id="annV"></b></label><input type="range" id="annS" min="45" max="72" step="1"></div>
+            <div class="slider"><label>Extension time at 72 °C <b id="extV"></b></label><input type="range" id="extS" min="10" max="180" step="5"></div>
+            <div class="slider"><label>Number of cycles <b id="cycV"></b></label><input type="range" id="cycS" min="10" max="45" step="1"></div>
+            <div class="svgbox" id="profile" style="margin-top:.6rem"></div>
+          </div>
+          <div class="ctl">
+            <h4>5 · Run</h4>
+            <div class="btn-row" style="margin-top:0"><button class="btn amber" id="runBtn">▶ Start run</button><button class="btn grey small" id="resetBtn">↺ Reset bench</button></div>
+            <div class="svgbox" id="ampPlot" style="margin-top:.6rem"></div>
+            <div class="caption" id="benchCaption"></div>
+          </div>
+        </div>
+      </div>
+      <div id="results"></div>
+    </div>
+  </section>
+
+  <!-- ================= PRIMERS ================= -->
+  <section id="primers" class="panel">
+    <div class="card">
+      <h2>Primer Design Challenge</h2>
+      <p class="muted">The template below is the <b>top strand</b> (5'→3') of a target region. Choose one forward and one reverse primer, each written 5'→3'. Good primers are 18–25 nt long with 40–60% GC, Tm within ~5 °C of each other, a G or C at the 3' end ("GC clamp"), no strong self-complementarity, and 3' ends that do not pair with each other. The reverse primer must match the <b>bottom</b> strand, so its sequence is the reverse complement of the top strand.</p>
+      <div class="score-board">
+        <div><span id="prCorrect">0</span>Best pair found</div>
+        <div><span id="prTries">0</span>Pairs tested</div>
+      </div>
+      <div class="seq" id="seqBox"></div>
+      <div class="primer-grid" style="margin-top:.8rem">
+        <div><h4>Forward primer candidates</h4><div id="fwdList"></div></div>
+        <div><h4>Reverse primer candidates</h4><div id="revList"></div></div>
+      </div>
+      <div class="btn-row"><button class="btn amber" id="evalPrimers">Evaluate this pair</button></div>
+      <div id="primerReport" class="report" style="margin-top:.6rem"></div>
+      <p class="tiny" style="margin-top:.6rem">Tm uses the basic formula Tm = 64.9 + 41 × (G+C − 16.4) / N. Design software uses nearest-neighbor thermodynamics and salt corrections, which typically give values a few degrees higher.</p>
+    </div>
+  </section>
+
+  <!-- ================= qPCR ================= -->
+  <section id="qpcr" class="panel">
+    <div class="card">
+      <h2>Real-time qPCR: viral load</h2>
+      <p class="muted">A SYBR Green qPCR assay measures a DNA virus in plasma (teaching data). Six 10-fold standards (10⁷ → 10² copies/reaction) build the standard curve. Move the <b>threshold</b> to read Ct values, then quantify the patients and check specificity with the melt curve.</p>
+      <div class="q-grid">
+        <div>
+          <div class="svgbox" id="ampCurves"></div>
+          <div class="legend-chips" id="qLegend"></div>
+          <div class="slider"><label>Threshold (ΔRn) <b id="thrV"></b></label><input type="range" id="thrS" min="0.03" max="0.6" step="0.01" value="0.15"></div>
+          <div class="btn-row"><button class="btn grey small" id="logBtn">Toggle log / linear scale</button></div>
+          <h3>Melt curve (−dF/dT)</h3>
+          <div class="svgbox" id="meltPlot"></div>
+        </div>
+        <div>
+          <h4>Ct table</h4>
+          <div class="tbl-wrap"><table class="ct" id="ctTable"></table></div>
+          <h3>Standard curve</h3>
+          <div class="svgbox" id="stdPlot"></div>
+          <div class="readout" id="stdStats"></div>
+        </div>
+      </div>
+      <h3>Interpret the run</h3>
+      <div id="qQuestions"></div>
+    </div>
+  </section>
+
+  <!-- ================= TROUBLE ================= -->
+  <section id="trouble" class="panel">
+    <div class="card">
+      <h2>Troubleshooting: what went wrong?</h2>
+      <p class="muted">Each gel comes from a real-world style failure. Read the ladder, the controls and the samples, then diagnose. (100 bp ladder, 1.5% agarose.)</p>
+      <div class="score-board"><div><span id="tsCorrect">0</span>Correct</div><div><span id="tsAnswered">0</span>Answered</div><div><span id="tsTotal">0</span>Cases</div></div>
+      <div class="case-list" id="tsList"></div>
+      <div id="tsArea"></div>
+    </div>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section id="quiz" class="panel">
+    <div class="card">
+      <h2>Knowledge Check</h2>
+      <div class="score-board">
+        <div><span id="qScore">0</span>Score</div>
+        <div><span id="qCurrent">1</span>/ <b id="qTotal" style="font-size:.85rem">0</b></div>
+        <div><span id="qStreak">0</span>Streak</div>
+      </div>
+      <div id="quizArea"></div>
+      <div style="text-align:center;margin-top:.8rem">
+        <button class="btn amber" id="nextBtn" style="display:none">Next →</button>
+        <button class="btn amber" id="restartBtn" style="display:none">Play again</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Interactive PCR training · Conventional PCR, primer design &amp; real-time qPCR · Teaching assays, not validated clinical protocols<br>
+    <span class="designer">Designed by Dr. R. Salas-Auvert</span>
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const sci = n => { if (!n) return '0'; const e = Math.floor(Math.log10(n)), c = n / Math.pow(10, e); return `${c.toFixed(1)}×10<sup>${e}</sup>`; };
+
+/* ===== TABS ===== */
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active'); $(btn.dataset.tab).classList.add('active');
+  if (btn.dataset.tab === 'quiz' && !quizStarted) startQuiz();
+}));
+
+/* =====================================================================
+   PCR BENCH
+   ===================================================================== */
+const TARGETS = {
+  mecA: {name:'mecA · methicillin resistance', org:'<i>Staphylococcus aureus</i> isolates', size:500, tm:60,
+    samples:[{name:'Positive control (MRSA)',copies:1e5,role:'pc'},{name:'No-template control',copies:0,role:'ntc'},{name:'Isolate 1',copies:2e5},{name:'Isolate 2',copies:0},{name:'Isolate 3',copies:5e4},{name:'Isolate 4',copies:0}]},
+  stx2: {name:'stx2 · Shiga toxin 2', org:'stool enrichment broths (<i>E. coli</i> O157:H7 outbreak)', size:350, tm:58,
+    samples:[{name:'Positive control (STEC)',copies:1e5,role:'pc'},{name:'No-template control',copies:0,role:'ntc'},{name:'Stool A',copies:3e4},{name:'Stool B',copies:0},{name:'Stool C',copies:8e4},{name:'Stool D',copies:15}]},
+  tcdB: {name:'tcdB · C. difficile toxin B', org:'unformed stool specimens', size:160, tm:62,
+    samples:[{name:'Positive control (toxigenic)',copies:1e5,role:'pc'},{name:'No-template control',copies:0,role:'ntc'},{name:'Patient 1',copies:0},{name:'Patient 2',copies:6e4},{name:'Patient 3',copies:0},{name:'Patient 4',copies:1.5e5}]},
+  r16S: {name:'16S rRNA gene · universal bacterial', org:'culture isolates for sequencing-based ID', size:1500, tm:55,
+    samples:[{name:'Positive control (E. coli)',copies:1e5,role:'pc'},{name:'No-template control',copies:0,role:'ntc'},{name:'Isolate A',copies:2e5},{name:'Isolate B',copies:1e5},{name:'Isolate C',copies:3e5},{name:'Isolate D',copies:8e4}]}
+};
+const REAGENTS = [
+  {id:'buf', name:'10× PCR buffer (Mg-free)', stock:'10×', fin:v=>10*v/25, unit:'×', dec:2, lo:0.8, hi:1.3, rec:2.5, range:'1×'},
+  {id:'mg',  name:'MgCl₂ (25 mM)', stock:'25 mM', fin:v=>25*v/25, unit:'mM', dec:2, lo:1.0, hi:3.0, rec:1.5, range:'1.5–2.5 mM'},
+  {id:'dntp',name:'dNTP mix (10 mM each)', stock:'10 mM', fin:v=>10000*v/25, unit:'µM', dec:0, lo:100, hi:400, rec:0.5, range:'~200 µM each'},
+  {id:'fwd', name:'Forward primer (10 µM)', stock:'10 µM', fin:v=>10*v/25, unit:'µM', dec:2, lo:0.1, hi:1.0, rec:1.0, range:'0.2–0.5 µM'},
+  {id:'rev', name:'Reverse primer (10 µM)', stock:'10 µM', fin:v=>10*v/25, unit:'µM', dec:2, lo:0.1, hi:1.0, rec:1.0, range:'0.2–0.5 µM'},
+  {id:'taq', name:'Taq polymerase (5 U/µL)', stock:'5 U/µL', fin:v=>5*v, unit:'U', dec:2, lo:0.3, hi:2.5, rec:0.25, range:'0.5–1.5 U'},
+  {id:'tmpl',name:'Template (sample)', stock:'—', fin:v=>v, unit:'µL', dec:1, lo:1, hi:5, rec:2, range:'1–5 µL'}
+];
+const bench = {target:null, vol:{buf:0,mg:0,dntp:0,fwd:0,rev:0,taq:0,tmpl:0}, prog:{den:95, ann:55, ext:30, cyc:30},
+               ran:false, running:false, results:null, touchedProg:false, mixTouched:false};
+
+function waterVol(){ return 25 - Object.values(bench.vol).reduce((a,b)=>a+b,0); }
+
+function buildTargetUI(){
+  $('targetSeg').innerHTML = Object.entries(TARGETS).map(([k,t]) => `<button data-t="${k}" class="${bench.target===k?'active':''}">${t.name}</button>`).join('');
+  const t = TARGETS[bench.target];
+  $('targetInfo').innerHTML = t ? `Specimens: ${t.org}. Teaching amplicon: <b style="color:#fbbf24">${t.size.toLocaleString()} bp</b>. Six tubes: positive control, NTC and four samples.` : 'Pick a target gene to begin.';
+  $('tmInfo').innerHTML = t ? `Primer Tm for this assay ≈ <b style="color:#fbbf24">${t.tm} °C</b> (both primers). Product: ${t.size.toLocaleString()} bp. Taq extends ~1 kb per minute.` : 'Choose an assay first.';
+}
+function buildMixUI(){
+  const show = $('showRanges').checked;
+  let h = `<tr><th>Reagent (stock)</th><th>µL / rxn</th><th style="text-align:right">Final</th></tr>`;
+  REAGENTS.forEach(r => {
+    const v = bench.vol[r.id], f = r.fin(v);
+    h += `<tr><td>${r.name}${show?`<div class="target">target: ${r.range}</div>`:''}</td><td><input type="number" min="0" max="25" step="0.05" data-r="${r.id}" value="${v||''}" placeholder="0"></td><td class="num">${f.toFixed(r.dec)} ${r.unit}</td></tr>`;
+  });
+  const w = waterVol();
+  h += `<tr><td>Nuclease-free water (to 25 µL)</td><td class="num" style="color:${w<0?'#f87171':'#e6edf7'}">${w.toFixed(2)}</td><td class="num">—</td></tr>`;
+  $('mixTable').innerHTML = h;
+  $('mixTable').querySelectorAll('input').forEach(inp => inp.addEventListener('change', e => {
+    bench.vol[e.target.dataset.r] = Math.max(0, parseFloat(e.target.value) || 0); bench.mixTouched = true; invalidate(); buildMixUI();
+  }));
+  $('mixReadout').innerHTML = w < 0 ? '<span style="color:#f87171">⚠ Volumes exceed 25 µL. Reduce something.</span>' : `Total 25.00 µL (water ${w.toFixed(2)} µL)`;
+  const n = TARGETS[bench.target] ? TARGETS[bench.target].samples.length : 6;
+  $('mmTable').innerHTML = `<table class="mix"><tr><th>Reagent</th><th style="text-align:right">× ${n+1} rxns</th></tr>` +
+    REAGENTS.filter(r=>r.id!=='tmpl').map(r => `<tr><td>${r.name}</td><td class="num">${(bench.vol[r.id]*(n+1)).toFixed(2)} µL</td></tr>`).join('') +
+    `<tr><td>Water</td><td class="num">${(Math.max(0,w)*(n+1)).toFixed(2)} µL</td></tr></table><p style="margin-top:.3rem">Dispense ${(25-bench.vol.tmpl).toFixed(2)} µL of master mix into each tube, then add ${bench.vol.tmpl.toFixed(1)} µL of sample (water for the NTC). The extra reaction covers pipetting loss.</p>`;
+  updateSteps();
+}
+function buildProgUI(){
+  const p = bench.prog;
+  $('denS').value = p.den; $('annS').value = p.ann; $('extS').value = p.ext; $('cycS').value = p.cyc;
+  $('denV').textContent = p.den + ' °C · 30 s'; $('annV').textContent = p.ann + ' °C · 30 s'; $('extV').textContent = p.ext + ' s'; $('cycV').textContent = p.cyc;
+  drawProfile();
+}
+function drawProfile(activeStep){
+  const p = bench.prog, W = 520, H = 170, x0 = 40, Y = T => 150 - (T - 4) / 96 * 130;
+  const segs = [['Initial denat.',95,52],['Denat.',p.den,40],['Anneal',p.ann,40],['Extend',72,Math.max(30, p.ext/180*70)],['Final ext.',72,56],['Hold',4,40]];
+  let x = x0, d = `M${x} ${Y(25)}`, labels = '';
+  segs.forEach((s,i) => {
+    d += ` L${x+8} ${Y(s[1])} L${x+s[2]} ${Y(s[1])}`;
+    const hl = activeStep != null && (i === activeStep);
+    labels += `<text x="${x+s[2]/2+4}" y="${Y(s[1])-6}" text-anchor="middle" font-size="10" fill="${hl?'#fbbf24':'#93a2bb'}">${s[1]}°</text><text x="${x+s[2]/2+4}" y="${H-4}" text-anchor="middle" font-size="9.5" fill="${hl?'#fbbf24':'#64748b'}">${s[0]}</text>`;
+    if (hl) labels += `<rect x="${x+2}" y="10" width="${s[2]}" height="${H-30}" fill="#fbbf24" opacity=".08"/>`;
+    x += s[2];
+  });
+  const cx0 = x0 + 52, cx1 = cx0 + 40 + 40 + Math.max(30, p.ext/180*70) + 8;
+  const s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Thermocycler program"><line x1="${x0}" y1="${Y(4)}" x2="${W-8}" y2="${Y(4)}" stroke="#1e293b"/>
+    <rect x="${cx0+2}" y="14" width="${cx1-cx0}" height="${H-34}" rx="6" fill="none" stroke="#a78bfa" stroke-dasharray="4 3"/>
+    <text x="${(cx0+cx1)/2}" y="${Y(4)-8}" text-anchor="middle" font-size="11" font-weight="700" fill="#c4b5fd">× ${p.cyc} cycles</text>
+    ${labels}<path d="${d}" fill="none" stroke="#f472b6" stroke-width="2.5"/></svg>`;
+  $('profile').innerHTML = s;
+}
+
+function evalMix(){
+  const out = {ok:true, eff:1, fatal:[], notes:[], nonspec:0, pd:0, inhib:false};
+  REAGENTS.forEach(r => {
+    const v = bench.vol[r.id], f = r.fin(v);
+    if (v <= 0){ out.ok = false; out.fatal.push(r); return; }
+    if (f < r.lo){ out.eff *= 0.62; out.notes.push({st:'warn', r, txt:`${r.name.split(' (')[0]} is low (${f.toFixed(r.dec)} ${r.unit}; aim for ${r.range}). Expect a weak product.`}); }
+    else if (f > r.hi){
+      if (r.id === 'mg'){ out.nonspec += 1; out.notes.push({st:'warn', r, txt:`MgCl₂ is high (${f.toFixed(2)} mM). Excess Mg²⁺ stabilizes mismatched primer binding, giving non-specific bands.`}); }
+      else if (r.id === 'fwd' || r.id === 'rev'){ out.pd += 0.35; out.nonspec += 0.4; out.notes.push({st:'warn', r, txt:`${r.name.split(' (')[0]} is high (${f.toFixed(2)} µM). Excess primer drives primer-dimer formation.`}); }
+      else if (r.id === 'dntp'){ out.eff *= 0.65; out.notes.push({st:'warn', r, txt:`dNTPs are high (${f.toFixed(0)} µM). They chelate free Mg²⁺ and reduce yield and fidelity.`}); }
+      else if (r.id === 'taq'){ out.nonspec += 0.6; out.notes.push({st:'warn', r, txt:`Too much Taq (${f.toFixed(2)} U). It increases non-specific products and wastes enzyme.`}); }
+      else if (r.id === 'tmpl'){ out.eff *= 0.7; out.inhib = true; out.notes.push({st:'warn', r, txt:`${f.toFixed(1)} µL of template carries over inhibitors from the extraction. Yield drops.`}); }
+      else { out.eff *= 0.8; out.notes.push({st:'warn', r, txt:`${r.name.split(' (')[0]} is above the usual range.`}); }
+    }
+  });
+  if (waterVol() < 0){ out.ok = false; out.over = true; }
+  return out;
+}
+function evalProg(t){
+  const p = bench.prog, out = {eff:1, nonspec:0, pd:0, notes:[], smear:false};
+  if (p.den < 88){ out.eff = 0; out.notes.push({st:'bad', txt:`Denaturation at ${p.den} °C cannot separate the DNA strands. No amplification.`}); }
+  else if (p.den < 93){ out.eff *= 0.55; out.notes.push({st:'warn', txt:`Denaturation at ${p.den} °C is incomplete. Use 94–98 °C.`}); }
+  else out.notes.push({st:'ok', txt:`Denaturation at ${p.den} °C fully separates the strands.`});
+  const d = p.ann - t.tm;
+  if (d > 4){ out.eff = 0; out.notes.push({st:'bad', txt:`Annealing at ${p.ann} °C is above the primer Tm (${t.tm} °C). The primers cannot bind, so there is no product.`}); }
+  else if (d > 1){ out.eff *= 0.45; out.notes.push({st:'warn', txt:`Annealing at ${p.ann} °C is at or above Tm. Binding is inefficient and the product is weak. Try Tm − 3 to 5 °C.`}); }
+  else if (d >= -6){ out.notes.push({st:'ok', txt:`Annealing at ${p.ann} °C (Tm ${t.tm} °C) is specific and efficient.`}); }
+  else if (d >= -11){ out.nonspec += 1; out.pd += 0.15; out.notes.push({st:'warn', txt:`Annealing at ${p.ann} °C is ${-d} °C below Tm. Primers tolerate mismatches, so extra (non-specific) bands appear.`}); }
+  else { out.nonspec += 1.8; out.pd += 0.3; out.notes.push({st:'bad', txt:`Annealing at ${p.ann} °C is far below Tm. Many non-specific products and primer-dimer.`}); }
+  const need = t.size / 1000 * 60;
+  if (p.ext < need * 0.5){ out.eff *= 0.25; out.notes.push({st:'bad', txt:`${p.ext} s of extension is far too short for a ${t.size} bp product (Taq ≈ 1 kb/min → ~${Math.ceil(need/5)*5} s).`}); }
+  else if (p.ext < need){ out.eff *= 0.7; out.notes.push({st:'warn', txt:`${p.ext} s of extension is a little short for ${t.size} bp (~${Math.ceil(need/5)*5} s needed).`}); }
+  else out.notes.push({st:'ok', txt:`Extension time ${p.ext} s is enough for ${t.size} bp.`});
+  if (p.cyc < 22) out.notes.push({st:'warn', txt:`Only ${p.cyc} cycles: low-copy samples may not reach a visible amount. 25–35 is typical.`});
+  else if (p.cyc > 40){ out.smear = true; out.nonspec += 0.4; out.notes.push({st:'warn', txt:`${p.cyc} cycles is excessive. Plateau-phase artifacts give smears and late non-specific bands.`}); }
+  else out.notes.push({st:'ok', txt:`${p.cyc} cycles is in the typical range.`});
+  return out;
+}
+const PLATEAU = 3e12;
+function copiesAt(N0, E, c){ if (!N0) return 0; const g = N0 * Math.pow(1+E, c); return g / (1 + (g - N0) / PLATEAU); }
+function amtFrom(N){ return N > 0 ? clamp((Math.log10(N) - 9.4) / 2.4, 0, 1.45) : 0; }
+
+function simulate(){
+  const t = TARGETS[bench.target], mix = evalMix(), prog = evalProg(t);
+  const clean = $('hyTips').checked && $('hyArea').checked;
+  const E = mix.ok ? 0.93 * mix.eff * prog.eff : 0;
+  const nonspec = mix.nonspec + prog.nonspec;
+  const tubes = t.samples.map((smp, i) => {
+    let N0 = smp.copies;
+    if (smp.role === 'ntc' && !clean) N0 = 40;
+    const N = E > 0 ? copiesAt(N0, E, bench.prog.cyc) : 0;
+    const amt = amtFrom(N);
+    const bands = [];
+    if (amt > 0.05) bands.push({s:t.size, amt, label:`${t.name.split(' ·')[0]} amplicon (${t.size} bp)${smp.role==='ntc'?': carry-over contamination!':''}`});
+    const hasDNA = smp.role !== 'ntc';
+    if (E > 0 && hasDNA && nonspec > 0.5){
+      const k = Math.min(nonspec, 2);
+      [[0.58,.32],[1.75,.28],[0.33,.22],[2.6,.18]].slice(0, Math.round(k*2)).forEach(([f,a],j) => {
+        const s = Math.round(t.size * f / 10) * 10; if (s >= 60 && s <= 4000) bands.push({s, amt:a*(0.8+0.3*k), label:`Non-specific product (~${s} bp)`});
+      });
+    }
+    if (mix.ok && E > 0){
+      let pd = 0.12 + mix.pd + prog.pd + (amt < 0.4 ? 0.22 : 0);
+      if (amt > 0.9) pd *= 0.5;
+      if (pd > 0.12) bands.push({s:45, amt:clamp(pd,0,0.9), label:'Primer-dimer (~45 bp)'});
+    }
+    const smear = prog.smear && amt > 0.8 ? [t.size*4, 80] : null;
+    // interpretation
+    let call, cls;
+    const hit = amt > 0.05;
+    if (smp.role === 'pc'){ call = hit ? 'Valid: band at expected size' : 'FAILED: run invalid'; cls = hit ? 'pos' : 'bad'; }
+    else if (smp.role === 'ntc'){ call = hit ? 'CONTAMINATED: run invalid' : (bands.length ? 'Clean (primer-dimer only)' : 'Clean'); cls = hit ? 'bad' : 'neg'; }
+    else if (hit && amt < 0.3){ call = 'Weak positive: repeat / confirm'; cls = 'warn'; }
+    else { call = hit ? 'Positive' : 'Negative'; cls = hit ? 'pos' : 'neg'; }
+    return {name:smp.name, role:smp.role, N0, N, amt, bands, smear, call, cls, expected: smp.copies > 0};
+  });
+  return {t, mix, prog, clean, E, tubes};
+}
+
+function invalidate(){
+  if (bench.ran){ bench.ran = false; bench.results = null; $('results').innerHTML = ''; $('benchCaption').textContent = 'Settings changed. Run again to update the results.'; drawAmp(0); }
+  updateSteps();
+}
+function updateSteps(){
+  const m = bench.mixTouched && REAGENTS.every(r => bench.vol[r.id] > 0) && waterVol() >= 0;
+  const done = [!!bench.target, m, $('hyTips').checked && $('hyArea').checked, bench.touchedProg, bench.ran, !!bench.sent];
+  const names = ['Choose assay','Master mix','Hygiene','Program cycler','Run','Send to gel'];
+  const cur = done.indexOf(false);
+  $('benchSteps').innerHTML = names.map((n,i) => `<div class="step ${done[i]?'done':''} ${i===cur?'current':''}"><span class="n">${done[i]?'✓':i+1}</span>${n}</div>`).join('');
+}
+
+function drawAmp(upto){
+  const W = 520, H = 210, m = {l:48, r:12, t:12, b:30};
+  const cyc = bench.prog.cyc, X = c => m.l + c / Math.max(cyc,1) * (W - m.l - m.r), Y = n => H - m.b - (Math.log10(Math.max(n,1)) / 13) * (H - m.t - m.b);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Copy number per cycle">`;
+  for (let e = 0; e <= 12; e += 3) s += `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(Math.pow(10,e))}" y2="${Y(Math.pow(10,e))}" stroke="#1e293b"/><text x="${m.l-5}" y="${Y(Math.pow(10,e))+3}" text-anchor="end" font-size="9.5" fill="#93a2bb">10${['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹','¹⁰','¹¹','¹²'][e]}</text>`;
+  s += `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(1e10)}" y2="${Y(1e10)}" stroke="#fbbf24" stroke-dasharray="4 3" opacity=".6"/><text x="${W-m.r}" y="${Y(1e10)-4}" text-anchor="end" font-size="9" fill="#fcd34d">≈ visible on a gel</text>`;
+  for (let c = 0; c <= cyc; c += 5) s += `<text x="${X(c)}" y="${H-m.b+13}" text-anchor="middle" font-size="9.5" fill="#93a2bb">${c}</text>`;
+  s += `<text x="${(W+m.l)/2}" y="${H-3}" text-anchor="middle" font-size="10" fill="#cbd5e1">Cycle</text><text x="11" y="${(H-m.b)/2}" font-size="10" fill="#cbd5e1" text-anchor="middle" transform="rotate(-90 11 ${(H-m.b)/2})">Copies</text>`;
+  const colors = ['#22c55e','#94a3b8','#38bdf8','#f472b6','#fbbf24','#a78bfa'];
+  if (bench.results && upto > 0){
+    bench.results.tubes.forEach((tb,i) => {
+      if (!tb.N0) return;
+      let d = '';
+      for (let c = 0; c <= upto; c += 0.5){ const n = copiesAt(tb.N0, bench.results.E, c); d += (c?'L':'M') + X(c).toFixed(1) + ' ' + Y(n).toFixed(1) + ' '; }
+      s += `<path d="${d}" fill="none" stroke="${colors[i]}" stroke-width="2"/>`;
+      const nEnd = copiesAt(tb.N0, bench.results.E, upto);
+      s += `<text x="${X(upto)+3}" y="${Y(nEnd)+3}" font-size="9" fill="${colors[i]}">${upto>=cyc?tb.name.split(' (')[0]:''}</text>`;
+    });
+  }
+  s += `<text x="${m.l+6}" y="${m.t+10}" font-size="10.5" fill="#fde68a">${upto?`Cycle ${Math.floor(upto)} / ${cyc}`:'Copy number appears here during the run'}</text></svg>`;
+  $('ampPlot').innerHTML = s;
+}
+
+function runPCR(){
+  const t = TARGETS[bench.target];
+  if (!t) return cap('Choose an assay first (step 1).', 'bad');
+  if (waterVol() < 0) return cap('Your volumes exceed 25 µL. Fix the master mix first.', 'bad');
+  bench.results = simulate(); bench.running = true; $('runBtn').disabled = true; $('results').innerHTML = '';
+  const cyc = bench.prog.cyc, t0 = performance.now(), dur = 3800;
+  cap('Running… initial denaturation, then cycling.');
+  (function frame(now){
+    const k = Math.min(1, (now - t0) / dur), c = k * cyc;
+    drawAmp(c); drawProfile(k < 0.04 ? 0 : (k >= 1 ? 4 : 1 + Math.floor((c * 3) % 3)));
+    if (k < 1) requestAnimationFrame(frame);
+    else { bench.running = false; bench.ran = true; $('runBtn').disabled = false; drawProfile(); renderResults(); cap('Run complete. Results below. Send the tubes to the gel to confirm.', 'good'); updateSteps(); }
+  })(t0);
+}
+function cap(msg, cls=''){ const c = $('benchCaption'); c.textContent = msg; c.className = 'caption ' + cls; }
+
+function renderResults(){
+  const R = bench.results, ic = {ok:'✅', warn:'⚠️', bad:'❌', info:'ℹ️'}, items = [];
+  // mix
+  if (R.mix.over) items.push({st:'bad', txt:'Reaction volume exceeded 25 µL.'});
+  R.mix.fatal.forEach(r => items.push({st:'bad', txt: r.id==='tmpl' ? 'No template was added, so no tube contains sample DNA.' : `${r.name.split(' (')[0]} was left out: ${({buf:'the buffer sets pH and salt; Taq is inactive without it',mg:'Taq needs Mg²⁺ as a cofactor, and this buffer is Mg-free',dntp:'there are no nucleotides to build new strands',fwd:'without both primers there is no exponential amplification',rev:'without both primers there is no exponential amplification',taq:'no polymerase means no DNA synthesis'})[r.id]}. No product.`}));
+  if (R.mix.ok && !R.mix.notes.length) items.push({st:'ok', txt:'Master mix concentrations are all in range.'});
+  R.mix.notes.forEach(n => items.push(n));
+  R.prog.notes.forEach(n => items.push(n));
+  if (!R.clean) items.push({st:'bad', txt:'Bench hygiene skipped: aerosolized amplicons from earlier runs contaminated the NTC. The whole run is invalid.'});
+  else items.push({st:'ok', txt:'Filter tips and a one-way pre/post-PCR workflow kept the NTC clean.'});
+  const pc = R.tubes.find(x=>x.role==='pc'), ntc = R.tubes.find(x=>x.role==='ntc');
+  const correctCalls = R.tubes.filter(x => !x.role).every(x => (x.amt > 0.05) === x.expected);
+  const valid = pc.amt > 0.05 && ntc.amt <= 0.05;
+  items.push(valid ? {st:'ok', txt:'Run is valid: positive control amplified and the NTC is free of target.'} : {st:'bad', txt:'Run is INVALID (controls failed). Patient results cannot be reported. Fix the problem and repeat.'});
+  const graded = items.filter(x=>x.st!=='info'), good = graded.filter(x=>x.st==='ok').length;
+
+  let tbl = `<table class="res"><tr><th>Tube</th><th>Final copies</th><th>Bands</th><th>Call</th></tr>`;
+  R.tubes.forEach(tb => {
+    const bandTxt = tb.bands.length ? tb.bands.map(b => `${b.s} bp${b.amt<0.3?' (faint)':''}`).join(', ') + (tb.smear?', smear':'') : 'none';
+    tbl += `<tr><td>${tb.name}</td><td>${tb.N ? sci(tb.N) : '0'}</td><td>${bandTxt}</td><td><span class="pill ${tb.cls}">${tb.call}</span></td></tr>`;
+  });
+  tbl += '</table>';
+  $('results').innerHTML = `<div class="grid2" style="margin-top:1rem">
+    <div class="report"><h4>Run report</h4><ul>${items.map(x=>`<li><span class="ic">${ic[x.st]}</span><span>${x.txt}</span></li>`).join('')}</ul>
+      <div class="score-line" style="color:${good===graded.length?'#86efac':good>=graded.length-2?'#fcd34d':'#fca5a5'}">Run quality: ${good} / ${graded.length}${good===graded.length?': clean, specific, valid run 🏆':''}</div></div>
+    <div><h4>Predicted results</h4>${tbl}
+      ${valid && correctCalls ? '<p class="tiny" style="margin-top:.5rem;color:#86efac">All patient calls match the true status of the samples.</p>' : ''}
+      <div class="gel-cta"><p><b style="color:#5eead4">Confirm on a gel.</b> Opens the Gel Electrophoresis Lab with a ladder and your six tubes already in the wells. You connect the power supply, run and stain.</p>
+      <button class="btn teal" id="sendGel">⚡ Send to gel</button></div></div></div>`;
+  $('sendGel').onclick = sendToGel;
+}
+
+function sendToGel(){
+  const R = bench.results, t = R.t;
+  const payload = {
+    src:'PCR Lab', target:t.name, size:t.size,
+    gel: t.size <= 250 ? '2.0' : t.size <= 800 ? '1.5' : '1.0',
+    ladder: t.size > 1000 ? 'L1kb' : 'L100',
+    tubes: R.tubes.map(tb => ({name:tb.name, bands:tb.bands.map(b=>({s:b.s, amt:+b.amt.toFixed(2), label:b.label})), smear:tb.smear}))
+  };
+  bench.sent = true; updateSteps();
+  const url = 'Electrophoresis_Interactive.html#pcr=' + encodeURIComponent(JSON.stringify(payload));
+  const w = window.open(url, '_blank');
+  if (!w) location.href = url;
+}
+
+// events
+$('targetSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || bench.running) return; bench.target = b.dataset.t; bench.sent = false; buildTargetUI(); buildMixUI(); invalidate(); cap(`Assay selected: ${TARGETS[bench.target].name}. Now calculate the master mix.`); });
+$('showRanges').onchange = buildMixUI;
+['hyTips','hyArea'].forEach(id => $(id).onchange = () => invalidate());
+[['denS','den'],['annS','ann'],['extS','ext'],['cycS','cyc']].forEach(([id,k]) => {
+  $(id).oninput = e => { bench.prog[k] = +e.target.value; bench.touchedProg = true; buildProgUI(); };
+  $(id).onchange = () => { invalidate(); drawAmp(0); };
+});
+$('runBtn').onclick = runPCR;
+$('resetBtn').onclick = () => {
+  if (bench.running) return;
+  Object.keys(bench.vol).forEach(k => bench.vol[k] = 0); bench.prog = {den:95, ann:55, ext:30, cyc:30};
+  bench.touchedProg = false; bench.mixTouched = false; bench.sent = false; $('hyTips').checked = false; $('hyArea').checked = false;
+  bench.ran = false; bench.results = null; $('results').innerHTML = ''; buildMixUI(); buildProgUI(); drawAmp(0); cap('Bench reset.');
+};
+
+/* =====================================================================
+   PRIMER DESIGN
+   ===================================================================== */
+const rc = s => s.split('').reverse().map(c => ({A:'T',T:'A',G:'C',C:'G'})[c]).join('');
+function rng(seed){ return () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+const PR = {
+  F:[{id:'FA', seq:'AGCTGACCTGAAGTCCATCG'},{id:'FB', seq:'TTATAATTGATTTAAGTATC'},{id:'FC', seq:'GCGGCCGCCGGGCGCCCGGC'},{id:'FD', seq:'GCTAGAATTCGAATTCTAGC'}],
+  R:[{id:'RA', seq:'CTTGGACAGTCAGCAGTACG'},{id:'RB', seq:'TCCGAGTACTGACGTTGCAA'},{id:'RC', seq:'GTGAGCCAGTTACCACGATG'},{id:'RD', seq:'GCCCGCGGCGGCCGCGTCGC'}]
+};
+const TEMPLATE = (() => {
+  const r = rng(7), L = 470; let s = '';
+  for (let i = 0; i < L; i++) s += 'ACGT'[Math.floor(r()*4)];
+  const put = (pos, seq) => { s = s.slice(0,pos) + seq + s.slice(pos + seq.length); };
+  put(14, PR.F[1].seq); put(60, PR.F[0].seq); put(108, PR.F[3].seq); put(156, PR.F[2].seq);
+  put(326, rc(PR.R[2].seq)); put(356, PR.R[1].seq); put(390, rc(PR.R[0].seq)); put(428, rc(PR.R[3].seq));
+  return s;
+})();
+function pStats(seq){
+  const n = seq.length, gc = (seq.match(/[GC]/g)||[]).length, tm = 64.9 + 41 * (gc - 16.4) / n;
+  let sc = 0; for (let k = 4; k <= 12; k++) for (let i = 0; i + k <= n; i++) if (seq.includes(rc(seq.slice(i,i+k)))) sc = Math.max(sc, k);
+  const last5 = seq.slice(-5), gc3 = (last5.match(/[GC]/g)||[]).length;
+  const run = /(A{4,}|C{4,}|G{4,}|T{4,})/.test(seq);
+  return {n, gcPct: Math.round(gc/n*100), tm, sc, clamp: /[GC]$/.test(seq), gc3, run};
+}
+function tailComp(a, b){ for (let k = 8; k >= 3; k--) if (rc(a.slice(-k)) === b.slice(-k)) return k; return 0; }
+const pr = {f:null, r:null, tries:0, found:false, tested:new Set()};
+function renderPrimerLists(){
+  const opt = (p, side) => { const st = pStats(p.seq); return `<button class="primer-opt ${pr[side]===p.id?'active':''}" data-side="${side}" data-id="${p.id}">5'-${p.seq}-3'<small>${st.n} nt · GC ${st.gcPct}% · Tm ≈ ${st.tm.toFixed(1)} °C</small></button>`; };
+  $('fwdList').innerHTML = PR.F.map(p => opt(p,'f')).join('');
+  $('revList').innerHTML = PR.R.map(p => opt(p,'r')).join('');
+}
+function renderSeq(){
+  const f = PR.F.find(p=>p.id===pr.f), r = PR.R.find(p=>p.id===pr.r);
+  const fPos = f ? TEMPLATE.indexOf(f.seq) : -1, rPos = r ? TEMPLATE.indexOf(rc(r.seq)) : -1;
+  const cls = i => {
+    let c = '';
+    if (fPos >= 0 && i >= fPos && i < fPos + 20) c += ' f';
+    if (rPos >= 0 && i >= rPos && i < rPos + 20) c += ' r';
+    if (fPos >= 0 && rPos > fPos && i >= fPos && i < rPos + 20) c += ' p';
+    return c.trim();
+  };
+  let out = '';
+  for (let l = 0; l < TEMPLATE.length; l += 60){
+    out += `<span class="n">${String(l+1).padStart(4,' ')}  </span>`;
+    for (let i = l; i < Math.min(l+60, TEMPLATE.length); i++){
+      const c = cls(i); out += c ? `<span class="${c}">${TEMPLATE[i]}</span>` : TEMPLATE[i];
+      if ((i+1) % 10 === 0) out += ' ';
+    }
+    out += '\n';
+  }
+  $('seqBox').innerHTML = `<span class="n">5'</span>\n` + out + `<span class="n">3'   <span style="color:#22c55e">■</span> forward site  <span style="color:#f472b6">■</span> reverse site  <u style="text-decoration-color:#fbbf24">product</u></span>`;
+}
+function evalPrimers(){
+  const box = $('primerReport');
+  if (!pr.f || !pr.r){ box.innerHTML = '<div class="feedback show info">Select one forward and one reverse primer.</div>'; return; }
+  const f = PR.F.find(p=>p.id===pr.f), r = PR.R.find(p=>p.id===pr.r), sf = pStats(f.seq), sr = pStats(r.seq);
+  const items = [], ic = {ok:'✅', warn:'⚠️', bad:'❌'};
+  const check = (lab, s) => {
+    if (s.gcPct < 40) items.push({st:'bad', txt:`${lab}: GC ${s.gcPct}% is too low (AT-rich). Low Tm (${s.tm.toFixed(1)} °C) and weak binding.`});
+    else if (s.gcPct > 60) items.push({st:'bad', txt:`${lab}: GC ${s.gcPct}% is too high. Tm ${s.tm.toFixed(1)} °C and GC-rich primers bind non-specifically.`});
+    else items.push({st:'ok', txt:`${lab}: ${s.n} nt, GC ${s.gcPct}%, Tm ≈ ${s.tm.toFixed(1)} °C.`});
+    if (s.sc >= 8) items.push({st:'bad', txt:`${lab}: a ${s.sc}-nt stretch is self-complementary${s.sc>=s.n?' (the whole primer is palindromic)':''}. It forms hairpins and self-dimers.`});
+    if (!s.clamp) items.push({st:'warn', txt:`${lab}: 3' end is A/T. A G or C at the 3' end (GC clamp) helps the polymerase start.`});
+    if (s.gc3 > 3) items.push({st:'warn', txt:`${lab}: more than 3 G/C in the last 5 bases. A too-"sticky" 3' end primes at wrong sites.`});
+    if (s.run) items.push({st:'warn', txt:`${lab}: run of 4+ identical bases. Risk of slippage/mispriming.`});
+  };
+  check('Forward', sf); check('Reverse', sr);
+  const fPos = TEMPLATE.indexOf(f.seq), rSite = TEMPLATE.indexOf(rc(r.seq));
+  let product = 0;
+  if (rSite < 0){
+    items.push({st:'bad', txt:'Reverse: this sequence is identical to the <b>top</b> strand, so it binds the same strand as the forward primer and extends in the same direction. No exponential product. The reverse primer must be the reverse complement of the top strand.'});
+  } else {
+    product = rSite + 20 - fPos;
+    items.push({st:'ok', txt:`Orientation correct: primers face each other. Predicted product: <b>${product} bp</b> (positions ${fPos+1}–${rSite+20}).`});
+  }
+  const dT = Math.abs(sf.tm - sr.tm);
+  items.push(dT <= 5 ? {st:'ok', txt:`ΔTm = ${dT.toFixed(1)} °C. Matched pair.`} : {st:'bad', txt:`ΔTm = ${dT.toFixed(1)} °C. With mismatched Tms, no single annealing temperature suits both primers.`});
+  const tc = tailComp(f.seq, r.seq);
+  if (tc >= 4) items.push({st:'bad', txt:`3' ends are complementary over ${tc} nt (…${f.seq.slice(-tc)}-3' / …${r.seq.slice(-tc)}-3'). The primers anneal to each other, giving primer-dimer.`});
+  else items.push({st:'ok', txt:"No 3'–3' complementarity between the primers."});
+  const best = pr.f === 'FA' && pr.r === 'RA';
+  const key = pr.f + pr.r;
+  if (!pr.tested.has(key)){ pr.tested.add(key); pr.tries++; if (best) pr.found = true; }
+  $('prCorrect').textContent = pr.found ? '✓' : '0'; $('prTries').textContent = pr.tries;
+  box.innerHTML = `<h4>Pair evaluation</h4><ul>${items.map(x=>`<li><span class="ic">${ic[x.st]}</span><span>${x.txt}</span></li>`).join('')}</ul>
+    <div class="feedback show ${best?'correct':'wrong'}">${best ? `🏆 Excellent design. Both primers are balanced, specific and face each other, giving a ${product} bp product. Suggested annealing: ~${(Math.min(sf.tm,sr.tm)-3).toFixed(0)} °C (basic-formula Tm − 3 °C).` : 'This pair has problems. Fix the ❌ items and try another combination.'}</div>`;
+}
+document.querySelector('.primer-grid').addEventListener('click', e => {
+  const b = e.target.closest('.primer-opt'); if (!b) return;
+  pr[b.dataset.side] = b.dataset.id; renderPrimerLists(); renderSeq(); $('primerReport').innerHTML = '';
+});
+$('evalPrimers').onclick = evalPrimers;
+
+/* =====================================================================
+   qPCR
+   ===================================================================== */
+const QE = 0.94, K = 1.55, C0 = 41.0, CYC = 45;
+const chOf = N0 => C0 - Math.log10(N0) / Math.log10(1 + QE);
+const QS = [
+  ...[7,6,5,4,3,2].map((e,i) => ({id:'S'+e, name:`Std 10${['','','²','³','⁴','⁵','⁶','⁷'][e]}`, N0:Math.pow(10,e), std:true, color:['#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'][i], tm:85.0, fmax:1, jit:[0.14,-0.11,0.09,-0.17,0.12,-0.06][i]})),
+  {id:'PA', name:'Patient A', N0:3.2e5, color:'#22c55e', tm:85.0, fmax:1},
+  {id:'PB', name:'Patient B', N0:450, color:'#fbbf24', tm:85.0, fmax:1},
+  {id:'PC', name:'Patient C', N0:0, color:'#f472b6', tm:85.0, fmax:1},
+  {id:'PD', name:'Patient D', N0:6, color:'#a78bfa', tm:85.0, fmax:0.9},
+  {id:'NTC', name:'NTC', N0:0, pd:true, color:'#94a3b8', tm:76.5, fmax:0.32}
+];
+function qF(s, c){
+  const base = 0.012 + 0.003 * Math.sin(c * 1.7 + s.id.length);
+  if (s.pd) return base + s.fmax / (1 + Math.exp(-(c - 42.2) / 1.3));
+  if (!s.N0) return base;
+  return base + s.fmax / (1 + Math.exp(-(c - chOf(s.N0) - (s.jit||0)) / K));
+}
+const qs = {thr:0.15, log:false, hidden:new Set()};
+function ctOf(s){
+  let prev = qF(s, 1);
+  for (let c = 1.02; c <= CYC; c += 0.02){ const v = qF(s, c); if (v >= qs.thr && prev < qs.thr) return c - 0.02 + 0.02 * (qs.thr - prev) / (v - prev); prev = v; }
+  return null;
+}
+function regress(pts){
+  const n = pts.length, mx = pts.reduce((a,p)=>a+p.x,0)/n, my = pts.reduce((a,p)=>a+p.y,0)/n;
+  const sxy = pts.reduce((a,p)=>a+(p.x-mx)*(p.y-my),0), sxx = pts.reduce((a,p)=>a+(p.x-mx)**2,0), syy = pts.reduce((a,p)=>a+(p.y-my)**2,0);
+  const m = sxy/sxx; return {m, b: my - m*mx, r2: (sxy*sxy)/(sxx*syy)};
+}
+function drawQ(){
+  $('thrV').textContent = qs.thr.toFixed(2);
+  // amplification plot
+  const W = 520, H = 280, m = {l:46, r:12, t:12, b:34};
+  const X = c => m.l + c / CYC * (W - m.l - m.r);
+  const ylo = qs.log ? Math.log10(0.005) : 0, yhi = qs.log ? Math.log10(1.6) : 1.15;
+  const Y = v => { const t = qs.log ? Math.log10(Math.max(v, 0.005)) : v; return H - m.b - (t - ylo) / (yhi - ylo) * (H - m.t - m.b); };
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Amplification curves">`;
+  for (let c = 0; c <= CYC; c += 5) s += `<line x1="${X(c)}" x2="${X(c)}" y1="${m.t}" y2="${H-m.b}" stroke="#1e293b"/><text x="${X(c)}" y="${H-m.b+13}" font-size="9.5" fill="#93a2bb" text-anchor="middle">${c}</text>`;
+  const ticks = qs.log ? [0.01,0.03,0.1,0.3,1] : [0,0.25,0.5,0.75,1];
+  ticks.forEach(v => s += `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#1e293b"/><text x="${m.l-5}" y="${Y(v)+3}" font-size="9.5" fill="#93a2bb" text-anchor="end">${v}</text>`);
+  s += `<text x="${(W+m.l)/2}" y="${H-4}" font-size="10.5" fill="#cbd5e1" text-anchor="middle">Cycle</text><text x="12" y="${(H-m.b)/2}" font-size="10.5" fill="#cbd5e1" text-anchor="middle" transform="rotate(-90 12 ${(H-m.b)/2})">ΔRn (fluorescence)${qs.log?', log':''}</text>`;
+  QS.forEach(q => {
+    if (qs.hidden.has(q.id)) return;
+    let d = ''; for (let c = 1; c <= CYC; c += 0.25) d += (c===1?'M':'L') + X(c).toFixed(1) + ' ' + Y(qF(q,c)).toFixed(1) + ' ';
+    s += `<path d="${d}" fill="none" stroke="${q.color}" stroke-width="${q.std?1.6:2.2}"/>`;
+  });
+  s += `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(qs.thr)}" y2="${Y(qs.thr)}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6 3"/><text x="${W-m.r-3}" y="${Y(qs.thr)-4}" font-size="10" fill="#fca5a5" text-anchor="end">threshold</text></svg>`;
+  $('ampCurves').innerHTML = s;
+  // legend
+  $('qLegend').innerHTML = QS.map(q => `<button class="${qs.hidden.has(q.id)?'off':''}" data-id="${q.id}"><i style="background:${q.color}"></i>${q.name}</button>`).join('');
+  // Ct table + std curve
+  const cts = {}; QS.forEach(q => cts[q.id] = ctOf(q));
+  const pts = QS.filter(q=>q.std && cts[q.id]).map(q => ({x:Math.log10(q.N0), y:cts[q.id]}));
+  const fit = pts.length >= 3 ? regress(pts) : null;
+  const eff = fit ? (Math.pow(10, -1/fit.m) - 1) * 100 : null;
+  const quant = ct => fit && ct ? Math.pow(10, (ct - fit.b) / fit.m) : null;
+  $('ctTable').innerHTML = `<tr><th>Sample</th><th>Ct</th><th>Quantity (copies/rxn)</th></tr>` + QS.map(q => {
+    const ct = cts[q.id];
+    const qn = q.std ? q.N0 : quant(ct);
+    const qtxt = q.std ? `${sci(q.N0)} (std)` : !ct ? '—' : q.pd ? 'not quantified (check melt)' : qn < 100 ? `${sci(qn)} (&lt; LLOQ)` : sci(qn);
+    return `<tr><td><span style="color:${q.color}">●</span> ${q.name}</td><td>${ct ? ct.toFixed(2) : 'Undet.'}</td><td>${qtxt}</td></tr>`;
+  }).join('');
+  // std plot
+  const W2 = 420, H2 = 240, m2 = {l:44, r:12, t:12, b:34};
+  const X2 = x => m2.l + (x - 1.5) / 6 * (W2 - m2.l - m2.r), Y2 = y => H2 - m2.b - (y - 8) / 32 * (H2 - m2.t - m2.b);
+  let s2 = `<svg viewBox="0 0 ${W2} ${H2}" role="img" aria-label="Standard curve">`;
+  for (let x = 2; x <= 7; x++) s2 += `<line x1="${X2(x)}" x2="${X2(x)}" y1="${m2.t}" y2="${H2-m2.b}" stroke="#1e293b"/><text x="${X2(x)}" y="${H2-m2.b+13}" font-size="9.5" fill="#93a2bb" text-anchor="middle">10${['','','²','³','⁴','⁵','⁶','⁷'][x]}</text>`;
+  for (let y = 10; y <= 40; y += 5) s2 += `<line x1="${m2.l}" x2="${W2-m2.r}" y1="${Y2(y)}" y2="${Y2(y)}" stroke="#1e293b"/><text x="${m2.l-5}" y="${Y2(y)+3}" font-size="9.5" fill="#93a2bb" text-anchor="end">${y}</text>`;
+  s2 += `<text x="${(W2+m2.l)/2}" y="${H2-4}" font-size="10.5" fill="#cbd5e1" text-anchor="middle">Starting copies (log scale)</text><text x="12" y="${(H2-m2.b)/2}" font-size="10.5" fill="#cbd5e1" text-anchor="middle" transform="rotate(-90 12 ${(H2-m2.b)/2})">Ct</text>`;
+  if (fit){
+    s2 += `<line x1="${X2(1.5)}" y1="${Y2(fit.m*1.5+fit.b)}" x2="${X2(7.5)}" y2="${Y2(fit.m*7.5+fit.b)}" stroke="#fbbf24" stroke-width="2"/>`;
+    pts.forEach(p => s2 += `<circle cx="${X2(p.x)}" cy="${Y2(p.y)}" r="4.5" fill="#60a5fa"/>`);
+    QS.filter(q=>!q.std && !q.pd && cts[q.id]).forEach(q => { const lx = (cts[q.id]-fit.b)/fit.m; if (lx > 0) s2 += `<circle cx="${X2(clamp(lx,1.5,7.5))}" cy="${Y2(cts[q.id])}" r="5" fill="none" stroke="${q.color}" stroke-width="2.2"/>`; });
+  }
+  $('stdPlot').innerHTML = s2 + '</svg>';
+  $('stdStats').innerHTML = fit ? `Ct = ${fit.m.toFixed(3)} × log₁₀(N₀) + ${fit.b.toFixed(2)} · R² = ${fit.r2.toFixed(4)} · Efficiency = 10<sup>(−1/slope)</sup> − 1 = <b style="color:${eff>=90&&eff<=110?'#86efac':'#fca5a5'}">${eff.toFixed(1)}%</b> (acceptable 90–110%)` : 'Threshold is too high or too low: fewer than three standards cross it.';
+  drawMelt();
+}
+function drawMelt(){
+  const W = 520, H = 200, m = {l:40, r:12, t:12, b:32}, T0 = 65, T1 = 95;
+  const X = T => m.l + (T - T0) / (T1 - T0) * (W - m.l - m.r), Y = v => H - m.b - v / 1.05 * (H - m.t - m.b);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Melt curves">`;
+  for (let T = 65; T <= 95; T += 5) s += `<line x1="${X(T)}" x2="${X(T)}" y1="${m.t}" y2="${H-m.b}" stroke="#1e293b"/><text x="${X(T)}" y="${H-m.b+13}" font-size="9.5" fill="#93a2bb" text-anchor="middle">${T}</text>`;
+  s += `<text x="${(W+m.l)/2}" y="${H-3}" font-size="10.5" fill="#cbd5e1" text-anchor="middle">Temperature (°C)</text>`;
+  QS.forEach(q => {
+    if (qs.hidden.has(q.id)) return;
+    const end = qF(q, CYC);
+    if (end < 0.05) return;
+    const amp = Math.min(1, end) * (q.pd ? 0.9 : 1), sd = q.pd ? 1.4 : 0.75;
+    let d = ''; for (let T = T0; T <= T1; T += 0.2) d += (T===T0?'M':'L') + X(T).toFixed(1) + ' ' + Y(amp * Math.exp(-((T-q.tm)**2)/(2*sd*sd))).toFixed(1) + ' ';
+    s += `<path d="${d}" fill="none" stroke="${q.color}" stroke-width="${q.std?1.4:2.2}"/>`;
+  });
+  s += `<text x="${X(85)}" y="${m.t+10}" font-size="10" fill="#cbd5e1" text-anchor="middle">specific product ~85 °C</text><text x="${X(76.5)}" y="${m.t+10}" font-size="10" fill="#cbd5e1" text-anchor="middle">primer-dimer ~76 °C</text>`;
+  $('meltPlot').innerHTML = s + '</svg>';
+}
+$('qLegend').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const id = b.dataset.id; qs.hidden.has(id) ? qs.hidden.delete(id) : qs.hidden.add(id); drawQ(); });
+$('thrS').oninput = e => { qs.thr = +e.target.value; drawQ(); };
+$('logBtn').onclick = () => { qs.log = !qs.log; drawQ(); };
+
+const QQ = [
+  {q:'From the standard curve, the PCR efficiency of this assay is about:', o:['~70%: the assay is failing','~95–100%: close to perfect doubling each cycle','Exactly 200%','It cannot be calculated without a gel'], a:1, e:'Efficiency = 10^(−1/slope) − 1. A slope near −3.3 to −3.5 means ~95–100%. Note that moving the threshold shifts every Ct but leaves the slope, and so the efficiency, almost unchanged.'},
+  {q:'Each 10-fold dilution of the standards shifts the Ct by about:', o:['1 cycle','3.3 cycles','10 cycles','0.3 cycles'], a:1, e:'At 100% efficiency, 2^3.32 = 10, so a 10-fold difference in template equals ~3.3 cycles.'},
+  {q:'Using the standard curve (or the Ct table), Patient A\'s viral load is closest to:', o:['~3 × 10² copies/reaction','~3 × 10⁵ copies/reaction','~3 × 10⁷ copies/reaction','Undetectable'], a:1, e:'Read the Ct on the standard curve (or use the table): ~3×10⁵ copies/reaction. Labs then convert to copies or IU per mL using the extraction and elution volumes.'},
+  {q:'The NTC crosses the threshold very late (Ct > 40 or not at all, depending on the threshold) and its melt peak is at ~76 °C instead of ~85 °C. Interpretation:', o:['Contamination with the target: invalid run','Primer-dimer, a low-Tm non-specific product typical of SYBR Green assays. The NTC is negative for target.','The standards are wrong','Patient samples are all positive'], a:1, e:'SYBR Green binds any double-stranded DNA. The melt curve shows that the late signal is a short, low-melting primer-dimer, not the 85 °C target amplicon. TaqMan probes avoid this problem.'},
+  {q:'Patient D has a Ct of ~35–36 with a correct 85 °C melt peak. The best report is:', o:['Not detected','Detected, below the lower limit of quantification: report as "detected, < LLOQ" or repeat','A high viral load','Invalid because Ct > 30'], a:1, e:'Very late Cts reflect only a few copies. Results are reliable for detection but outside the validated quantitative range (here, below the lowest standard, 10² copies).'},
+  {q:'Patient C shows no amplification (Undetermined). Before reporting "not detected", you must confirm that:', o:['The threshold is set to zero','The internal/extraction control in that sample amplified normally (no inhibition)','The gel shows a band','Its melt peak is 76 °C'], a:1, e:'A negative result is only valid if the internal control worked. Otherwise inhibitors or a failed extraction could cause a false negative.'}
+];
+const qState = {};
+function renderQQ(){
+  $('qQuestions').innerHTML = QQ.map((q,j) => {
+    const ans = qState[j];
+    return `<div class="question-card"><h3>${j+1}. ${q.q}</h3><div class="options">${q.o.map((o,k) => {
+      let c = 'option'; if (ans != null){ c += ' locked'; if (k===q.a) c += ' correct'; else if (k===ans) c += ' wrong'; }
+      return `<div class="${c}" data-j="${j}" data-k="${k}">${o}</div>`; }).join('')}</div>
+      <div class="feedback ${ans!=null?'show '+(ans===q.a?'correct':'wrong'):''}">${ans!=null?(ans===q.a?'✓ ':'✗ ')+q.e:''}</div></div>`;
+  }).join('');
+  $('qQuestions').querySelectorAll('.option').forEach(el => el.onclick = () => { const j = +el.dataset.j; if (qState[j] != null) return; qState[j] = +el.dataset.k; renderQQ(); });
+}
+
+/* =====================================================================
+   TROUBLESHOOTING (mini gels)
+   ===================================================================== */
+function miniGel(lanes, uid){
+  const n = lanes.length, W = 60 + n*54, H = 300, gx0 = 50, gx1 = W - 10, lw = (gx1-gx0)/n, top = 40, run = 240;
+  const win = [200, 3000], rf = s => { const L = Math.log10(s), a = Math.log10(win[0]), b = Math.log10(win[1]); if (L > b) return 0.12*Math.exp(-(L-b)*2.5); if (L < a) return 0.92 + 0.08*(1-Math.exp(-(a-L)*2.5)); return 0.12 + 0.8*(b-L)/(b-a); };
+  const y = s => top + rf(s) * run * 0.92;
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W+40}px" role="img" aria-label="Agarose gel"><defs><filter id="${uid}b"><feGaussianBlur stdDeviation="0.9"/></filter><filter id="${uid}g"><feGaussianBlur stdDeviation="2.4"/></filter><linearGradient id="${uid}sm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9dffad" stop-opacity=".1"/><stop offset="1" stop-color="#9dffad" stop-opacity=".55"/></linearGradient></defs>
+    <rect width="${W}" height="${H}" rx="12" fill="#04080a"/><rect x="${gx0}" y="22" width="${gx1-gx0}" height="${H-30}" rx="5" fill="#0a1511" stroke="#1f3a2e"/>`;
+  lanes.forEach((ln,i) => {
+    const x = gx0 + i*lw + lw*0.16, w = lw*0.68;
+    s += `<rect x="${x}" y="28" width="${w}" height="6" fill="#020604" stroke="#1f3a2e"/><text x="${x+w/2}" y="16" text-anchor="middle" font-size="10" fill="#9ca3af">${i+1}</text>`;
+    if (ln.smear) s += `<rect x="${x}" y="${y(ln.smear[0])}" width="${w}" height="${y(ln.smear[1])-y(ln.smear[0])}" fill="url(#${uid}sm)" filter="url(#${uid}b)"/>`;
+    (ln.bands||[]).forEach(b => {
+      const o = clamp(b.a*0.75, 0.2, 1), h = 3.5 + b.a*1.6;
+      s += `<rect x="${x-1}" y="${y(b.s)-h/2-1.5}" width="${w+2}" height="${h+3}" fill="#9dffad" opacity="${(o*.4).toFixed(2)}" filter="url(#${uid}g)"/><rect x="${x}" y="${y(b.s)-h/2}" width="${w}" height="${h}" rx="2" fill="#9dffad" opacity="${o.toFixed(2)}" filter="url(#${uid}b)"/>`;
+    });
+    if (ln.ladder){ let last = -99; ln.bands.forEach(b => { const yy = y(b.s); if (Math.abs(yy-last) < 9) return; last = yy; s += `<text x="${gx0-4}" y="${yy+3}" text-anchor="end" font-size="9" fill="#9ca3af">${b.s}</text>`; }); }
+  });
+  return s + `<text x="${gx0-4}" y="16" text-anchor="end" font-size="9" fill="#9ca3af">bp</text></svg>`;
+}
+const LAD = {name:'100 bp ladder', ladder:true, bands:[1500,1000,900,800,700,600,500,400,300,200,100].map(s=>({s, a:s===500?1.5:0.9}))};
+const B = (s,a) => ({s,a});
+const TS = [
+  {title:'Nothing but the ladder', desc:'<i>mecA</i> PCR (500 bp). Lanes: 1 ladder, 2 positive control, 3 NTC, 4–6 isolates.',
+   lanes:[LAD,{name:'Positive control'},{name:'NTC'},{name:'Isolate 1'},{name:'Isolate 2'},{name:'Isolate 3'}],
+   q:'The ladder is fine, but no lane shows any band, not even primer-dimer. Most likely cause?',
+   o:['All isolates are mecA-negative','A core reagent (Taq, dNTPs or Mg²⁺) was omitted, or the thermocycler did not run','Too many cycles','NTC contamination'], a:1,
+   e:'A failed positive control invalidates the run. The complete absence of primer-dimer suggests that no polymerization happened at all: check the master mix and the cycler log.'},
+  {title:'A band where none should be', desc:'<i>stx2</i> PCR (350 bp). Lanes: 1 ladder, 2 positive control, 3 NTC, 4–6 stool samples.',
+   lanes:[LAD,{name:'Positive control',bands:[B(350,1.3)]},{name:'NTC',bands:[B(350,0.55)]},{name:'Stool A',bands:[B(350,1.2)]},{name:'Stool B',bands:[B(350,0.5)]},{name:'Stool C',bands:[B(350,1.1)]}],
+   q:'What is the correct action?',
+   o:['Report stool A, B and C as positive','The NTC shows the target band: contamination. Invalidate the run, decontaminate, use fresh reagents and repeat.','Ignore the NTC, since it is only a control','Run the gel longer'], a:1,
+   e:'A target-size band in the NTC means amplicon or template contamination. Any positive (especially weak ones like stool B) might be false. Common sources: opening post-PCR tubes in the clean area, non-filter tips, contaminated water or primers.'},
+  {title:'Ladder-like extra bands', desc:'<i>mecA</i> PCR (500 bp). Lanes: 1 ladder, 2 positive control, 3 NTC, 4–6 isolates.',
+   lanes:[LAD,{name:'Positive control',bands:[B(500,1.2),B(290,.45),B(880,.4),B(170,.3)]},{name:'NTC',bands:[B(45,.4)]},{name:'Isolate 1',bands:[B(500,1.1),B(290,.4),B(880,.35)]},{name:'Isolate 2',bands:[B(290,.45),B(880,.4),B(170,.3)]},{name:'Isolate 3',bands:[B(500,1.0),B(290,.4),B(880,.4)]}],
+   q:'Multiple unexpected bands appear in every sample with DNA. The best fix is:',
+   o:['Lower the annealing temperature','Raise the annealing temperature (or use touchdown PCR) and/or reduce MgCl₂','Add more primers','Add more template'], a:1,
+   e:'Non-specific amplification means primers are binding to partially matched sites. A higher annealing temperature, less Mg²⁺, hot-start Taq or touchdown PCR restore specificity. Isolate 2 lacks the 500 bp band, so it is still mecA-negative.'},
+  {title:'Bright low band only', desc:'<i>tcdB</i> PCR (160 bp). Lanes: 1 ladder, 2 positive control, 3 NTC, 4–6 patients.',
+   lanes:[LAD,{name:'Positive control',bands:[B(160,.35),B(45,1.0)]},{name:'NTC',bands:[B(45,1.1)]},{name:'Patient 1',bands:[B(45,1.0)]},{name:'Patient 2',bands:[B(160,.3),B(45,.95)]},{name:'Patient 3',bands:[B(45,1.0)]}],
+   q:'Every lane has an intense, fuzzy band at ~45 bp and the specific products are weak. The likely problem is:',
+   o:['Genomic DNA contamination','Primer-dimer from excess primer, low annealing temperature, or primers with complementary 3\' ends','A plasmid','RNA contamination'], a:1,
+   e:'Primer-dimer competes for reagents and steals amplification from the target. Lower the primer concentration, raise the annealing temperature, use hot-start Taq, or redesign primers whose 3\' ends pair.'},
+  {title:'Smears', desc:'16S rRNA PCR (~1.5 kb). Lanes: 1 ladder, 2 positive control, 3 NTC, 4–6 isolates.',
+   lanes:[LAD,{name:'Positive control',bands:[B(1500,1.3)],smear:[3000,150]},{name:'NTC'},{name:'Isolate A',bands:[B(1500,1.3)],smear:[3000,150]},{name:'Isolate B',bands:[B(1500,1.2)],smear:[3000,150]},{name:'Isolate C',bands:[B(1500,1.3)],smear:[3000,150]}],
+   q:'Strong bands sit on top of smears in all positive lanes. Which change is most likely to help?',
+   o:['Add 10 more cycles','Reduce the cycle number and/or the amount of template; check DNA integrity','Lower the denaturation temperature','Use less agarose'], a:1,
+   e:'Over-cycling and template overload push reactions deep into plateau, producing heteroduplexes and random products that run as smears. Degraded template also smears.'},
+  {title:'The internal control vanished', desc:'Duplex PCR: <i>stx2</i> (350 bp) plus an internal amplification control (IC, 220 bp) spiked into every extracted sample. Lanes: 1 ladder, 2 positive control, 3 NTC, 4 stool A, 5 stool B.',
+   lanes:[LAD,{name:'Positive control',bands:[B(350,1.2),B(220,.9)]},{name:'NTC',bands:[]},{name:'Stool A',bands:[B(220,1.0)]},{name:'Stool B',bands:[]}],
+   q:'Stool A shows only the IC band; stool B shows nothing. How do you report?',
+   o:['Both stx2-negative','Stool A: stx2 not detected (valid). Stool B: invalid, likely PCR inhibitors (bile salts, polysaccharides). Dilute or re-extract and repeat.','Both positive','Both invalid'], a:1,
+   e:'The IC proves that amplification was possible in that tube. Stool A is a true negative. In stool B even the IC failed, so a negative result cannot be trusted.'}
+];
+const tsState = {cur:0, ans:{}};
+function tsScores(){ const a = Object.keys(tsState.ans).length; $('tsAnswered').textContent = a; $('tsCorrect').textContent = Object.entries(tsState.ans).filter(([i,k]) => TS[i].a === k).length; $('tsTotal').textContent = TS.length; }
+function showTS(i){
+  tsState.cur = i;
+  $('tsList').innerHTML = TS.map((t,k) => `<button class="case-btn ${k===i?'active':''}" data-i="${k}">${k+1}. ${t.title} ${tsState.ans[k]!=null?'<span class="ok">✓</span>':''}</button>`).join('');
+  const t = TS[i], ans = tsState.ans[i];
+  $('tsArea').innerHTML = `<div class="grid2"><div><div class="svgbox" style="display:flex;justify-content:center">${miniGel(t.lanes,'ts'+i)}</div>
+    <div class="lane-key">${t.lanes.map((l,k)=>`<span>${k+1}: <b>${l.name}</b></span>`).join('')}</div></div>
+    <div><h3 style="margin-top:0">${t.title}</h3><p class="muted">${t.desc}</p>
+    <div class="question-card"><h3>${t.q}</h3><div class="options">${t.o.map((o,k) => { let c = 'option'; if (ans!=null){ c+=' locked'; if (k===t.a) c+=' correct'; else if (k===ans) c+=' wrong'; } return `<div class="${c}" data-k="${k}">${o}</div>`; }).join('')}</div>
+    <div class="feedback ${ans!=null?'show '+(ans===t.a?'correct':'wrong'):''}">${ans!=null?(ans===t.a?'✓ ':'✗ ')+t.e:''}</div></div>
+    <div class="btn-row">${i>0?'<button class="btn grey small" id="tsPrev">← Previous</button>':''}${i<TS.length-1?'<button class="btn amber small" id="tsNext">Next case →</button>':''}</div></div></div>`;
+  $('tsArea').querySelectorAll('.option').forEach(el => el.onclick = () => { if (tsState.ans[i] != null) return; tsState.ans[i] = +el.dataset.k; tsScores(); showTS(i); });
+  if ($('tsPrev')) $('tsPrev').onclick = () => showTS(i-1);
+  if ($('tsNext')) $('tsNext').onclick = () => showTS(i+1);
+}
+$('tsList').addEventListener('click', e => { const b = e.target.closest('.case-btn'); if (b) showTS(+b.dataset.i); });
+
+/* =====================================================================
+   QUIZ
+   ===================================================================== */
+const QUESTIONS = [
+  {q:'Why is Taq polymerase essential for automated PCR?', o:['It works at room temperature','It survives the repeated ~95 °C denaturation steps','It does not need primers','It proofreads perfectly'], a:1, e:'Taq comes from the thermophile Thermus aquaticus and stays active through dozens of heating cycles.'},
+  {q:'The annealing temperature is usually set:', o:['At 95 °C','About 3–5 °C below the primer Tm','At exactly 72 °C','20 °C below the Tm'], a:1, e:'Too high and primers will not bind; too low and they bind partially matched sites (non-specific bands).'},
+  {q:'Starting from 10 copies, how many copies are there in theory after 10 perfect cycles?', o:['100','~10,000 (10 × 2¹⁰)','1,000,000','20'], a:1, e:'2¹⁰ = 1,024, so 10 × 1,024 ≈ 10⁴.'},
+  {q:'Excess MgCl₂ in a PCR usually causes:', o:['No product','Non-specific bands','A smaller target','Faster extension only'], a:1, e:'Mg²⁺ stabilizes primer–template duplexes, including mismatched ones.'},
+  {q:'A reverse primer is written 5\'→3\' and is:', o:['Identical to the top strand downstream','The reverse complement of the top-strand sequence at the downstream end','The complement read 3\'→5\'','Identical to the forward primer'], a:1, e:'It anneals to the top strand and extends toward the forward primer, so the primers "face" each other.'},
+  {q:'You need ~200 µM final dNTPs in 25 µL from a 10 mM stock. Volume to add?', o:['0.05 µL','0.5 µL','5 µL','2.5 µL'], a:1, e:'V₁ = C₂V₂/C₁ = 0.2 mM × 25 µL / 10 mM = 0.5 µL.'},
+  {q:'RT-PCR is required to detect:', o:['Bacterial plasmids','An RNA virus such as SARS-CoV-2 or influenza','Fungal DNA','Methylated DNA'], a:1, e:'Reverse transcriptase first converts RNA into cDNA, which Taq can then amplify.'},
+  {q:'In real-time qPCR, a lower Ct means:', o:['Less starting template','More starting template','A longer product','Contamination'], a:1, e:'More template reaches the threshold in fewer cycles. Each ~3.3 cycles represents a 10-fold difference.'},
+  {q:'A SYBR Green NTC shows late amplification with a melt peak well below the product\'s. This is most consistent with:', o:['Target contamination','Primer-dimer','Genomic DNA','A perfect run'], a:1, e:'Short primer-dimers melt at a lower temperature than the specific amplicon.'},
+  {q:'A sample is negative for the target AND its internal amplification control failed. You should:', o:['Report negative','Report the result as invalid (possible inhibition) and re-extract/dilute','Report positive','Ignore the IC'], a:1, e:'Without a working IC, a negative result could be a false negative.'},
+  {q:'A 1.5 kb product needs roughly how long an extension with Taq?', o:['5 s','~90 s (≈1 kb/min)','10 min','Extension time does not matter'], a:1, e:'Too short an extension yields little or no full-length product, especially for longer amplicons.'},
+  {q:'Which practice best prevents carry-over contamination?', o:['Opening amplified tubes next to the master mix','One-way workflow with separate pre- and post-PCR areas and filter tips','More cycles','Using the same pipette for everything'], a:1, e:'Amplicons are the most dangerous contaminant: ~10¹² copies per tube.'}
+];
+let quizStarted = false, qi = 0, score = 0, streak = 0, answered = false;
+function startQuiz(){ quizStarted = true; qi = 0; score = 0; streak = 0; $('qScore').textContent = 0; $('qStreak').textContent = 0; $('qTotal').textContent = QUESTIONS.length; $('restartBtn').style.display = 'none'; showQ(); }
+function showQ(){
+  answered = false; const q = QUESTIONS[qi]; $('qCurrent').textContent = qi + 1;
+  $('quizArea').innerHTML = `<div class="question-card"><h3>${q.q}</h3><div class="options">${q.o.map((o,k)=>`<div class="option" data-k="${k}">${o}</div>`).join('')}</div><div class="feedback" id="qFb"></div></div>`;
+  $('nextBtn').style.display = 'none';
+  $('quizArea').querySelectorAll('.option').forEach(el => el.onclick = () => pickQ(+el.dataset.k));
+}
+function pickQ(k){
+  if (answered) return; answered = true;
+  const q = QUESTIONS[qi], opts = $('quizArea').querySelectorAll('.option'), fb = $('qFb');
+  opts.forEach(o => o.classList.add('locked'));
+  if (k === q.a){ opts[k].classList.add('correct'); score++; streak++; fb.className = 'feedback show correct'; fb.textContent = '✓ ' + q.e; }
+  else { opts[k].classList.add('wrong'); opts[q.a].classList.add('correct'); streak = 0; fb.className = 'feedback show wrong'; fb.textContent = '✗ ' + q.e; }
+  $('qScore').textContent = score; $('qStreak').textContent = streak;
+  if (qi < QUESTIONS.length - 1) $('nextBtn').style.display = 'inline-block';
+  else setTimeout(() => { $('quizArea').innerHTML = `<div class="question-card" style="text-align:center"><h2>Quiz complete!</h2><p style="font-size:1.3rem;margin:.6rem 0">${score} / ${QUESTIONS.length}</p><p class="muted">${score===QUESTIONS.length?'Perfect: ready for the molecular lab. 🏆':score>=9?'Strong work. Review the questions you missed.':'Revisit the Learn tab and the PCR Bench, then try again.'}</p></div>`; $('restartBtn').style.display = 'inline-block'; }, 1100);
+}
+$('nextBtn').onclick = () => { qi++; showQ(); };
+$('restartBtn').onclick = startQuiz;
+
+/* ===== INIT ===== */
+buildTargetUI(); buildMixUI(); buildProgUI(); drawAmp(0); updateSteps(); cap('Step 1: choose an assay.');
+renderPrimerLists(); renderSeq();
+drawQ(); renderQQ();
+showTS(0); tsScores();
+</script>
+<!-- ===== Instructions + disclaimer (Microbiology Explorer) ===== -->
+<style id="mxh-style">
+.mxh-btn{position:fixed;right:16px;bottom:16px;z-index:9998;display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;border:1.5px solid rgba(251,191,36,.7);background:#111827;color:#fde68a;font:700 14px/1 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform .15s}
+.mxh-btn:hover{transform:translateY(-2px)}
+.mxh-btn:focus-visible,.mxh-x:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.mxh-ov{position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,.66);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+.mxh-ov.open{display:flex}
+.mxh-panel{width:min(720px,100%);background:#111827;color:#e5e7eb;border:1px solid #334155;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);font:15px/1.55 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;text-align:left;animation:mxhIn .2s ease}
+@keyframes mxhIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mxh-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #334155}
+.mxh-head h2{margin:0;font-size:19px;color:#fde68a;font-weight:800;letter-spacing:0;text-transform:none;background:none;-webkit-text-fill-color:currentColor}
+.mxh-x{border:1px solid #475569;background:#1f2937;color:#e5e7eb;border-radius:10px;width:36px;height:36px;font-size:20px;line-height:1;cursor:pointer;flex:none}
+.mxh-body{padding:16px 20px 8px}
+.mxh-sum{background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.45);border-left:5px solid #2dd4bf;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.mxh-sum b{color:#5eead4}
+.mxh-sec{margin:12px 0}
+.mxh-sec h3{margin:0 0 6px;font-size:15px;color:#c4b5fd;font-weight:800;text-transform:none;letter-spacing:0;background:none;-webkit-text-fill-color:currentColor}
+.mxh-sec ol,.mxh-sec ul{margin:0 0 0 20px;padding:0}
+.mxh-sec li{margin:4px 0;color:#d1d5db}
+.mxh-sec li b{color:#f9fafb}
+.mxh-foot{padding:12px 20px 16px;border-top:1px solid #334155;font-size:12.5px;color:#9ca3af}
+.mxh-disc{text-align:center;font:12.5px/1.5 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;color:#8a94a6;padding:14px 16px 76px;max-width:900px;margin:0 auto}
+@media print{.mxh-btn,.mxh-ov{display:none!important}}
+</style>
+<button class="mxh-btn" id="mxhOpen" type="button" aria-haspopup="dialog" aria-controls="mxhOv">ℹ️ Instructions</button>
+<div class="mxh-ov" id="mxhOv" role="dialog" aria-modal="true" aria-labelledby="mxhTitle">
+  <div class="mxh-panel">
+    <div class="mxh-head"><h2 id="mxhTitle">How to use: PCR Training Lab</h2><button class="mxh-x" id="mxhClose" type="button" aria-label="Close instructions">×</button></div>
+    <div class="mxh-body"><div class="mxh-sum"><b>In brief:</b> Build a PCR master mix, program the thermocycler, design primers, read real-time qPCR curves, and troubleshoot failed runs. Then send your reactions to the gel.</div><div class="mxh-sec"><h3>PCR Bench: step by step</h3><ol><li><b>Choose an assay</b> (mecA, stx2, tcdB or 16S rRNA).</li><li><b>Master mix:</b> type the µL of each reagent for a 25 µL reaction. Final concentrations update live; tick <b>Show target ranges</b> if you need a hint.</li><li><b>Hygiene:</b> tick both good-practice boxes, or the no-template control will be contaminated.</li><li><b>Program the cycler:</b> set denaturation, annealing (≈ primer Tm − 3 to 5 °C), extension time (~1 min per kb) and cycles.</li><li><b>Run:</b> watch the copy-number curve, then read the run report and the result for each tube.</li><li><b>Send to gel:</b> opens the Gel Electrophoresis Lab with your tubes loaded.</li></ol></div><div class="mxh-sec"><h3>Other tabs</h3><ul><li><b>Primer Design:</b> pick one forward and one reverse primer, then press <b>Evaluate this pair</b>. Find the best-designed pair.</li><li><b>Real-time qPCR:</b> drag the threshold, click legend chips to show or hide curves, read Ct values and the standard curve, then answer the questions.</li><li><b>Troubleshooting:</b> diagnose six failed gels.</li><li><b>Quiz:</b> 12 questions.</li></ul></div></div>
+    <div class="mxh-foot">Content and availability of these activities are subject to change without notice. For educational purposes only.</div>
+  </div>
+</div>
+<div class="mxh-disc">Content and availability of these activities are subject to change without notice. For educational purposes only.</div>
+<script>
+(function(){
+  var ov=document.getElementById('mxhOv'), op=document.getElementById('mxhOpen'), cl=document.getElementById('mxhClose');
+  function show(){ ov.classList.add('open'); cl.focus(); }
+  function hide(){ ov.classList.remove('open'); op.focus(); }
+  op.addEventListener('click', show); cl.addEventListener('click', hide);
+  ov.addEventListener('click', function(e){ if(e.target===ov) hide(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && ov.classList.contains('open')) hide(); });
+})();
+</script>
+</body>
+</html>

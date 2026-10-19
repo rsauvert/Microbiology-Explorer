@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gel Electrophoresis Lab</title>
+<style>
+:root{
+  --bg:#0a0f1a; --card:#141c2e; --card2:#0d1424; --line:#2a3650; --text:#e6edf7; --muted:#93a2bb;
+  --teal:#2dd4bf; --amber:#fbbf24; --violet:#a78bfa; --sky:#38bdf8;
+  --good:#22c55e; --bad:#ef4444; --warn:#f59e0b; --anode:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--text);line-height:1.5;min-height:100vh;
+  background:radial-gradient(ellipse 900px 500px at 10% -10%,rgba(45,212,191,.12),transparent 60%),
+             radial-gradient(ellipse 800px 500px at 100% 0%,rgba(251,191,36,.08),transparent 55%),
+             linear-gradient(170deg,#0a0f1a,#111a2e 55%,#0a0f1a);}
+.container{max-width:1180px;margin:0 auto;padding:1.2rem 16px 2rem}
+header{text-align:center;padding:1.4rem 1rem 1.1rem;margin-bottom:1rem;border-radius:18px;background:rgba(20,28,46,.85);border:1px solid rgba(45,212,191,.22)}
+.eyebrow{display:inline-block;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:700;border:1px solid rgba(45,212,191,.35);padding:3px 11px;border-radius:999px;margin-bottom:.5rem}
+h1{font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.15;background:linear-gradient(90deg,#5eead4,#fbbf24,#f472b6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:var(--muted);max-width:720px;margin:.4rem auto 0}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;margin-bottom:1rem}
+.tab-btn{padding:.5rem 1.05rem;border-radius:999px;border:1px solid transparent;background:var(--card);color:var(--muted);font-weight:650;cursor:pointer;font-size:.9rem}
+.tab-btn:hover{color:var(--text);border-color:var(--teal)}
+.tab-btn.active{background:linear-gradient(135deg,#0d9488,#d97706);color:#fff;box-shadow:0 4px 16px rgba(45,212,191,.25)}
+.panel{display:none;animation:fade .3s ease}.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:16px;padding:1.25rem;margin-bottom:1rem;border:1px solid rgba(147,162,187,.13);box-shadow:0 8px 28px rgba(0,0,0,.3)}
+h2{font-size:1.3rem;color:var(--teal);margin-bottom:.55rem}
+h3{font-size:1.05rem;color:var(--amber);margin:.9rem 0 .4rem}
+h4{font-size:.82rem;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.45rem}
+p{margin-bottom:.6rem}
+.muted{color:var(--muted);font-size:.92rem}
+.tiny{font-size:.8rem;color:var(--muted)}
+ul.clean{margin:.3rem 0 .6rem 1.15rem}ul.clean li{margin:.2rem 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+@media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+.mini{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:.9rem}
+.mini b{color:var(--text)}
+.mini.teal{border-left:4px solid var(--teal)}.mini.amber{border-left:4px solid var(--amber)}.mini.violet{border-left:4px solid var(--violet)}.mini.red{border-left:4px solid var(--anode)}
+table.cmp{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:.5rem}
+table.cmp th,table.cmp td{border:1px solid var(--line);padding:.5rem .6rem;text-align:left;vertical-align:top}
+table.cmp th{background:var(--card2);color:var(--teal)}
+table.cmp tr:nth-child(even) td{background:rgba(13,20,36,.5)}
+.tbl-wrap{overflow-x:auto}
+.diagram{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:.6rem;margin:.6rem 0}
+.diagram svg{width:100%;height:auto;display:block}
+
+/* ===== LAB ===== */
+.steps{display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0 1rem}
+.step{flex:1 1 120px;display:flex;align-items:center;gap:.45rem;padding:.45rem .6rem;border-radius:10px;background:var(--card2);border:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+.step .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#24304a;font-weight:700;font-size:.75rem;flex:none}
+.step.done{color:#bbf7d0;border-color:rgba(34,197,94,.45)}.step.done .n{background:var(--good);color:#052e16}
+.step.current{color:var(--text);border-color:var(--amber);box-shadow:0 0 0 3px rgba(251,191,36,.15)}.step.current .n{background:var(--amber);color:#3b2604}
+.lab-grid{display:grid;grid-template-columns:350px 1fr;gap:1rem;align-items:start}
+@media(max-width:940px){.lab-grid{grid-template-columns:1fr}}
+.ctl{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:.85rem;margin-bottom:.7rem}
+.seg{display:flex;flex-wrap:wrap;gap:.35rem}
+.seg button,.chip,.tube{border:1.5px solid var(--line);background:#101a2e;color:var(--text);border-radius:9px;padding:.42rem .65rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+.seg button:hover,.chip:hover,.tube:hover{border-color:var(--teal)}
+.seg button.active,.chip.active{border-color:var(--teal);background:rgba(45,212,191,.16);color:#99f6e4}
+.seg.full button{flex:1 1 100%;text-align:left}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.rack{display:flex;flex-wrap:wrap;gap:.35rem}
+.tube{display:flex;align-items:center;gap:.4rem;font-size:.78rem;padding:.35rem .55rem}
+.tube .cap{width:10px;height:14px;border-radius:2px 2px 6px 6px;background:var(--c,#60a5fa);flex:none}
+.tube.active{border-color:var(--amber);background:rgba(251,191,36,.14);color:#fde68a}
+.check{display:flex;gap:.5rem;align-items:flex-start;font-size:.85rem;margin:.35rem 0;cursor:pointer}
+.check input{margin-top:.25rem;accent-color:var(--teal)}
+.slider label{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin:.5rem 0 .2rem}
+.slider label b{color:var(--amber)}
+input[type=range]{width:100%;accent-color:var(--amber)}
+select{background:#101a2e;color:var(--text);border:1.5px solid var(--line);border-radius:8px;padding:.4rem .5rem;font-size:.85rem}
+.btn{border:none;border-radius:10px;padding:.6rem 1rem;font-weight:700;cursor:pointer;font-size:.88rem;color:#fff;background:linear-gradient(135deg,#0d9488,#0f766e);transition:transform .15s,filter .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.1)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.amber{background:linear-gradient(135deg,#d97706,#b45309)}
+.btn.violet{background:linear-gradient(135deg,#7c3aed,#5b21b6)}
+.btn.grey{background:linear-gradient(135deg,#475569,#334155)}
+.btn.small{padding:.4rem .7rem;font-size:.8rem}
+.btn-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.55rem}
+.readout{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;color:var(--muted);margin-top:.35rem}
+.orient button{font-size:.8rem}
+.stage{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:.8rem}
+.gel-host{display:flex;justify-content:center}
+.gel-svg{width:100%;max-width:560px;height:auto;display:block;user-select:none}
+.well{cursor:pointer}.well:hover{stroke:#fbbf24;stroke-width:1.5}
+.band-hit{cursor:pointer}
+.caption{text-align:center;font-size:.88rem;color:var(--muted);margin:.5rem 0;min-height:1.4em}
+.caption.bad{color:#fca5a5}.caption.good{color:#86efac}
+.info-box{background:#0b1220;border:1px solid var(--line);border-radius:10px;padding:.7rem .85rem;font-size:.88rem;min-height:3rem;margin-top:.5rem}
+.info-box b{color:var(--amber)}
+.lane-key{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.25rem .8rem;font-size:.8rem;color:var(--muted);margin-top:.6rem}
+.lane-key span b{color:var(--text)}
+.report{margin-top:.7rem}
+.report ul{list-style:none}
+.report li{display:flex;gap:.55rem;padding:.4rem 0;border-top:1px dashed var(--line);font-size:.86rem}
+.report li:first-child{border-top:none}
+.report .ic{flex:none;width:1.3rem;text-align:center}
+.score-line{font-weight:700;margin-top:.4rem}
+.legend-row{display:flex;flex-wrap:wrap;gap:.4rem 1rem;justify-content:center;font-size:.75rem;color:var(--muted);margin-top:.3rem}
+.legend-row i{display:inline-block;width:14px;height:5px;border-radius:2px;vertical-align:middle;margin-right:4px}
+
+/* ===== UNKNOWN / CASES / QUIZ ===== */
+.score-board{display:flex;justify-content:space-around;background:var(--card2);border-radius:12px;padding:.8rem;margin-bottom:1rem;text-align:center;font-size:.85rem;color:var(--muted)}
+.score-board span{display:block;font-size:1.45rem;font-weight:800;color:var(--amber)}
+.uk-grid{display:grid;grid-template-columns:340px 1fr;gap:1rem;align-items:start}
+@media(max-width:860px){.uk-grid{grid-template-columns:1fr}}
+.ladder-table{width:100%;border-collapse:collapse;font-size:.82rem;font-family:ui-monospace,Consolas,monospace}
+.ladder-table td,.ladder-table th{padding:.28rem .45rem;border-bottom:1px solid var(--line);text-align:right}
+.ladder-table th{color:var(--teal);font-family:'Segoe UI',sans-serif}
+.ladder-table tr.out td{color:#64748b}
+.ans-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-top:.6rem}
+.ans-row input{width:130px;background:#101a2e;color:var(--text);border:1.5px solid var(--line);border-radius:8px;padding:.5rem .6rem;font-size:1rem}
+.feedback{margin-top:.6rem;padding:.65rem .8rem;border-radius:9px;font-size:.88rem;display:none}
+.feedback.show{display:block}
+.feedback.correct{background:rgba(34,197,94,.13);border:1px solid var(--good)}
+.feedback.wrong{background:rgba(239,68,68,.13);border:1px solid var(--bad)}
+.feedback.info{background:rgba(56,189,248,.1);border:1px solid var(--sky)}
+.case-list{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.case-btn{border:1.5px solid var(--line);background:var(--card2);color:var(--muted);border-radius:10px;padding:.5rem .75rem;font-size:.83rem;font-weight:650;cursor:pointer;text-align:left}
+.case-btn:hover{border-color:var(--teal);color:var(--text)}
+.case-btn.active{border-color:var(--amber);color:#fde68a;background:rgba(251,191,36,.1)}
+.case-btn .ok{color:var(--good)}
+.badge{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin-left:.4rem;vertical-align:middle}
+.badge.agar{background:rgba(45,212,191,.16);color:#5eead4}.badge.page{background:rgba(167,139,250,.18);color:#c4b5fd}.badge.sds{background:rgba(251,191,36,.16);color:#fcd34d}
+.case-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1rem;align-items:start}
+@media(max-width:860px){.case-grid{grid-template-columns:1fr}}
+.question-card{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:1rem;margin-bottom:.8rem}
+.question-card h3{color:var(--text);margin:0 0 .5rem;font-size:1rem}
+.options{display:grid;gap:.45rem}
+.option{padding:.65rem .85rem;background:#0b1220;border:2px solid var(--line);border-radius:10px;cursor:pointer;font-size:.9rem;transition:all .15s}
+.option:hover:not(.locked){border-color:var(--teal);background:rgba(45,212,191,.07)}
+.option.correct{border-color:var(--good);background:rgba(34,197,94,.14)}
+.option.wrong{border-color:var(--bad);background:rgba(239,68,68,.14)}
+.option.locked{cursor:default}
+
+.topnav{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.7rem;font-size:.85rem}
+.topnav a{color:var(--muted);text-decoration:none;border:1px solid var(--line);padding:.3rem .75rem;border-radius:999px;background:rgba(20,28,46,.7)}
+.topnav a:hover{color:var(--text);border-color:var(--teal)}
+.import-banner{margin-bottom:.8rem;padding:.7rem .9rem;border-radius:12px;border:1.5px solid rgba(167,139,250,.55);background:rgba(167,139,250,.1);font-size:.88rem}
+.import-banner b{color:#ddd6fe}
+footer{text-align:center;margin-top:1.6rem;color:var(--muted);font-size:.85rem}
+footer .designer{display:inline-block;margin-top:.3rem;color:#fcd34d;font-weight:600}
+</style>
+</head>
+<body>
+<div class="container">
+  <nav class="topnav">
+    <a href="index.html">← Microbiology Explorer</a>
+    <a href="PCR_Interactive.html">🧬 PCR Training Lab →</a>
+  </nav>
+  <header>
+    <div class="eyebrow">Analytical Gel Electrophoresis</div>
+    <h1>⚡ Gel Electrophoresis Lab</h1>
+    <p class="subtitle">Agarose and polyacrylamide gels for nucleic acids and proteins. Pour the gel, load the wells, connect the power supply, run, stain, and interpret the bands.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="learn">Learn</button>
+    <button class="tab-btn" data-tab="lab">Gel Bench</button>
+    <button class="tab-btn" data-tab="unknown">Size the Unknown</button>
+    <button class="tab-btn" data-tab="cases">Case Files</button>
+    <button class="tab-btn" data-tab="quiz">Quiz</button>
+  </nav>
+
+  <!-- ================= LEARN ================= -->
+  <section id="learn" class="panel active">
+    <div class="card">
+      <h2>The principle in one sentence</h2>
+      <p>Charged molecules placed in a porous gel and an electric field move toward the electrode of opposite charge. The gel acts as a molecular sieve, so <b>small molecules travel farther than large ones</b>.</p>
+      <div class="diagram">
+        <svg viewBox="0 0 640 240" role="img" aria-label="Horizontal electrophoresis chamber: wells at the black cathode, bands migrating toward the red anode">
+          <rect x="20" y="40" width="600" height="150" rx="14" fill="#10223a" stroke="#2a3650"/>
+          <rect x="34" y="52" width="572" height="126" rx="8" fill="#1d3a55" opacity=".55"/>
+          <rect x="70" y="62" width="500" height="106" rx="4" fill="#cfe8f3" opacity=".22" stroke="#9cc6da" stroke-opacity=".5"/>
+          <rect x="40" y="56" width="10" height="118" rx="3" fill="#0b0f17" stroke="#64748b"/>
+          <rect x="590" y="56" width="10" height="118" rx="3" fill="#dc2626"/>
+          <g fill="#0a1424"><rect x="86" y="72" width="8" height="20" rx="2"/><rect x="86" y="104" width="8" height="20" rx="2"/><rect x="86" y="136" width="8" height="20" rx="2"/></g>
+          <g fill="#fbbf24"><rect x="150" y="72" width="6" height="20" rx="2"/><rect x="230" y="72" width="6" height="20" rx="2"/><rect x="330" y="72" width="6" height="20" rx="2"/><rect x="470" y="72" width="6" height="20" rx="2"/>
+          <rect x="190" y="104" width="6" height="20" rx="2"/><rect x="400" y="104" width="6" height="20" rx="2"/><rect x="270" y="136" width="6" height="20" rx="2"/></g>
+          <text x="45" y="30" text-anchor="middle" fill="#cbd5e1" font-size="14" font-weight="700">− Cathode</text>
+          <text x="595" y="30" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">+ Anode</text>
+          <text x="90" y="182" text-anchor="middle" fill="#93a2bb" font-size="11">wells</text>
+          <path d="M160 214 H520" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#ar)"/>
+          <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#fbbf24"/></marker></defs>
+          <text x="340" y="232" text-anchor="middle" fill="#fde68a" font-size="12">DNA, RNA and SDS-coated proteins (all negative) migrate toward + : "Run to Red"</text>
+          <text x="160" y="205" fill="#93a2bb" font-size="11">large · slow</text>
+          <text x="520" y="205" text-anchor="end" fill="#93a2bb" font-size="11">small · fast</text>
+        </svg>
+      </div>
+      <div class="grid3">
+        <div class="mini teal"><b>Charge</b><br><span class="muted">Nucleic acids carry one negative phosphate per nucleotide. In SDS-PAGE, SDS gives proteins a uniform negative coat. Either way the charge-to-mass ratio is roughly constant.</span></div>
+        <div class="mini amber"><b>Sieving matrix</b><br><span class="muted">Agarose (large pores) or polyacrylamide (small, tunable pores). A higher gel % gives smaller pores and better resolution of small molecules.</span></div>
+        <div class="mini violet"><b>Readout</b><br><span class="muted">In the linear range, migration distance falls linearly with log₁₀(size). A ladder of known sizes turns distance into bp, nt, or kDa.</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Agarose vs. polyacrylamide</h2>
+      <div class="tbl-wrap">
+      <table class="cmp">
+        <thead><tr><th>Feature</th><th>Agarose gel</th><th>Native PAGE (TBE), nucleic acids</th><th>SDS-PAGE, proteins</th></tr></thead>
+        <tbody>
+          <tr><td>Matrix</td><td>Polysaccharide from red seaweed; physical gel set by cooling</td><td colspan="2">Acrylamide + bis-acrylamide cross-linked by free-radical polymerization (APS + TEMED)</td></tr>
+          <tr><td>Typical %</td><td>0.7–2%</td><td>5–20%</td><td>8–15% (or 4–20% gradient)</td></tr>
+          <tr><td>Useful range</td><td>~50 bp to ~20 kb (PFGE: up to Mb)</td><td>~5 to ~1,000 bp; higher % resolves small fragments, down to a few bp apart</td><td>~5 to ~250 kDa</td></tr>
+          <tr><td>Format</td><td>Horizontal, submerged in TAE or TBE</td><td>Vertical, TBE buffer</td><td>Vertical, Tris-glycine-SDS; stacking gel (pH 6.8) over resolving gel (pH 8.8)</td></tr>
+          <tr><td>Sample prep</td><td>Mix with loading dye (glycerol + tracking dyes)</td><td>Loading dye; heat + urea/formamide for <i>denaturing</i> PAGE</td><td>SDS + reducing agent (β-ME or DTT), heat ~95 °C for 5 min</td></tr>
+          <tr><td>Stains</td><td>SYBR Safe / GelRed (blue light or UV); ethidium bromide (UV)</td><td>SYBR family / EtBr</td><td>Coomassie (~0.1 µg per band); silver (~1 ng range)</td></tr>
+          <tr><td>Classic uses</td><td>PCR checks, restriction digests, plasmid prep, RNA integrity</td><td>Small amplicons, primer-dimers, oligos, small RNAs, closely spaced fragments</td><td>Protein purity, MW estimate, subunit structure, before Western blot</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="card grid2">
+      <div>
+        <h3 style="margin-top:0">Nucleic acids: what changes migration</h3>
+        <ul class="clean muted">
+          <li><b>Length</b>: the main variable. Distance is proportional to −log₁₀(bp).</li>
+          <li><b>Conformation</b>: an uncut plasmid runs as supercoiled (fastest), linear, and nicked/open-circular (slowest).</li>
+          <li><b>Gel %</b>: low % for large fragments, high % for small ones.</li>
+          <li><b>Voltage</b>: too high heats the gel, causing "smiling" lanes, smeared bands, and even melted agarose.</li>
+          <li><b>RNA</b>: secondary structure distorts migration; denaturing gels (formaldehyde agarose, urea-PAGE) give true sizes.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Proteins: SDS-PAGE essentials</h3>
+        <ul class="clean muted">
+          <li><b>SDS</b> binds ~1.4 g per g of protein, unfolds it, and masks its intrinsic charge, so separation is by mass.</li>
+          <li><b>Reducing agent</b> breaks disulfide bonds. IgG runs at ~150 kDa unreduced, or as 50 + 25 kDa chains when reduced.</li>
+          <li><b>Stacking gel</b> concentrates samples into a thin starting zone (Laemmli discontinuous system).</li>
+          <li><b>Native PAGE</b> omits SDS: proteins separate by charge, size, and shape and keep their activity.</li>
+          <li>Afterwards, proteins can be transferred to a membrane for a <b>Western blot</b>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Microbiology applications</h2>
+      <div class="grid3">
+        <div class="mini teal"><b>PCR detection</b><br><span class="muted">Virulence or resistance genes (such as <i>mecA</i>, toxin genes): one band at the expected size, read against positive and no-template controls.</span></div>
+        <div class="mini teal"><b>Plasmid analysis</b><br><span class="muted">Plasmid profiles, restriction mapping, and checking a cloning step.</span></div>
+        <div class="mini amber"><b>Outbreak typing</b><br><span class="muted">PFGE of rare-cutter genomic digests was the reference method for decades. Whole-genome sequencing has now largely replaced it.</span></div>
+        <div class="mini violet"><b>Protein profiles</b><br><span class="muted">Whole-cell and outer-membrane protein patterns, recombinant protein purification, toxin subunits.</span></div>
+        <div class="mini violet"><b>Serology</b><br><span class="muted">Western blots show which antigen bands a patient's antibodies recognize.</span></div>
+        <div class="mini red"><b>Safety</b><br><span class="muted">EtBr is a mutagen, so prefer SYBR Safe or GelRed. Unpolymerized acrylamide is a neurotoxin. Shield your eyes and skin from UV. The power supply carries high voltage.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LAB ================= -->
+  <section id="lab" class="panel">
+    <div class="card">
+      <h2>Virtual Gel Bench</h2>
+      <p class="muted">Work through the protocol in order. Choose a gel system, prepare and load samples, wire the power supply, run, then stain. Click any stained band to identify it.</p>
+      <div id="importBanner"></div>
+      <div class="steps" id="labSteps"></div>
+      <div class="lab-grid">
+        <div>
+          <div class="ctl">
+            <h4>1 · Gel system &amp; percentage</h4>
+            <div class="seg full" id="modeSeg">
+              <button data-mode="dna">🧬 Agarose · DNA / RNA (horizontal)</button>
+              <button data-mode="page">🧪 Native PAGE · small nucleic acids (vertical)</button>
+              <button data-mode="protein">🧫 SDS-PAGE · proteins (vertical)</button>
+            </div>
+            <div class="chips" id="gelChips"></div>
+            <p class="tiny" id="gelInfo" style="margin-top:.4rem"></p>
+          </div>
+          <div class="ctl" id="prepBlock"></div>
+          <div class="ctl">
+            <h4>3 · Load the wells</h4>
+            <p class="tiny">Pick up a tube, then click a well on the gel. Click a loaded well with no tube selected to empty it.</p>
+            <div class="rack" id="rack"></div>
+            <div class="btn-row"><button class="btn small grey" id="demoLoad">Demo load</button><button class="btn small grey" id="clearWells">Clear wells</button></div>
+          </div>
+          <div class="ctl">
+            <h4>4 · Power supply</h4>
+            <div class="seg orient" id="orientSeg">
+              <button data-o="correct">Wells at ⊖ black (cathode)</button>
+              <button data-o="wrong">Wells at ⊕ red (anode)</button>
+            </div>
+            <div class="slider"><label>Voltage <b id="vVal"></b></label><input type="range" id="vSlider"></div>
+            <div class="slider"><label>Run time <b id="tVal"></b></label><input type="range" id="tSlider"></div>
+            <div class="readout" id="runReadout"></div>
+          </div>
+          <div class="ctl">
+            <h4>5–6 · Run &amp; visualize</h4>
+            <div class="btn-row" style="margin-top:0">
+              <button class="btn amber" id="runBtn">▶ Run gel</button>
+              <select id="stainSel" aria-label="Stain"></select>
+              <button class="btn violet" id="stainBtn">Stain &amp; image</button>
+            </div>
+            <div class="btn-row"><button class="btn small grey" id="newGelBtn">↺ Pour a new gel (keep samples)</button></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="gel-host" id="labGel"></div>
+          <div class="legend-row" id="labLegend"></div>
+          <div class="caption" id="labCaption"></div>
+          <div class="info-box" id="bandInfo"><span class="muted">Band details appear here after staining. Click a band.</span></div>
+          <div class="lane-key" id="labKey"></div>
+          <div class="report" id="labReport"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= UNKNOWN ================= -->
+  <section id="unknown" class="panel">
+    <div class="card">
+      <h2>Size the Unknown: build a standard curve</h2>
+      <p class="muted">Measure how far the ladder bands and the unknown band traveled, then interpolate on the semi-log plot of log₁₀(size) against distance. Answers within ±10% count as correct.</p>
+      <div class="score-board">
+        <div><span id="ukCorrect">0</span>Correct</div>
+        <div><span id="ukAttempts">0</span>Attempted</div>
+        <div><span id="ukStreak">0</span>Streak</div>
+      </div>
+      <div class="seg" id="ukSeg" style="margin-bottom:.8rem">
+        <button data-mode="dna" class="active">Agarose · DNA</button>
+        <button data-mode="page">Native PAGE · DNA</button>
+        <button data-mode="protein">SDS-PAGE · protein</button>
+      </div>
+      <div class="uk-grid">
+        <div class="stage">
+          <div class="gel-host" id="ukGel"></div>
+          <div class="caption" id="ukCaption"></div>
+        </div>
+        <div>
+          <div class="mini" id="ukMeta"></div>
+          <h3>1 · Measure</h3>
+          <p class="tiny">Click the unknown band in lane 2 to measure its distance from the well. Ladder distances (mm) are listed below.</p>
+          <div class="info-box" id="ukMeasure"><span class="muted">Unknown band distance: not measured yet</span></div>
+          <h3>2 · Ladder data</h3>
+          <div class="tbl-wrap"><table class="ladder-table" id="ukTable"></table></div>
+          <p class="tiny" style="margin-top:.3rem">Grey rows fall outside the gel's linear range. Leave them out of the curve.</p>
+          <h3>3 · Standard curve</h3>
+          <button class="btn small grey" id="ukCurveBtn">Show / hide standard curve</button>
+          <div id="ukCurve" style="display:none;margin-top:.5rem"></div>
+          <h3>4 · Your estimate</h3>
+          <div class="ans-row">
+            <input type="number" id="ukInput" placeholder="size" min="0" step="any">
+            <span id="ukUnit" class="muted">bp</span>
+            <button class="btn amber" id="ukCheck">Check</button>
+            <button class="btn grey" id="ukNew">New unknown</button>
+          </div>
+          <div class="feedback" id="ukFeedback"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CASES ================= -->
+  <section id="cases" class="panel">
+    <div class="card">
+      <h2>Case Files: read real-world gels</h2>
+      <p class="muted">Each case shows a finished, stained gel. Read the bands against the ladder and the controls, then answer. Click any band for its details. Teaching scenarios; sizes are simplified.</p>
+      <div class="score-board">
+        <div><span id="caseCorrect">0</span>Correct</div>
+        <div><span id="caseAnswered">0</span>Answered</div>
+        <div><span id="caseTotal">0</span>Questions</div>
+      </div>
+      <div class="case-list" id="caseList"></div>
+      <div id="caseArea"></div>
+    </div>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section id="quiz" class="panel">
+    <div class="card">
+      <h2>Knowledge Check</h2>
+      <div class="score-board">
+        <div><span id="qScore">0</span>Score</div>
+        <div><span id="qCurrent">1</span>/ <b id="qTotal" style="font-size:.85rem">0</b></div>
+        <div><span id="qStreak">0</span>Streak</div>
+      </div>
+      <div id="quizArea"></div>
+      <div style="text-align:center;margin-top:.8rem">
+        <button class="btn amber" id="nextBtn" style="display:none">Next →</button>
+        <button class="btn amber" id="restartBtn" style="display:none">Play again</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Interactive analytical gel electrophoresis · Agarose, native PAGE &amp; SDS-PAGE<br>
+    <span class="designer">Designed by Dr. R. Salas-Auvert</span>
+  </footer>
+</div>
+
+<script>
+/* =====================================================================
+   GEL MODEL
+   Within a gel's linear range, relative mobility (Rf) falls linearly with
+   log10(size). Above the range, fragments compress near the well; below it
+   they pile up near the dye front.
+   ===================================================================== */
+const START_Y = 50, RUN_PX = 360, GEL_Y0 = 30, GEL_Y1 = 414, SVG_H = 446, RUN_MM = 70;
+
+const SYSTEMS = {
+  dna:     { name:'Agarose', unit:'bp', ref:5000, Vmin:40, Vmax:200, Vdef:100, Tdef:40, Vhot:140, gels:{'0.7':[800,12000],'1.0':[500,10000],'1.5':[200,3000],'2.0':[50,2000]}, gelLabel:g=>g+'% agarose', stains:['sybr','etbr'] },
+  page:    { name:'Native PAGE', unit:'bp', ref:9000, Vmin:60, Vmax:250, Vdef:150, Tdef:55, Vhot:220, gels:{'5':[80,500],'8':[60,400],'12':[40,200],'20':[6,100]}, gelLabel:g=>g+'% polyacrylamide (TBE)', stains:['sybr','etbr'] },
+  protein: { name:'SDS-PAGE', unit:'kDa', ref:9000, Vmin:60, Vmax:250, Vdef:150, Tdef:55, Vhot:220, gels:{'8':[30,200],'10':[20,150],'12':[12,100],'15':[8,60]}, gelLabel:g=>g+'% resolving gel', stains:['coomassie','silver'] }
+};
+// Approximate co-migration sizes of tracking dyes (bromophenol blue, xylene cyanol)
+const DYES = {
+  dna:  {'0.7':{bpb:500,xc:7000},'1.0':{bpb:300,xc:4000},'1.5':{bpb:150,xc:2000},'2.0':{bpb:80,xc:800}},
+  page: {'5':{bpb:65,xc:260},'8':{bpb:45,xc:160},'12':{bpb:20,xc:70},'20':{bpb:12,xc:45}}
+};
+
+function rf(size, win){
+  const L = Math.log10(size), a = Math.log10(win[0]), b = Math.log10(win[1]);
+  if (L > b) return 0.12 * Math.exp(-(L - b) * 2.5);
+  if (L < a) return 0.92 + 0.10 * (1 - Math.exp(-(a - L) * 2.5));
+  return 0.12 + 0.80 * (b - L) / (b - a);
+}
+function dyeList(mode, gel, win){
+  if (mode === 'protein') return [{rf:1.03, color:'#3b5bdb', name:'Bromophenol blue (dye front)'}];
+  const d = DYES[mode][gel];
+  return [{rf:rf(d.bpb,win), color:'#4f46e5', name:'Bromophenol blue', size:d.bpb},
+          {rf:rf(d.xc,win), color:'#0891b2', name:'Xylene cyanol', size:d.xc}];
+}
+function pseudo(x){ const t = Math.sin(x * 12.9898) * 43758.5453; return t - Math.floor(t); }
+function fmt(s, unit){
+  if (unit === 'kDa') return (s < 20 ? (+s.toFixed(1)) : Math.round(s)) + ' kDa';
+  if (unit === 'kb') return (+s.toFixed(1)) + ' kb';
+  if (unit === 'nt') return Math.round(s).toLocaleString() + ' nt';
+  return Math.round(s).toLocaleString() + ' bp';
+}
+
+/* ===== STAINS ===== */
+const STAINS = {
+  none:      {chamber:'#0b1a2c', gel:'rgba(173,216,230,0.15)', edge:'rgba(173,216,230,0.35)', well:'rgba(5,14,26,0.9)', ink:'#cbd5e1', thr:99, gain:0, glow:false, label:'Unstained'},
+  sybr:      {chamber:'#04080a', gel:'#0a1511', edge:'#1f3a2e', well:'#020604', ink:'#9ca3af', band:'#9dffad', thr:0.06, gain:0.7, glow:true, label:'SYBR Safe · blue-light transilluminator'},
+  etbr:      {chamber:'#07040a', gel:'#160a17', edge:'#3a1d3a', well:'#040108', ink:'#b5aec4', band:'#ffc8a0', thr:0.06, gain:0.7, glow:true, label:'Ethidium bromide · UV transilluminator'},
+  coomassie: {chamber:'#e9eff6', gel:'#d3e1ef', edge:'#9fb6cc', well:'#aec3da', ink:'#1e293b', band:'#1e2a7a', thr:0.22, gain:0.72, glow:false, label:'Coomassie Brilliant Blue'},
+  silver:    {chamber:'#f3ecd9', gel:'#eee0b8', edge:'#c7b78a', well:'#d5c597', ink:'#3f2f1c', band:'#2b1c0e', thr:0.025, gain:1.4, glow:false, label:'Silver stain (high sensitivity)'}
+};
+
+/* ===== SAMPLE LIBRARIES ===== */
+const LYSATE = [[180,.14],[130,.2],[110,.3],[95,.22],[82,.35],[70,.5],[62,.28],[56,.6],[48,.4],[43,.75],[40,.3],[37,.95],[34,.45],[30,.3],[27,.42],[24,.22],[21,.3],[18,.48],[16,.18],[14,.36],[12,.25],[10.5,.2],[88,.08],[66,.1],[52,.09],[29,.07],[19,.08],[11,.06]]
+  .map(([s,a]) => ({s, amt:a}));
+
+const LIB = {
+  dna: [
+    {id:'L1kb', name:'1 kb DNA ladder', c:'#38bdf8', ladder:true, bands:[10000,8000,6000,5000,4000,3000,2000,1500,1000,500].map(s=>({s, amt:s===3000?1.7:1}))},
+    {id:'L100', name:'100 bp DNA ladder', c:'#7dd3fc', ladder:true, bands:[1500,1000,900,800,700,600,500,400,300,200,100].map(s=>({s, amt:s===500?1.7:0.9}))},
+    {id:'lam', name:'λ DNA / HindIII', c:'#a78bfa', bands:[23130,9416,6557,4361,2322,2027,564,125].map(s=>({s, amt:Math.min(1.8, Math.max(0.12, s/6000))}))},
+    {id:'pA', name:'PCR amplicon A · 350 bp', c:'#fbbf24', bands:[{s:350,amt:1.2},{s:45,amt:0.3,label:'Primer-dimer (~45 bp)'}]},
+    {id:'pB', name:'PCR amplicon B · 850 bp', c:'#f59e0b', bands:[{s:850,amt:1.2}]},
+    {id:'pC', name:'PCR amplicon C · 1,650 bp', c:'#d97706', bands:[{s:1650,amt:1.2}]},
+    {id:'dig', name:'Plasmid digest · 4.0 + 2.0 kb', c:'#34d399', bands:[{s:4000,amt:1.3},{s:2000,amt:0.65}]},
+    {id:'unc', name:'Uncut plasmid (5.0 kb)', c:'#2dd4bf', bands:[
+      {s:9000,amt:0.5,label:'Open-circular (nicked) plasmid: runs slower than its true size'},
+      {s:5000,amt:0.25,label:'Linear plasmid: runs at its true size (5.0 kb)'},
+      {s:3200,amt:1.2,label:'Supercoiled plasmid: compact, runs faster than its true size'}]},
+    {id:'gen', name:'Bacterial genomic DNA', c:'#94a3b8', bands:[{s:30000,amt:1.6,label:'High-molecular-weight genomic DNA (>20 kb): stays near the well'}]},
+    {id:'rna', name:'Bacterial total RNA', c:'#f472b6', bands:[{s:2900,amt:1.3,label:'23S rRNA (~2.9 kb)'},{s:1540,amt:0.65,label:'16S rRNA (~1.5 kb)'},{s:110,amt:0.35,label:'5S rRNA + tRNA (~75–120 nt)'}]},
+    {id:'deg', name:'Degraded nucleic acid', c:'#64748b', bands:[], smear:[6000,60]}
+  ],
+  page: [
+    {id:'LLR', name:'Low-range DNA ladder', c:'#38bdf8', ladder:true, bands:[500,400,300,250,200,150,100,75,50,35,25,15].map(s=>({s, amt:s===100?1.6:0.9}))},
+    {id:'p120', name:'Amplicon · 120 bp', c:'#fbbf24', bands:[{s:120,amt:1.2},{s:42,amt:0.3,label:'Primer-dimer (~42 bp)'}]},
+    {id:'p135', name:'Amplicon · 135 bp', c:'#f59e0b', bands:[{s:135,amt:1.2}]},
+    {id:'pmix', name:'Mix · 120 + 135 bp', c:'#fb923c', bands:[{s:120,amt:1},{s:135,amt:1}]},
+    {id:'olig', name:'Oligonucleotide · 25-mer', c:'#a78bfa', bands:[{s:25,amt:1.1,label:'25-mer oligonucleotide (approximate on a native gel)'}]},
+    {id:'srna', name:'Small RNA (~22 nt)', c:'#f472b6', bands:[{s:22,amt:0.9,label:'Small RNA ~22 nt (approximate on a native gel)'}]},
+    {id:'str', name:'STR-like alleles · 162 + 170 bp', c:'#34d399', bands:[{s:162,amt:1},{s:170,amt:1}]},
+    {id:'big', name:'Large fragment · 1,200 bp', c:'#94a3b8', bands:[{s:1200,amt:1.3,label:'1,200 bp: too large for this gel, so it compresses near the well'}]}
+  ],
+  protein: [
+    {id:'PM', name:'Prestained protein marker', c:'#60a5fa', ladder:true, prestained:true, bands:[250,150,100,75,50,37,25,20,15,10].map(s=>({s, amt:1, pc:(s===75||s===25)?'#f472b6':'#60a5fa'}))},
+    {id:'bsa', name:'BSA · 66 kDa', c:'#fbbf24', bands:[{s:66,amt:1.2,label:'Bovine serum albumin (~66 kDa)'}]},
+    {id:'ova', name:'Ovalbumin · 45 kDa', c:'#f59e0b', bands:[{s:45,amt:1.1,label:'Ovalbumin (~45 kDa apparent)'}]},
+    {id:'lys', name:'Lysozyme · 14.3 kDa', c:'#d97706', bands:[{s:14.3,amt:1.0,label:'Hen egg-white lysozyme (14.3 kDa)'}]},
+    {id:'igg', name:'IgG antibody', c:'#f472b6', dynamic:'igg'},
+    {id:'cel', name:'E. coli whole-cell lysate', c:'#34d399', complex:true, bands:LYSATE},
+    {id:'his', name:'Purified His-tag protein · 32 kDa', c:'#2dd4bf', bands:[{s:32,amt:1.3,label:'Purified recombinant protein (~32 kDa)'},{s:64,amt:0.04,label:'Trace contaminant/dimer (~64 kDa): visible only with silver stain'}]}
+  ]
+};
+function findSample(id){ for (const m in LIB){ const s = LIB[m].find(x=>x.id===id); if (s) return s; } return null; }
+
+/* ===== GEL LAYOUT + RENDERER ===== */
+const BAND_REG = {};
+function laneFactor(i, n, smile){ if (!smile || n < 2) return 1; const u = (i - (n-1)/2) / ((n-1)/2); return 1 - 0.08*u*u; }
+
+function computeLayout(cfg){
+  const n = cfg.lanes.length, dir = cfg.orient === 'wrong' ? -1 : 1;
+  return cfg.lanes.map((ln, i) => {
+    if (!ln || ln.empty) return null;
+    const f = laneFactor(i, n, cfg.smile);
+    const bands = (ln.bands || []).map(b => {
+      const d = rf(b.s, cfg.win) * cfg.progress * RUN_PX * dir * f;
+      const lost = dir < 0 ? cfg.progress > 0.02 : d > RUN_PX + 3;
+      return {...b, d, y: START_Y + d, lost};
+    });
+    let smear = null;
+    if (ln.smear && dir > 0){
+      const y0 = START_Y + rf(ln.smear[0], cfg.win) * cfg.progress * RUN_PX * f;
+      const y1 = Math.min(GEL_Y1 - 3, START_Y + rf(ln.smear[1], cfg.win) * cfg.progress * RUN_PX * f);
+      if (y0 < GEL_Y1 - 3) smear = {y0, y1};
+    }
+    return {...ln, f, bands, smear};
+  });
+}
+
+function renderGel(cfg){
+  const n = cfg.lanes.length, W = cfg.width, ml = cfg.marginLeft || 16, mr = 14;
+  const gx0 = ml, gx1 = W - mr, laneW = (gx1 - gx0) / n;
+  const st = STAINS[cfg.stain || 'none'];
+  const uid = cfg.id, reg = []; BAND_REG[uid] = reg;
+  const layout = computeLayout(cfg);
+  const bh0 = cfg.mode === 'dna' ? 5 : 4;
+  let s = `<svg viewBox="0 0 ${W} ${SVG_H}" class="gel-svg" id="${uid}" role="img" aria-label="${cfg.aria || 'Electrophoresis gel'}"><defs>`;
+  for (let k = 1; k <= 8; k++) s += `<filter id="${uid}-f${k}" x="-30%" y="-400%" width="160%" height="900%"><feGaussianBlur stdDeviation="${(k*0.55).toFixed(2)}"/></filter>`;
+  layout.forEach((ln, i) => { if (ln && ln.smear) s += `<linearGradient id="${uid}-sm${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${st.band||'#999'}" stop-opacity=".12"/><stop offset=".55" stop-color="${st.band||'#999'}" stop-opacity=".45"/><stop offset="1" stop-color="${st.band||'#999'}" stop-opacity=".75"/></linearGradient>`; });
+  s += `</defs><rect width="${W}" height="${SVG_H}" rx="14" fill="${st.chamber}"/>`;
+  s += `<rect x="${gx0}" y="${GEL_Y0}" width="${gx1-gx0}" height="${GEL_Y1-GEL_Y0}" rx="6" fill="${st.gel}" stroke="${st.edge}"/>`;
+
+  // electrodes
+  if (cfg.electrodes){
+    const conn = !!cfg.orientSet;
+    const topIsCathode = cfg.orient !== 'wrong';
+    const bar = (y, cathode) => {
+      if (!conn) return `<rect x="${gx0}" y="${y}" width="${gx1-gx0}" height="8" rx="4" fill="none" stroke="#475569" stroke-dasharray="5 4"/>`;
+      return `<rect x="${gx0}" y="${y}" width="${gx1-gx0}" height="8" rx="4" fill="${cathode?'#0b0f17':'#dc2626'}" stroke="${cathode?'#94a3b8':'#fca5a5'}"/>
+        <circle cx="${gx0-16}" cy="${y+4}" r="9" fill="${cathode?'#0b0f17':'#dc2626'}" stroke="${cathode?'#94a3b8':'#fca5a5'}"/>
+        <text x="${gx0-16}" y="${y+8.5}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${cathode?'−':'+'}</text>`;
+    };
+    s += bar(10, topIsCathode) + bar(GEL_Y1 + 12, !topIsCathode);
+  }
+  // ruler
+  if (cfg.ruler){
+    const pxcm = RUN_PX / 7;
+    for (let c = 0; c <= 7; c++){
+      const y = START_Y + c * pxcm;
+      s += `<line x1="${gx0-7}" x2="${gx0-1}" y1="${y}" y2="${y}" stroke="${st.ink}" opacity=".7"/>`;
+      if (c > 0) s += `<text x="${gx0-9}" y="${y+3.5}" text-anchor="end" font-size="9.5" fill="${st.ink}" opacity=".8">${c}</text>`;
+      if (c < 7) s += `<line x1="${gx0-4}" x2="${gx0-1}" y1="${y+pxcm/2}" y2="${y+pxcm/2}" stroke="${st.ink}" opacity=".45"/>`;
+    }
+    s += `<text x="${gx0-9}" y="${START_Y+3}" text-anchor="end" font-size="8.5" fill="${st.ink}" opacity=".8">cm</text>`;
+  }
+  // wells + lane numbers
+  for (let i = 0; i < n; i++){
+    const x = gx0 + i*laneW + laneW*0.16, w = laneW*0.68;
+    const ln = cfg.lanes[i];
+    const loaded = ln && !ln.empty;
+    const fill = (cfg.stain === 'none' || !cfg.stain) && loaded && cfg.progress < 0.02 ? '#5b5bd6' : st.well;
+    s += `<rect class="${cfg.wellsClickable?'well':''}" data-lane="${i}" x="${x}" y="38" width="${w}" height="8" rx="1.5" fill="${fill}" stroke="${st.edge}"/>`;
+    if (!cfg.noNumbers) s += `<text x="${gx0+(i+0.5)*laneW}" y="${cfg.electrodes?GEL_Y0+6:24}" text-anchor="middle" font-size="9" fill="${st.ink}" opacity="${cfg.electrodes?0.55:0.85}">${i+1}</text>`;
+  }
+  // dyes (unstained view)
+  if (cfg.dyes){
+    const dir = cfg.orient === 'wrong' ? -1 : 1;
+    layout.forEach((ln, i) => {
+      if (!ln || cfg.progress < 0.02) return;
+      cfg.dyes.forEach(d => {
+        const y = START_Y + d.rf * cfg.progress * RUN_PX * dir * ln.f;
+        if (y < GEL_Y0 + 2 || y > GEL_Y1 - 3) return;
+        const x = gx0 + i*laneW + laneW*0.16;
+        s += `<rect x="${x}" y="${y-2.5}" width="${laneW*0.68}" height="5" rx="2" fill="${d.color}" opacity=".8" filter="url(#${uid}-f3)"/>`;
+      });
+    });
+  }
+  // bands
+  const stained = cfg.stain && cfg.stain !== 'none';
+  layout.forEach((ln, i) => {
+    if (!ln) return;
+    const cx = gx0 + (i+0.5)*laneW, bw = laneW*0.68, x = cx - bw/2;
+    const blur = Math.min(8, Math.max(1, Math.round((cfg.blur || 1.2) + (ln.blurExtra || 0))));
+    if (ln.smear && stained){
+      s += `<rect x="${x}" y="${ln.smear.y0}" width="${bw}" height="${ln.smear.y1-ln.smear.y0}" rx="3" fill="url(#${uid}-sm${i})" filter="url(#${uid}-f3)"/>`;
+      reg.push({lane:i, name:ln.name, label:'Smear: randomly fragmented (degraded) nucleic acid of all sizes'});
+      s += `<rect class="band-hit" data-uid="${uid}" data-k="${reg.length-1}" x="${x}" y="${ln.smear.y0}" width="${bw}" height="${ln.smear.y1-ln.smear.y0}" fill="transparent"/>`;
+    }
+    ln.bands.forEach(b => {
+      if (b.lost) return;
+      const showPre = cfg.showPrestained && ln.prestained;
+      if (!stained && !showPre) return;
+      if (stained && b.amt < st.thr) return;
+      const color = stained ? st.band : (b.pc || '#60a5fa');
+      const o = stained ? Math.min(1, Math.max(0.25, b.amt * st.gain)) : 0.85;
+      const h = bh0 + Math.min(4, b.amt * 1.3);
+      const y = b.y - h/2;
+      if (y > GEL_Y1 - 2) return;
+      if (stained && st.glow) s += `<rect x="${x-1}" y="${y-1.5}" width="${bw+2}" height="${h+3}" rx="3" fill="${color}" opacity="${(o*0.45).toFixed(2)}" filter="url(#${uid}-f${Math.min(8,blur+3)})"/>`;
+      s += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${color}" opacity="${o.toFixed(2)}" filter="url(#${uid}-f${blur})"/>`;
+      reg.push({lane:i, name:ln.name, s:b.s, label:b.label, d:b.d, unit:cfg.unit, inRange: b.s >= cfg.win[0] && b.s <= cfg.win[1], apparent: ln.apparent});
+      s += `<rect class="band-hit" data-uid="${uid}" data-k="${reg.length-1}" x="${x}" y="${b.y-6}" width="${bw}" height="12" fill="transparent"/>`;
+    });
+  });
+  // ladder labels
+  if (cfg.labelLane != null && stained){
+    const ln = layout[cfg.labelLane];
+    if (ln){
+      let lastY = -99;
+      ln.bands.filter(b=>!b.lost && b.amt >= st.thr).sort((a,b)=>a.y-b.y).forEach(b => {
+        if (b.y - lastY < 9) return; lastY = b.y;
+        const t = cfg.unit === 'kDa' ? b.s : (cfg.unit === 'kb' ? b.s : (b.s >= 1000 ? (b.s/1000)+' k' : b.s));
+        s += `<text x="${gx0-5}" y="${b.y+3.2}" text-anchor="end" font-size="9.5" fill="${st.ink}">${t}</text>`;
+      });
+      s += `<text x="${gx0-5}" y="${24}" text-anchor="end" font-size="9" fill="${st.ink}" opacity=".8">${cfg.unit}</text>`;
+    }
+  }
+  return s + '</svg>';
+}
+
+function bandInfoHTML(r){
+  if (!r) return '';
+  let h = `<b>Lane ${r.lane+1}</b> · ${r.name}<br>`;
+  if (r.s == null) return h + r.label;
+  h += r.label ? `${r.label}<br>` : `Band size: <b>${fmt(r.s, r.unit)}</b><br>`;
+  h += `Migration: <b>${(r.d * RUN_MM / RUN_PX).toFixed(1)} mm</b> from the well`;
+  if (!r.inRange) h += ` · <span style="color:#fbbf24">outside the linear range of this gel, so size estimates are unreliable</span>`;
+  return h;
+}
+function bindBandClicks(host, out){
+  host.addEventListener('click', e => {
+    const t = e.target.closest('.band-hit'); if (!t) return;
+    const r = BAND_REG[t.dataset.uid] && BAND_REG[t.dataset.uid][+t.dataset.k];
+    if (r) out(r);
+  });
+}
+
+/* ===== TABS ===== */
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(btn.dataset.tab).classList.add('active');
+  if (btn.dataset.tab === 'quiz' && !quizStarted) startQuiz();
+  if (btn.dataset.tab === 'unknown' && !uk.cur) newUnknown();
+}));
+
+/* =====================================================================
+   GEL BENCH
+   ===================================================================== */
+const N_LANES = 8;
+const lab = {mode:'dna', gel:null, V:100, t:40, orient:null, lanes:Array(N_LANES).fill(null), pick:null,
+             denature:false, reduce:false, stain:'sybr', phase:'setup', prog:0};
+const $ = id => document.getElementById(id);
+
+function sys(){ return SYSTEMS[lab.mode]; }
+function win(){ return lab.gel ? sys().gels[lab.gel] : Object.values(sys().gels)[1]; }
+function progressTarget(){ return lab.V * lab.t / sys().ref; }
+function isHot(){ return lab.V > sys().Vhot; }
+
+function laneData(id){
+  const smp = findSample(id); if (!smp) return {empty:true};
+  let bands = smp.bands ? smp.bands.map(b=>({...b})) : [];
+  let blurExtra = 0;
+  if (smp.dynamic === 'igg'){
+    bands = lab.reduce
+      ? [{s:50,amt:1.3,label:'IgG heavy chain (~50 kDa), after disulfide reduction'},{s:25,amt:0.65,label:'IgG light chain (~25 kDa), after disulfide reduction'}]
+      : [{s:150,amt:1.9,label:'Intact IgG, H₂L₂ (~150 kDa): disulfide bonds intact'}];
+  }
+  if (lab.mode === 'protein' && !lab.denature && !smp.ladder){
+    bands = bands.map((b,j) => ({...b, s: b.s * (0.6 + 0.8*pseudo(b.s + j*7)), label:(b.label||fmt(b.s,'kDa')) + ' (not denatured: aberrant migration, unreliable size)'}));
+    blurExtra = 2.5;
+  }
+  return {name:smp.name, complex:!!smp.complex, ladder:!!smp.ladder, prestained:!!smp.prestained, bands, smear:smp.smear, blurExtra};
+}
+
+function labCfg(){
+  const stained = lab.phase === 'stained';
+  return {
+    id:'labSvg', width:534, marginLeft:40, mode:lab.mode, unit:sys().unit, win:win(), progress:lab.prog,
+    lanes: lab.lanes.map(id => id ? laneData(id) : {empty:true}),
+    stain: stained ? lab.stain : 'none',
+    dyes: stained ? null : dyeList(lab.mode, lab.gel || Object.keys(sys().gels)[1], win()),
+    showPrestained: lab.phase !== 'setup' || lab.prog > 0,
+    electrodes:true, orient:lab.orient || 'correct', orientSet: !!lab.orient,
+    ruler:true, wellsClickable:true, smile: isHot(), blur: isHot() ? 2.6 : 1.2,
+    aria:'Virtual gel'
+  };
+}
+
+function drawLab(){
+  $('labGel').innerHTML = renderGel(labCfg());
+  const stained = lab.phase === 'stained';
+  $('labLegend').innerHTML = stained ? `<span>${STAINS[lab.stain].label}</span>` :
+    (lab.mode === 'protein' ? '<span><i style="background:#3b5bdb"></i>Bromophenol blue dye front</span><span><i style="background:#60a5fa"></i>Prestained marker (visible while running)</span>'
+                            : '<span><i style="background:#4f46e5"></i>Bromophenol blue</span><span><i style="background:#0891b2"></i>Xylene cyanol</span><span>Bands stay invisible until stained</span>');
+  // lane key
+  $('labKey').innerHTML = lab.lanes.map((id,i) => `<span>${i+1}: <b>${id ? findSample(id).name : '(empty)'}</b></span>`).join('');
+  updateSteps();
+  updateButtons();
+}
+
+function setCaption(msg, cls=''){ const c = $('labCaption'); c.textContent = msg; c.className = 'caption ' + cls; }
+
+function buildModeUI(){
+  document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('active', b.dataset.mode === lab.mode));
+  const S = sys();
+  $('gelChips').innerHTML = Object.keys(S.gels).map(g => `<button class="chip ${lab.gel===g?'active':''}" data-gel="${g}">${S.gelLabel(g)}</button>`).join('');
+  $('gelInfo').innerHTML = lab.gel ? `Linear (resolving) range ≈ <b style="color:#fbbf24">${fmt(S.gels[lab.gel][0],S.unit)} – ${fmt(S.gels[lab.gel][1],S.unit)}</b>` : 'Choose a gel percentage to cast the gel.';
+  // prep
+  if (lab.mode === 'protein'){
+    $('prepBlock').innerHTML = `<h4>2 · Sample preparation</h4>
+      <label class="check"><input type="checkbox" id="denChk" ${lab.denature?'checked':''}> <span>Mix with SDS sample buffer and heat at 95 °C for 5 min (denature)</span></label>
+      <label class="check"><input type="checkbox" id="redChk" ${lab.reduce?'checked':''}> <span>Add reducing agent (β-mercaptoethanol / DTT) to break disulfide bonds</span></label>
+      <p class="tiny">Tip: compare the IgG sample with and without the reducing agent.</p>`;
+    $('denChk').onchange = e => { lab.denature = e.target.checked; invalidateRun('Sample prep changed.'); };
+    $('redChk').onchange = e => { lab.reduce = e.target.checked; invalidateRun('Sample prep changed.'); };
+  } else {
+    $('prepBlock').innerHTML = `<h4>2 · Sample preparation</h4><p class="tiny">Every tube is premixed with 6× loading dye: glycerol makes the sample sink into the well, and the tracking dyes (bromophenol blue, xylene cyanol) let you follow the run.${lab.mode==='page'?' This is a <b>native</b> gel: RNA and single-stranded oligos give only approximate sizes.':''}</p>`;
+  }
+  // rack
+  $('rack').innerHTML = LIB[lab.mode].map(smp => `<button class="tube ${lab.pick===smp.id?'active':''}" data-id="${smp.id}" style="--c:${smp.c}"><span class="cap"></span>${smp.name}</button>`).join('');
+  // stain select
+  $('stainSel').innerHTML = S.stains.map(k => `<option value="${k}" ${lab.stain===k?'selected':''}>${STAINS[k].label.split(' · ')[0]}</option>`).join('');
+  // sliders
+  const v = $('vSlider'), t = $('tSlider');
+  v.min = S.Vmin; v.max = S.Vmax; v.step = 5; v.value = lab.V;
+  t.min = 5; t.max = 120; t.step = 5; t.value = lab.t;
+  document.querySelectorAll('#orientSeg button').forEach(b => b.classList.toggle('active', b.dataset.o === lab.orient));
+  updateReadout();
+}
+function updateReadout(){
+  $('vVal').textContent = lab.V + ' V'; $('tVal').textContent = lab.t + ' min';
+  const p = progressTarget();
+  const dyes = dyeList(lab.mode, lab.gel || Object.keys(sys().gels)[1], win());
+  const front = Math.min(dyes[0].rf * p, 1.5);
+  $('runReadout').innerHTML = `${lab.V * lab.t} V·min → predicted dye front at <b style="color:${front>1?'#f87171':front<0.45?'#fbbf24':'#86efac'}">${Math.round(front*100)}%</b> of gel length${isHot()?' · <span style="color:#f87171">⚠ overheating risk</span>':''}`;
+}
+
+function invalidateRun(why){
+  if (lab.phase !== 'setup' || lab.prog > 0){
+    lab.phase = 'setup'; lab.prog = 0;
+    $('labReport').innerHTML = '';
+    $('bandInfo').innerHTML = '<span class="muted">Band details appear here after staining. Click a band.</span>';
+    setCaption(why + ' A fresh gel was poured; your samples were reloaded.', '');
+  }
+  drawLab();
+}
+
+function updateSteps(){
+  const loaded = lab.lanes.some(Boolean);
+  const done = [
+    !!lab.gel,
+    lab.mode === 'protein' ? lab.denature : !!lab.gel,
+    loaded,
+    !!lab.orient,
+    lab.phase === 'ran' || lab.phase === 'stained',
+    lab.phase === 'stained'
+  ];
+  const names = ['Cast gel','Prep samples','Load wells','Connect power','Run','Stain & read'];
+  const cur = done.indexOf(false);
+  $('labSteps').innerHTML = names.map((n,i) => `<div class="step ${done[i]?'done':''} ${i===cur?'current':''}"><span class="n">${done[i]?'✓':i+1}</span>${n}</div>`).join('');
+}
+function updateButtons(){
+  const running = lab.phase === 'running';
+  $('runBtn').disabled = running || lab.phase === 'ran' || lab.phase === 'stained';
+  $('stainBtn').disabled = lab.phase !== 'ran';
+  ['demoLoad','clearWells','newGelBtn'].forEach(id => $(id).disabled = running);
+}
+
+// --- events
+$('modeSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || lab.phase === 'running') return;
+  lab.mode = b.dataset.mode; lab.gel = null; lab.lanes = Array(N_LANES).fill(null); lab.pick = null;
+  lab.V = sys().Vdef; lab.t = sys().Tdef; lab.stain = sys().stains[0]; lab.denature = false; lab.reduce = false;
+  lab.phase = 'setup'; lab.prog = 0; $('labReport').innerHTML = '';
+  setCaption(`${sys().name} selected. Now cast the gel by choosing a percentage.`);
+  buildModeUI(); drawLab();
+});
+$('gelChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b || lab.phase === 'running') return;
+  lab.gel = b.dataset.gel; buildModeUI();
+  invalidateRun('Gel percentage changed.');
+  if (lab.phase === 'setup' && lab.prog === 0) setCaption(`Cast a ${sys().gelLabel(lab.gel)}. Next: prepare and load your samples.`);
+});
+$('rack').addEventListener('click', e => {
+  const b = e.target.closest('.tube'); if (!b) return;
+  lab.pick = lab.pick === b.dataset.id ? null : b.dataset.id;
+  buildModeUI();
+  setCaption(lab.pick ? `Pipette loaded with "${findSample(lab.pick).name}". Click a well.` : 'Pipette emptied.');
+});
+$('labGel').addEventListener('click', e => {
+  const w = e.target.closest('.well'); if (!w) return;
+  if (lab.phase === 'running') return;
+  if (lab.phase !== 'setup' || lab.prog > 0){ setCaption('This gel has already been run. Press "Pour a new gel" to load again.', 'bad'); return; }
+  if (!lab.gel){ setCaption('Cast a gel first (step 1).', 'bad'); return; }
+  const i = +w.dataset.lane;
+  if (lab.pick){ lab.lanes[i] = lab.pick; setCaption(`Lane ${i+1}: loaded ${findSample(lab.pick).name}.`); }
+  else if (lab.lanes[i]){ setCaption(`Lane ${i+1} emptied.`); lab.lanes[i] = null; }
+  else setCaption('Pick a tube from the rack first.', 'bad');
+  drawLab();
+});
+bindBandClicks($('labGel'), r => $('bandInfo').innerHTML = bandInfoHTML(r));
+$('demoLoad').onclick = () => {
+  const demo = {dna:{gel:'1.0', lanes:['L1kb','pA','pB','pC','dig','unc','rna','L100']},
+                page:{gel:'8', lanes:['LLR','p120','p135','pmix','str','olig','big','LLR']},
+                protein:{gel:'12', lanes:['PM','bsa','ova','lys','igg','cel','his','PM']}}[lab.mode];
+  lab.gel = demo.gel; lab.lanes = [...demo.lanes];
+  if (lab.mode === 'protein'){ lab.denature = true; lab.reduce = true; }
+  lab.phase = 'setup'; lab.prog = 0; $('labReport').innerHTML = '';
+  buildModeUI(); drawLab();
+  setCaption('Demo samples loaded. Next: connect the power supply. Which electrode should sit next to the wells?');
+};
+$('clearWells').onclick = () => { lab.lanes = Array(N_LANES).fill(null); invalidateRun('Wells cleared.'); setCaption('All wells emptied.'); };
+$('newGelBtn').onclick = () => { lab.phase = 'setup'; lab.prog = 0; $('labReport').innerHTML=''; $('bandInfo').innerHTML = '<span class="muted">Band details appear here after staining. Click a band.</span>'; drawLab(); setCaption('Fresh gel poured, samples reloaded. Adjust the settings and run again.'); };
+$('orientSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || lab.phase === 'running') return;
+  lab.orient = b.dataset.o; buildModeUI(); invalidateRun('Leads reconnected.');
+  setCaption(lab.orient === 'correct' ? 'Leads connected: black (−) at the wells, red (+) at the far end.' : 'Leads connected: red (+) next to the wells…', '');
+});
+$('vSlider').oninput = e => { lab.V = +e.target.value; updateReadout(); };
+$('tSlider').oninput = e => { lab.t = +e.target.value; updateReadout(); };
+$('vSlider').onchange = $('tSlider').onchange = () => { if (lab.phase !== 'setup' || lab.prog > 0) invalidateRun('Run conditions changed.'); };
+$('stainSel').onchange = e => { lab.stain = e.target.value; if (lab.phase === 'stained') { drawLab(); buildReport(); } };
+
+$('runBtn').onclick = () => {
+  if (!lab.gel) return setCaption('Cast a gel first (step 1).', 'bad');
+  if (!lab.lanes.some(Boolean)) return setCaption('Load at least one well (step 3).', 'bad');
+  if (!lab.orient) return setCaption('Connect the power supply first (step 4).', 'bad');
+  lab.phase = 'running'; updateButtons();
+  const target = progressTarget(), t0 = performance.now(), dur = 2200 + 1500 * Math.min(1.4, target);
+  setCaption(lab.orient === 'wrong' ? 'Running… the dye is moving toward the top of the gel?!' : 'Running… watch the tracking dyes migrate.');
+  const ease = k => k < .5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2;
+  (function frame(now){
+    const k = Math.min(1, (now - t0) / dur);
+    lab.prog = target * ease(k); drawLab();
+    if (k < 1) requestAnimationFrame(frame);
+    else { lab.phase = 'ran'; drawLab(); buildReport(); setCaption('Run complete. Now stain and image the gel.', 'good'); }
+  })(t0);
+};
+$('stainBtn').onclick = () => {
+  lab.stain = $('stainSel').value; lab.phase = 'stained'; drawLab(); buildReport();
+  setCaption(lab.orient === 'wrong' ? 'Stained… but the lanes are empty.' : `Imaged with ${STAINS[lab.stain].label}. Click bands to identify them.`, lab.orient === 'wrong' ? 'bad' : 'good');
+};
+
+function buildReport(){
+  const cfg = labCfg(), L = computeLayout(cfg), S = sys(), items = [];
+  const add = (st, txt) => items.push({st, txt});
+  const loaded = lab.lanes.map((id,i)=>id?{id,i}:null).filter(Boolean);
+  // ladder
+  if (loaded.some(x => findSample(x.id).ladder)) add('ok','A size ladder was loaded, so band sizes can be estimated.');
+  else add('warn','No ladder or marker was loaded. Without one you cannot estimate sizes. Always run a ladder.');
+  // orientation
+  if (lab.orient === 'wrong'){ add('bad','Leads reversed: the wells sat at the anode (+). The negatively charged samples migrated backward out of the wells into the buffer and were lost. Remember "Run to Red": the wells go at the black (−) electrode.'); }
+  else add('ok','Correct polarity: wells at the cathode (−), samples migrated toward the anode (+).');
+  // voltage
+  if (isHot()) add('warn',`${lab.V} V is too high for this system. Joule heating causes "smiling" (curved) lanes and fuzzy bands${lab.mode==='dna'?', and the agarose can even melt':''}.`);
+  else add('ok', `Voltage ${lab.V} V is in a safe range. Bands stay sharp.`);
+  if (lab.orient !== 'wrong'){
+    const dye = dyeList(lab.mode, lab.gel, win())[0];
+    const front = dye.rf * lab.prog;
+    const lost = []; let lostCount = 0;
+    L.forEach((ln,i) => { if (!ln) return; ln.bands.forEach(b => { if (b.lost){ lostCount++; if (lost.length < 4) lost.push(`lane ${i+1} (${fmt(b.s,S.unit)})`); } }); });
+    if (front < 0.4) add('warn',`Under-run: the dye front travelled only ${Math.round(front*100)}% of the gel, so bands are crowded near the wells. Increase the time or voltage.`);
+    else if (front > 1.0 || lostCount) add('bad',`Over-run: the dye front ran off the gel and ${lostCount} band(s) were lost (${lost.join(', ')}${lostCount>lost.length?', …':''}). Shorten the run.`);
+    else add('ok',`Good run length: the dye front reached ${Math.round(front*100)}% of the gel.`);
+    // resolution / range
+    const w = win(), above = new Set(), below = new Set(), unresolved = [];
+    L.forEach((ln,i) => {
+      if (!ln) return;
+      if (ln.ladder || ln.complex) return;
+      const vis = ln.bands.filter(b => !b.lost && b.amt >= 0.5).sort((a,b)=>a.d-b.d);
+      vis.forEach(b => { { if (b.s > w[1]*1.05) above.add(ln.name); if (b.s < w[0]/1.05) below.add(ln.name); } });
+      for (let k = 1; k < vis.length; k++) if (vis[k].d - vis[k-1].d < 4.5) unresolved.push(`lane ${i+1}: ${fmt(vis[k-1].s,S.unit)} / ${fmt(vis[k].s,S.unit)}`);
+    });
+    if (unresolved.length) add('warn',`Unresolved bands: ${unresolved.slice(0,3).join('; ')}. Try a gel % matched to these sizes${lab.mode==='dna'?' (or switch to polyacrylamide for small, closely spaced fragments)':''}, or run longer.`);
+    if (above.size) add('warn',`Samples above the linear range (${[...above].slice(0,3).join(', ')}) are compressed near the wells. A lower % gel would resolve them.`);
+    if (below.size) add('warn',`Samples below the linear range (${[...below].slice(0,3).join(', ')}) bunch up near the dye front. A higher % gel would resolve them.`);
+    if (!unresolved.length && !above.size && !below.size && loaded.length) add('ok','Gel percentage suits the sample sizes. All bands sit in the linear range and are resolved.');
+  }
+  if (lab.mode === 'protein'){
+    if (lab.denature) add('ok','Samples were denatured with SDS and heat, so migration reflects molecular mass.');
+    else add('bad','Samples were not heat-denatured with SDS. Proteins kept part of their folded shape, so migration is aberrant and smeared and sizes are unreliable.');
+    add('info', lab.reduce ? 'Reducing agent was added: disulfide-linked subunits (for example IgG heavy and light chains) run separately.' : 'No reducing agent: disulfide-linked complexes (for example intact IgG at ~150 kDa) stay together.');
+    if (lab.phase === 'stained' && lab.stain === 'coomassie' && lab.lanes.includes('his')) add('info','Try silver stain: it reveals faint contaminant bands that Coomassie cannot detect.');
+  }
+  const graded = items.filter(x => x.st !== 'info'), good = graded.filter(x => x.st === 'ok').length;
+  const ic = {ok:'✅', warn:'⚠️', bad:'❌', info:'ℹ️'};
+  $('labReport').innerHTML = `<h4>Run report</h4><ul>${items.map(x=>`<li><span class="ic">${ic[x.st]}</span><span>${x.txt}</span></li>`).join('')}</ul>
+    <div class="score-line" style="color:${good===graded.length?'#86efac':good>=graded.length-1?'#fcd34d':'#fca5a5'}">Run quality: ${good} / ${graded.length}${good===graded.length?': publication-quality gel! 🏆':''}</div>`;
+}
+
+/* =====================================================================
+   SIZE THE UNKNOWN
+   ===================================================================== */
+const uk = {mode:'dna', cur:null, measured:null, correct:0, attempts:0, streak:0, curve:false, done:false};
+function ladderFor(mode, g){
+  if (mode === 'protein') return findSample('PM');
+  if (mode === 'page') return findSample('LLR');
+  return parseFloat(g) >= 1.5 ? findSample('L100') : findSample('L1kb');
+}
+function newUnknown(){
+  const S = SYSTEMS[uk.mode], gels = Object.keys(S.gels);
+  const g = gels[Math.floor(Math.random()*gels.length)], w = S.gels[g];
+  const ladder = ladderFor(uk.mode, g);
+  const inR = ladder.bands.map(b=>b.s).filter(s => s >= w[0] && s <= w[1]);
+  const lo = Math.max(w[0], Math.min(...inR)) * 1.1, hi = Math.min(w[1], Math.max(...inR)) / 1.1;
+  let s = Math.pow(10, Math.log10(lo) + Math.random()*(Math.log10(hi)-Math.log10(lo)));
+  if (S.unit === 'kDa') s = s < 20 ? Math.round(s*2)/2 : Math.round(s);
+  else s = s < 100 ? Math.round(s) : s < 1000 ? Math.round(s/10)*10 : Math.round(s/50)*50;
+  uk.cur = {g, w, ladder, size:s, prog: uk.mode === 'dna' ? 0.85 : 0.95};
+  uk.measured = null; uk.done = false;
+  $('ukInput').value = ''; $('ukFeedback').className = 'feedback';
+  $('ukUnit').textContent = S.unit;
+  drawUnknown();
+}
+function ukDist(size){ return rf(size, uk.cur.w) * uk.cur.prog * RUN_MM; }
+function ukFit(){
+  const pts = uk.cur.ladder.bands.map(b=>b.s).filter(s => s >= uk.cur.w[0] && s <= uk.cur.w[1]).map(s => ({x:+ukDist(s).toFixed(1), y:Math.log10(s)}));
+  const n = pts.length, mx = pts.reduce((a,p)=>a+p.x,0)/n, my = pts.reduce((a,p)=>a+p.y,0)/n;
+  const b = pts.reduce((a,p)=>a+(p.x-mx)*(p.y-my),0) / pts.reduce((a,p)=>a+(p.x-mx)**2,0);
+  return {pts, a: my - b*mx, b};
+}
+function drawUnknown(){
+  const S = SYSTEMS[uk.mode], c = uk.cur;
+  const stain = uk.mode === 'protein' ? 'coomassie' : 'sybr';
+  const lad = {name:c.ladder.name, ladder:true, bands:c.ladder.bands};
+  const cfg = {id:'ukSvg', width:330, marginLeft:66, mode:uk.mode, unit:S.unit, win:c.w, progress:c.prog, stain,
+    lanes:[lad, {name:'Unknown sample', bands:[{s:c.size, amt:1.1, label:'Unknown band'}]}, lad], labelLane:0, aria:'Unknown sizing gel'};
+  $('ukGel').innerHTML = renderGel(cfg);
+  $('ukCaption').textContent = `${S.gelLabel(c.g)} · ${STAINS[stain].label.split(' · ')[0]}`;
+  $('ukMeta').innerHTML = `<b>Gel:</b> ${S.name}, ${S.gelLabel(c.g)}<br><b>Linear range:</b> ${fmt(c.w[0],S.unit)} – ${fmt(c.w[1],S.unit)}<br><b>Ladder:</b> ${c.ladder.name}`;
+  $('ukTable').innerHTML = `<tr><th>Ladder band</th><th>Distance (mm)</th><th>log₁₀(size)</th></tr>` +
+    c.ladder.bands.map(b => { const d = ukDist(b.s), out = b.s < c.w[0] || b.s > c.w[1]; return `<tr class="${out?'out':''}"><td>${fmt(b.s,S.unit)}</td><td>${d.toFixed(1)}</td><td>${Math.log10(b.s).toFixed(3)}</td></tr>`; }).join('');
+  $('ukMeasure').innerHTML = uk.measured == null ? '<span class="muted">Unknown band distance: not measured yet. Click the band in lane 2.</span>' : `Unknown band migrated <b>${uk.measured.toFixed(1)} mm</b> from the well.`;
+  drawCurve();
+}
+function drawCurve(){
+  const box = $('ukCurve'); box.style.display = uk.curve ? 'block' : 'none';
+  if (!uk.curve) return;
+  const S = SYSTEMS[uk.mode], f = ukFit(), W = 420, H = 260, m = {l:52, r:14, t:14, b:38};
+  const xs = f.pts.map(p=>p.x), ys = f.pts.map(p=>p.y);
+  const x0 = 0, x1 = Math.ceil((Math.max(...xs)+4)/10)*10, y0 = Math.floor(Math.min(...ys)*10)/10 - 0.05, y1 = Math.ceil(Math.max(...ys)*10)/10 + 0.05;
+  const X = x => m.l + (x-x0)/(x1-x0)*(W-m.l-m.r), Y = y => H-m.b - (y-y0)/(y1-y0)*(H-m.t-m.b);
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:440px;background:#0b1220;border:1px solid #2a3650;border-radius:10px">`;
+  for (let x = x0; x <= x1; x += 10){ s += `<line x1="${X(x)}" x2="${X(x)}" y1="${m.t}" y2="${H-m.b}" stroke="#1e293b"/><text x="${X(x)}" y="${H-m.b+14}" font-size="10" fill="#93a2bb" text-anchor="middle">${x}</text>`; }
+  // log gridlines at 1,2,5 ×10^k
+  for (let k = Math.floor(y0); k <= Math.ceil(y1); k++) [1,2,5].forEach(mul => { const v = Math.log10(mul) + k; if (v < y0 || v > y1) return;
+    s += `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#1e293b"/><text x="${m.l-5}" y="${Y(v)+3}" font-size="10" fill="#93a2bb" text-anchor="end">${(mul*Math.pow(10,k)).toLocaleString()}</text>`; });
+  s += `<text x="${(W+m.l)/2}" y="${H-6}" font-size="11" fill="#cbd5e1" text-anchor="middle">Distance migrated (mm)</text>`;
+  s += `<text x="12" y="${(H-m.b+m.t)/2}" font-size="11" fill="#cbd5e1" text-anchor="middle" transform="rotate(-90 12 ${(H-m.b+m.t)/2})">Size (${S.unit}, log scale)</text>`;
+  const lx0 = Math.min(...xs) - 3, lx1 = Math.max(...xs) + 3;
+  s += `<line x1="${X(lx0)}" y1="${Y(f.a+f.b*lx0)}" x2="${X(lx1)}" y2="${Y(f.a+f.b*lx1)}" stroke="#fbbf24" stroke-width="2"/>`;
+  f.pts.forEach(p => s += `<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4" fill="#2dd4bf"/>`);
+  if (uk.measured != null){
+    const yv = f.a + f.b*uk.measured;
+    s += `<line x1="${X(uk.measured)}" x2="${X(uk.measured)}" y1="${H-m.b}" y2="${Y(yv)}" stroke="#f472b6" stroke-dasharray="4 3"/>`;
+    s += `<line x1="${m.l}" x2="${X(uk.measured)}" y1="${Y(yv)}" y2="${Y(yv)}" stroke="#f472b6" stroke-dasharray="4 3"/>`;
+    s += `<circle cx="${X(uk.measured)}" cy="${Y(yv)}" r="5" fill="none" stroke="#f472b6" stroke-width="2"/>`;
+  }
+  s += `<text x="${W-m.r-4}" y="${m.t+12}" font-size="10.5" fill="#fde68a" text-anchor="end">log₁₀(size) = ${f.a.toFixed(3)} ${f.b<0?'−':'+'} ${Math.abs(f.b).toFixed(4)}·d</text></svg>`;
+  box.innerHTML = s;
+}
+bindBandClicks($('ukGel'), r => {
+  if (r.lane === 1){ uk.measured = +(r.d * RUN_MM / RUN_PX).toFixed(1); drawUnknown(); }
+  else $('ukMeasure').innerHTML = `Ladder band <b>${fmt(r.s, r.unit)}</b>: ${(r.d*RUN_MM/RUN_PX).toFixed(1)} mm. ${uk.measured!=null?`Unknown: <b>${uk.measured.toFixed(1)} mm</b>.`:'Now click the unknown band in lane 2.'}`;
+});
+$('ukSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#ukSeg button').forEach(x => x.classList.toggle('active', x === b)); uk.mode = b.dataset.mode; newUnknown(); });
+$('ukCurveBtn').onclick = () => { uk.curve = !uk.curve; drawCurve(); };
+$('ukNew').onclick = newUnknown;
+$('ukCheck').onclick = () => {
+  const v = parseFloat($('ukInput').value), fb = $('ukFeedback'), S = SYSTEMS[uk.mode];
+  if (!(v > 0)){ fb.className = 'feedback show info'; fb.textContent = 'Enter a positive number first.'; return; }
+  if (uk.measured == null){ fb.className = 'feedback show info'; fb.textContent = 'Measure the unknown band first: click it in lane 2.'; return; }
+  const f = ukFit(), est = Math.pow(10, f.a + f.b*uk.measured), err = Math.abs(v - uk.cur.size) / uk.cur.size;
+  const work = `Standard curve: log₁₀(size) = ${f.a.toFixed(3)} ${f.b<0?'−':'+'} ${Math.abs(f.b).toFixed(4)} × ${uk.measured.toFixed(1)} mm = ${(f.a+f.b*uk.measured).toFixed(3)} → 10^${(f.a+f.b*uk.measured).toFixed(3)} ≈ ${fmt(est,S.unit)}. True size: ${fmt(uk.cur.size,S.unit)}.`;
+  if (!uk.done){ uk.attempts++; }
+  if (err <= 0.10){
+    if (!uk.done){ uk.correct++; uk.streak++; }
+    fb.className = 'feedback show correct'; fb.innerHTML = `✓ Within ${Math.round(err*100)}%. ${work}`;
+  } else {
+    if (!uk.done) uk.streak = 0;
+    fb.className = 'feedback show wrong'; fb.innerHTML = `✗ Off by ${Math.round(err*100)}%. ${work} Tip: use only ladder bands inside the linear range, and interpolate on a log scale, not a linear one.`;
+  }
+  uk.done = true;
+  $('ukCorrect').textContent = uk.correct; $('ukAttempts').textContent = uk.attempts; $('ukStreak').textContent = uk.streak;
+};
+
+/* =====================================================================
+   CASE FILES
+   ===================================================================== */
+const L = id => { const s = findSample(id); return {name:s.name, ladder:true, bands:s.bands}; };
+const B = (s, amt, label) => ({s, amt, label});
+const OB = [610,480,390,300,245,205,170,135,98,72,52,36];
+const pf = arr => arr.map(s => B(s, 0.45 + s/700));
+const lysMinus = (targetAmt) => LYSATE.map(b=>({...b})).concat([B(32, targetAmt, targetAmt>0.5?'Overexpressed recombinant protein (~32 kDa)':'Residual target protein (~32 kDa)')]);
+
+const CASES = [
+  { title:'PCR detection of mecA', badge:'agar', sys:'Agarose 1.5%',
+    desc:'Four <i>Staphylococcus aureus</i> isolates are screened for <i>mecA</i>, the gene behind methicillin resistance (MRSA). In this teaching assay the primers give a <b>500 bp</b> product. Lanes: 1 = 100 bp ladder, 2 = positive control (MRSA reference strain), 3 = no-template control (NTC), 4–7 = isolates 1–4.',
+    gel:{mode:'dna', unit:'bp', win:SYSTEMS.dna.gels['1.5'], progress:0.85, stain:'sybr',
+      lanes:[L('L100'), {name:'Positive control', bands:[B(500,1.3,'mecA amplicon (500 bp)'),B(45,.2,'Primer-dimer')]}, {name:'No-template control', bands:[B(45,.45,'Primer-dimer (~45 bp): primers annealed to each other, not a target product')]},
+        {name:'Isolate 1', bands:[B(500,1.2,'mecA amplicon (500 bp)'),B(45,.25,'Primer-dimer')]}, {name:'Isolate 2', bands:[B(45,.45,'Primer-dimer only')]},
+        {name:'Isolate 3', bands:[B(500,1.0,'mecA amplicon (500 bp)')]}, {name:'Isolate 4', bands:[B(45,.4,'Primer-dimer only')]}]},
+    qs:[
+      {q:'Which isolates carry mecA?', o:['Isolates 1 and 3','Isolates 2 and 4','All four, since every lane has a band','Only isolate 3'], a:0,
+       e:'Only isolates 1 and 3 have a band at 500 bp, matching the positive control. The faint, fuzzy band near the dye front is primer-dimer, not product. (A phenotypically resistant <i>mecA</i>-negative isolate could carry <i>mecC</i>, which needs a different primer set.)'},
+      {q:'The NTC shows a faint, fuzzy band at ~45 bp but nothing at 500 bp. The run is:', o:['Invalid: the NTC is contaminated','Valid: that band is primer-dimer, expected when no template is present','Invalid: the ladder failed','Valid only if the band is above 500 bp'], a:1,
+       e:'Primer-dimers form when primers anneal and extend on each other. They are common and strongest when there is no template to compete. The NTC would be invalid only if it showed a band at the target size (500 bp).'}
+    ]},
+  { title:'Plasmid conformations', badge:'agar', sys:'Agarose 1.0%',
+    desc:'A 5.0 kb plasmid was purified from <i>E. coli</i>. Lanes: 1 = 1 kb ladder, 2 = uncut plasmid, 3 = plasmid cut once with EcoRI (linearized).',
+    gel:{mode:'dna', unit:'bp', win:SYSTEMS.dna.gels['1.0'], progress:0.85, stain:'sybr',
+      lanes:[L('L1kb'), {name:'Uncut plasmid', apparent:true, bands:findSample('unc').bands}, {name:'EcoRI-linearized plasmid', bands:[B(5000,1.4,'Linear plasmid: true size 5.0 kb')]}]},
+    qs:[
+      {q:'In lane 2 (uncut), which band is the supercoiled plasmid?', o:['The top band (slowest)','The middle band','The bottom band (fastest)','None: supercoiled DNA does not enter the gel'], a:2,
+       e:'Supercoiled DNA is tightly wound and compact, so it moves through the pores faster than linear or nicked (open-circular) DNA of the same length. The open-circular form is the slowest.'},
+      {q:'Where can you read the true size of the plasmid?', o:['Lane 2 bottom band, ~3.2 kb','Lane 3: ~5.0 kb, because one cut converts the circle to a linear molecule that runs true to its size','Lane 2 top band, ~9 kb','It cannot be determined'], a:1,
+       e:'Ladders are linear DNA, so only a linear molecule can be sized against them. A single-cutter enzyme linearizes the plasmid.'}
+    ]},
+  { title:'Restriction mapping', badge:'agar', sys:'Agarose 1.0%',
+    desc:'A 6.0 kb circular plasmid is digested. Lanes: 1 = 1 kb ladder, 2 = EcoRI, 3 = HindIII, 4 = EcoRI + HindIII (double digest).',
+    gel:{mode:'dna', unit:'bp', win:SYSTEMS.dna.gels['1.0'], progress:0.85, stain:'sybr',
+      lanes:[L('L1kb'), {name:'EcoRI', bands:[B(6000,1.5)]}, {name:'HindIII', bands:[B(4000,1.1),B(2000,.6)]}, {name:'EcoRI + HindIII', bands:[B(4000,1.1),B(1500,.45),B(500,.2)]}]},
+    qs:[
+      {q:'How many HindIII sites does the plasmid have?', o:['1','2','3','4'], a:1,
+       e:'On a <b>circular</b> molecule, n cuts give n fragments. HindIII gives 2 fragments (4.0 + 2.0 kb = 6.0 kb), so there are 2 sites. (A linear molecule would give n + 1 fragments.)'},
+      {q:'Where is the single EcoRI site?', o:['Inside the 4.0 kb HindIII fragment','Inside the 2.0 kb HindIII fragment, 0.5 kb from one HindIII site','Exactly on a HindIII site','There is no EcoRI site'], a:1,
+       e:'In the double digest the 4.0 kb fragment survives intact while the 2.0 kb fragment becomes 1.5 + 0.5 kb. The EcoRI site must therefore lie within the 2.0 kb fragment, 0.5 kb from one HindIII site.'}
+    ]},
+  { title:'Closely spaced amplicons: agarose vs PAGE', badge:'page', sys:'Native PAGE 8%',
+    desc:'A multiplex PCR should yield 120 bp and 135 bp products. The same samples were run on a 2% agarose gel and an 8% native polyacrylamide gel; the PAGE result is shown here. Lanes: 1 = low-range ladder, 2 = 120 bp control, 3 = 135 bp control, 4 = patient sample with both products, 5 = patient sample with one product.',
+    gel:{mode:'page', unit:'bp', win:SYSTEMS.page.gels['8'], progress:0.95, stain:'sybr',
+      lanes:[L('LLR'), {name:'120 bp control', bands:[B(120,1.1)]}, {name:'135 bp control', bands:[B(135,1.1)]}, {name:'Patient A', bands:[B(120,1),B(135,1)]}, {name:'Patient B', bands:[B(135,1.1)]}]},
+    qs:[
+      {q:'On the 2% agarose gel, patient A looked like a single thick band. Why does PAGE resolve it into two?', o:['PAGE has larger pores','Polyacrylamide has smaller, tunable pores and resolves fragments that differ by a few percent in length, which agarose cannot','PAGE separates by charge, not size','The DNA was denatured'], a:1,
+       e:'A 15 bp difference (~12%) is hard to resolve on agarose, but easy on 8% polyacrylamide. Sequencing-grade denaturing PAGE can even separate fragments differing by a single nucleotide.'},
+      {q:'Which product(s) does patient B carry?', o:['120 bp only','135 bp only','Both','Neither'], a:1, e:'Patient B has one band co-migrating with the 135 bp control (lane 3).'}
+    ]},
+  { title:'RNA integrity check', badge:'agar', sys:'Agarose 1.0% (non-denaturing)',
+    desc:'Two bacterial total-RNA preps are checked before RT-qPCR. Lanes: 1 = 1 kb DNA ladder (approximate on a native gel), 2 = RNA prep A, 3 = RNA prep B.',
+    gel:{mode:'dna', unit:'bp', win:SYSTEMS.dna.gels['1.0'], progress:0.85, stain:'sybr',
+      lanes:[L('L1kb'), {name:'RNA prep A', bands:findSample('rna').bands}, {name:'RNA prep B', smear:[3500,60], bands:[B(2900,.22,'Faint 23S rRNA'),B(1540,.35,'16S rRNA (partly degraded)')]}]},
+    qs:[
+      {q:'Which RNA prep is suitable for downstream use?', o:['Prep A: sharp 23S and 16S bands, with 23S about twice as bright as 16S','Prep B: more material in the lower part of the lane','Both equally','Neither: RNA cannot be run on agarose'], a:0,
+       e:'Intact RNA shows crisp rRNA bands. Prep B shows a downward smear and a weak 23S band, the signature of RNase degradation. Integrity is often summarized by the 23S:16S ratio or an instrument RIN score.'},
+      {q:'Why is 23S about twice as bright as 16S in intact RNA?', o:['23S is more abundant, molecule for molecule','They are equimolar (one each per ribosome), but 23S (~2.9 kb) is about twice as long, so it binds about twice as much dye','The stain prefers 23S','It is a gel artifact'], a:1,
+       e:'Fluorescent dyes bind in proportion to nucleic-acid mass. Equal numbers of molecules with twice the length give about twice the signal.'}
+    ]},
+  { title:'PFGE outbreak typing', badge:'agar', sys:'Pulsed-field agarose',
+    desc:'<i>Salmonella</i> isolates from a foodborne outbreak. Genomic DNA was cut with the rare-cutting enzyme XbaI and separated by pulsed-field gel electrophoresis. Lanes: 1 = λ concatemer PFG ladder (48.5 kb steps), 2 = outbreak strain, 3–6 = isolates 1–4. (PulseNet has since moved from PFGE to whole-genome sequencing, but the logic of pattern matching is the same.)',
+    gel:{mode:'dna', unit:'kb', win:[20,700], progress:1.15, stain:'etbr',
+      lanes:[{name:'λ PFG ladder', ladder:true, bands:Array.from({length:14},(_,k)=>B(+(48.5*(k+1)).toFixed(1),0.9))},
+        {name:'Outbreak strain', bands:pf(OB)}, {name:'Isolate 1', bands:pf(OB)},
+        {name:'Isolate 2', bands:pf(OB.filter(x=>x!==245).concat([275]))}, {name:'Isolate 3', bands:pf(OB)},
+        {name:'Isolate 4', bands:pf([660,520,430,350,310,260,190,150,120,88,60,44,30])}]},
+    qs:[
+      {q:'Which isolates are indistinguishable from the outbreak strain?', o:['Isolates 1 and 3','Isolates 1, 2 and 3','Only isolate 4','All four'], a:0,
+       e:'Isolates 1 and 3 have exactly the same band pattern as the outbreak strain.'},
+      {q:'Isolate 2 differs by two bands (one lost at ~245 kb, one gained at ~275 kb). By the Tenover criteria it is:', o:['Unrelated','Closely related: consistent with a single genetic event, and probably part of the outbreak','Identical','Not interpretable'], a:1,
+       e:'Tenover criteria: 0 differences = indistinguishable; 2–3 = closely related (one genetic event such as an insertion or deletion); 4–6 = possibly related; ≥7 = unrelated. Isolate 4 is unrelated.'}
+    ]},
+  { title:'IgG: reducing vs non-reducing SDS-PAGE', badge:'sds', sys:'SDS-PAGE 10%',
+    desc:'A purified monoclonal IgG was analysed. Lanes: 1 = prestained marker, 2 = IgG without reducing agent, 3 = IgG with β-mercaptoethanol. Coomassie stain.',
+    gel:{mode:'protein', unit:'kDa', win:SYSTEMS.protein.gels['10'], progress:0.95, stain:'coomassie',
+      lanes:[L('PM'), {name:'IgG, non-reducing', bands:[B(150,1.9,'Intact IgG, H₂L₂ (~150 kDa)')]}, {name:'IgG, reducing', bands:[B(50,1.3,'Heavy chain (~50 kDa)'),B(25,.65,'Light chain (~25 kDa)')]}]},
+    qs:[
+      {q:'Why does the reduced sample show two bands?', o:['The antibody was degraded by proteases','β-mercaptoethanol broke the inter-chain disulfide bonds, releasing heavy (~50 kDa) and light (~25 kDa) chains','SDS was left out','The gel percentage changed'], a:1,
+       e:'SDS alone cannot break covalent disulfide bonds. Reducing agents (β-ME, DTT) do, so the subunits separate.'},
+      {q:'Why does the ~50 kDa band stain about twice as strongly as the ~25 kDa band?', o:['There are twice as many heavy chains as light chains','Each IgG has 2 heavy + 2 light chains; heavy chains have ~2× the mass, and Coomassie staining scales roughly with protein mass','Light chains do not bind Coomassie','The gel is overloaded'], a:1,
+       e:'Equal numbers of chains, but twice the mass, means about twice the dye bound.'}
+    ]},
+  { title:'His-tag protein purification', badge:'sds', sys:'SDS-PAGE 12%',
+    desc:'A His-tagged recombinant protein was expressed in <i>E. coli</i> and purified on a Ni-NTA column. Lanes: 1 = marker, 2 = cleared lysate, 3 = flow-through, 4 = wash, 5 = imidazole elution.',
+    gel:{mode:'protein', unit:'kDa', win:SYSTEMS.protein.gels['12'], progress:0.95, stain:'coomassie',
+      lanes:[L('PM'), {name:'Cleared lysate', bands:lysMinus(1.5)}, {name:'Flow-through', bands:lysMinus(0.3)},
+        {name:'Wash', bands:[B(70,.25),B(56,.24),B(37,.3),B(32,.24,'Small loss of target in wash')]}, {name:'Elution', bands:[B(32,1.5,'Purified His-tagged protein (~32 kDa)')]}]},
+    qs:[
+      {q:'Which lane contains the purified protein?', o:['Lane 2 (lysate)','Lane 3 (flow-through)','Lane 4 (wash)','Lane 5 (elution)'], a:3,
+       e:'Host proteins do not bind Ni-NTA and appear in the flow-through. The His-tagged protein binds and is released by imidazole, giving a single dominant band.'},
+      {q:'Using the marker, the purified protein\'s apparent MW is about:', o:['~15 kDa','~32 kDa (between the 37 and 25 kDa markers)','~50 kDa','~75 kDa'], a:1,
+       e:'The elution band runs between the 37 and 25 kDa markers. Interpolating on log(MW) gives ~32 kDa.'}
+    ]}
+];
+// The "agarose vs PAGE" case describes a 2% agarose comparison; note it in the description text.
+CASES[3].desc = CASES[3].desc.replace('and an 8% native polyacrylamide gel; the PAGE result is shown here', 'and an 8% native polyacrylamide gel. The PAGE result is shown here');
+CASES[3].sys = 'Native PAGE 8%';
+
+const caseState = {cur:0, answers:{}};
+function caseScores(){
+  let c = 0, a = 0, t = 0;
+  CASES.forEach((cs,i) => cs.qs.forEach((q,j) => { t++; const k = caseState.answers[i+'-'+j]; if (k != null){ a++; if (k === q.a) c++; } }));
+  $('caseCorrect').textContent = c; $('caseAnswered').textContent = a; $('caseTotal').textContent = t;
+}
+function renderCaseList(){
+  $('caseList').innerHTML = CASES.map((cs,i) => {
+    const allDone = cs.qs.every((q,j) => caseState.answers[i+'-'+j] != null);
+    return `<button class="case-btn ${i===caseState.cur?'active':''}" data-i="${i}">${i+1}. ${cs.title} ${allDone?'<span class="ok">✓</span>':''}</button>`;
+  }).join('');
+}
+function showCase(i){
+  caseState.cur = i; renderCaseList();
+  const cs = CASES[i], g = cs.gel, n = g.lanes.length;
+  const W = Math.min(560, 66 + n*64 + 14);
+  const svg = renderGel({...g, id:'caseSvg', width:W, marginLeft:66, labelLane:0, aria:cs.title + ' gel'});
+  const badgeTxt = {agar:'Agarose', page:'Polyacrylamide', sds:'SDS-PAGE'}[cs.badge];
+  let html = `<div class="case-grid"><div class="stage"><div class="gel-host" id="caseGel">${svg}</div>
+    <div class="caption">${cs.sys} · ${STAINS[g.stain].label.split(' · ')[0]}</div>
+    <div class="lane-key">${g.lanes.map((l,k)=>`<span>${k+1}: <b>${l.name}</b></span>`).join('')}</div>
+    <div class="info-box" id="caseInfo"><span class="muted">Click a band for details.</span></div></div>
+    <div><h3 style="margin-top:0">${cs.title}<span class="badge ${cs.badge}">${badgeTxt}</span></h3><p class="muted">${cs.desc}</p>`;
+  cs.qs.forEach((q,j) => {
+    const key = i+'-'+j, ans = caseState.answers[key];
+    html += `<div class="question-card"><h3>${q.q}</h3><div class="options">${q.o.map((o,k)=>{
+      let cls = 'option'; if (ans != null){ cls += ' locked'; if (k === q.a) cls += ' correct'; else if (k === ans) cls += ' wrong'; }
+      return `<div class="${cls}" data-q="${j}" data-k="${k}">${o}</div>`; }).join('')}</div>
+      <div class="feedback ${ans!=null?'show '+(ans===q.a?'correct':'wrong'):''}">${ans!=null?(ans===q.a?'✓ ':'✗ ')+q.e:''}</div></div>`;
+  });
+  html += `<div class="btn-row">${i>0?'<button class="btn grey small" id="prevCase">← Previous case</button>':''}${i<CASES.length-1?'<button class="btn amber small" id="nextCase">Next case →</button>':''}</div></div></div>`;
+  $('caseArea').innerHTML = html;
+  bindBandClicks($('caseGel'), r => $('caseInfo').innerHTML = bandInfoHTML(r));
+  $('caseArea').querySelectorAll('.option').forEach(el => el.onclick = () => {
+    const j = +el.dataset.q, k = +el.dataset.k, key = i+'-'+j;
+    if (caseState.answers[key] != null) return;
+    caseState.answers[key] = k; caseScores(); showCase(i);
+  });
+  if ($('prevCase')) $('prevCase').onclick = () => showCase(i-1);
+  if ($('nextCase')) $('nextCase').onclick = () => showCase(i+1);
+}
+$('caseList').addEventListener('click', e => { const b = e.target.closest('.case-btn'); if (b) showCase(+b.dataset.i); });
+
+/* =====================================================================
+   QUIZ
+   ===================================================================== */
+const QUESTIONS = [
+  {q:'In a standard agarose gel, DNA migrates toward the:', o:['Cathode (−, black)','Anode (+, red)','Whichever electrode is closer','It doesn\'t move; only the dye does'], a:1, e:'The phosphate backbone is negatively charged, so DNA runs toward the positive anode: "Run to Red".'},
+  {q:'Why do DNA fragments separate mainly by size rather than by charge?', o:['Larger fragments carry less charge','DNA has a nearly constant charge-to-mass ratio, so the gel matrix sieves fragments by length','Small fragments are positively charged','Agarose binds large fragments chemically'], a:1, e:'Each nucleotide contributes one negative charge. With charge proportional to mass, the sieving matrix decides who wins.'},
+  {q:'In SDS-PAGE, SDS:', o:['Stains the proteins blue','Breaks disulfide bonds','Denatures proteins and coats them with a uniform negative charge','Polymerizes the gel'], a:2, e:'SDS binds ~1.4 g per g of protein. Disulfide bonds need a separate reducing agent (β-ME or DTT).'},
+  {q:'To resolve PCR products of 150 bp and 165 bp, the best choice is:', o:['0.7% agarose','A high-% gel, ideally native polyacrylamide','Any gel works','A shorter run time'], a:1, e:'Small, closely spaced fragments need small pores: high-% agarose or, better, polyacrylamide.'},
+  {q:'Within a gel\'s linear range, migration distance is approximately:', o:['Proportional to size','Proportional to the square of size','A linear, decreasing function of log₁₀(size)','Independent of size'], a:2, e:'This is why standard curves plot log(size) against distance. Interpolate on a semi-log plot.'},
+  {q:'Uncut plasmid DNA often shows several bands. The fastest-migrating form is usually:', o:['Nicked (open-circular)','Linear','Supercoiled','Single-stranded concatemer'], a:2, e:'Supercoiled DNA is the most compact form.'},
+  {q:'What is the purpose of the stacking gel in Laemmli SDS-PAGE?', o:['To separate proteins by size','To concentrate samples into a thin, sharp starting zone before the resolving gel','To remove SDS','To stain proteins'], a:1, e:'Its low % and pH 6.8, combined with the glycine/chloride ion fronts, stack proteins into a thin band.'},
+  {q:'Loading dye is added to samples to:', o:['Make DNA fluoresce','Increase density so samples sink into the wells, and track the run','Cut the DNA','Denature proteins'], a:1, e:'Glycerol or Ficoll adds density. Bromophenol blue and xylene cyanol show how far the run has progressed.'},
+  {q:'The no-template control (NTC) in a diagnostic PCR shows a band at the expected amplicon size. You should:', o:['Report all positives as confirmed','Treat the run as invalid (contamination likely) and repeat','Ignore it; NTCs always show bands','Change the ladder'], a:1, e:'A target-size band in the NTC means template contamination, so no result from that run can be trusted.'},
+  {q:'If the leads are reversed (wells at the anode), DNA samples will:', o:['Run normally','Migrate backward out of the wells into the buffer and be lost','Stay in the wells','Run faster'], a:1, e:'Always check polarity before switching on.'},
+  {q:'Which stain is the better choice to detect a protein present at only a few nanograms?', o:['Coomassie','Silver stain','Ethidium bromide','Crystal violet'], a:1, e:'Silver staining reaches the ~1 ng range; Coomassie R-250 needs roughly 0.1 µg per band.'},
+  {q:'Native PAGE differs from SDS-PAGE because it:', o:['Uses agarose','Separates proteins by charge, size and shape while keeping them folded and active','Separates only DNA','Requires heating at 95 °C'], a:1, e:'Without SDS, intrinsic charge and shape matter. Useful for enzyme activity stains and complexes.'},
+  {q:'PFGE was used for decades in outbreak typing because it:', o:['Separates proteins by charge','Resolves very large DNA fragments (tens to hundreds of kb) from rare-cutter genomic digests','Sequences whole genomes','Detects viruses directly'], a:1, e:'Alternating field directions let huge DNA molecules reorient and separate. WGS has now largely replaced it.'},
+  {q:'A protein runs at ~150 kDa without reducing agent and at ~50 and ~25 kDa with DTT. Most likely it is:', o:['A single 150 kDa polypeptide','A disulfide-linked complex such as IgG (2 heavy + 2 light chains)','Degraded by proteases','Glycosylated'], a:1, e:'Reduction separates disulfide-linked subunits.'}
+];
+let quizStarted = false, qi = 0, score = 0, streak = 0, answered = false;
+function startQuiz(){
+  quizStarted = true; qi = 0; score = 0; streak = 0;
+  $('qScore').textContent = 0; $('qStreak').textContent = 0; $('qTotal').textContent = QUESTIONS.length;
+  $('restartBtn').style.display = 'none'; showQ();
+}
+function showQ(){
+  answered = false; const q = QUESTIONS[qi]; $('qCurrent').textContent = qi + 1;
+  $('quizArea').innerHTML = `<div class="question-card"><h3>${q.q}</h3><div class="options">${q.o.map((o,k)=>`<div class="option" data-k="${k}">${o}</div>`).join('')}</div><div class="feedback" id="qFb"></div></div>`;
+  $('nextBtn').style.display = 'none';
+  $('quizArea').querySelectorAll('.option').forEach(el => el.onclick = () => pickQ(+el.dataset.k));
+}
+function pickQ(k){
+  if (answered) return; answered = true;
+  const q = QUESTIONS[qi], opts = $('quizArea').querySelectorAll('.option'), fb = $('qFb');
+  opts.forEach(o => o.classList.add('locked'));
+  if (k === q.a){ opts[k].classList.add('correct'); score++; streak++; fb.className = 'feedback show correct'; fb.textContent = '✓ ' + q.e; }
+  else { opts[k].classList.add('wrong'); opts[q.a].classList.add('correct'); streak = 0; fb.className = 'feedback show wrong'; fb.textContent = '✗ ' + q.e; }
+  $('qScore').textContent = score; $('qStreak').textContent = streak;
+  if (qi < QUESTIONS.length - 1) $('nextBtn').style.display = 'inline-block';
+  else setTimeout(() => {
+    $('quizArea').innerHTML = `<div class="question-card" style="text-align:center"><h2>Quiz complete!</h2><p style="font-size:1.3rem;margin:.6rem 0">${score} / ${QUESTIONS.length}</p><p class="muted">${score===QUESTIONS.length?'Perfect: your gels will always run to red. 🏆':score>=10?'Strong work. Review the questions you missed in the Learn tab.':'Revisit the Learn tab and the Gel Bench, then try again.'}</p></div>`;
+    $('restartBtn').style.display = 'inline-block';
+  }, 1100);
+}
+$('nextBtn').onclick = () => { qi++; showQ(); };
+$('restartBtn').onclick = startQuiz;
+
+/* ===== IMPORT FROM PCR LAB ===== */
+function importFromPCR(){
+  const m = location.hash.match(/^#pcr=(.+)$/); if (!m) return false;
+  let d; try { d = JSON.parse(decodeURIComponent(m[1])); } catch(e){ return false; }
+  if (!d || !Array.isArray(d.tubes)) return false;
+  LIB.dna = LIB.dna.filter(x => !x.fromPcr);
+  d.tubes.slice(0, N_LANES - 1).forEach((t,i) => LIB.dna.push({id:'pcr'+i, fromPcr:true, name:'PCR · ' + String(t.name).slice(0,40), c:'#c4b5fd',
+    bands:(t.bands||[]).filter(b => b && b.s > 0).map(b => ({s:+b.s, amt:Math.min(2, +b.amt || 0), label:b.label ? String(b.label).slice(0,90) : undefined})),
+    smear: Array.isArray(t.smear) ? t.smear.map(Number) : undefined}));
+  lab.mode = 'dna'; lab.gel = SYSTEMS.dna.gels[d.gel] ? d.gel : '1.5';
+  lab.lanes = Array(N_LANES).fill(null);
+  lab.lanes[0] = findSample(d.ladder) ? d.ladder : 'L100';
+  d.tubes.slice(0, N_LANES - 1).forEach((t,i) => lab.lanes[i+1] = 'pcr'+i);
+  lab.V = SYSTEMS.dna.Vdef; lab.t = SYSTEMS.dna.Tdef; lab.stain = 'sybr'; lab.orient = null; lab.phase = 'setup'; lab.prog = 0;
+  const esc = x => String(x).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c]);
+  $('importBanner').innerHTML = `<div class="import-banner">🧬 <b>Imported from the PCR Training Lab:</b> ${esc(d.target)} (expected ${Number(d.size).toLocaleString()} bp). Lane 1 holds the ladder and lanes 2–${d.tubes.length+1} your PCR tubes, on a ${lab.gel}% agarose gel. Now connect the power supply (step 4), run, and stain.</div>`;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'lab'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'lab'));
+  return true;
+}
+
+/* ===== INIT ===== */
+const imported = importFromPCR();
+buildModeUI(); drawLab(); setCaption(imported ? 'PCR reactions loaded. Which electrode should sit next to the wells?' : 'Start with step 1: choose a gel system and percentage.');
+renderCaseList(); showCase(0); caseScores();
+</script>
+<!-- ===== Instructions + disclaimer (Microbiology Explorer) ===== -->
+<style id="mxh-style">
+.mxh-btn{position:fixed;right:16px;bottom:16px;z-index:9998;display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;border:1.5px solid rgba(251,191,36,.7);background:#111827;color:#fde68a;font:700 14px/1 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform .15s}
+.mxh-btn:hover{transform:translateY(-2px)}
+.mxh-btn:focus-visible,.mxh-x:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.mxh-ov{position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,.66);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+.mxh-ov.open{display:flex}
+.mxh-panel{width:min(720px,100%);background:#111827;color:#e5e7eb;border:1px solid #334155;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);font:15px/1.55 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;text-align:left;animation:mxhIn .2s ease}
+@keyframes mxhIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mxh-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #334155}
+.mxh-head h2{margin:0;font-size:19px;color:#fde68a;font-weight:800;letter-spacing:0;text-transform:none;background:none;-webkit-text-fill-color:currentColor}
+.mxh-x{border:1px solid #475569;background:#1f2937;color:#e5e7eb;border-radius:10px;width:36px;height:36px;font-size:20px;line-height:1;cursor:pointer;flex:none}
+.mxh-body{padding:16px 20px 8px}
+.mxh-sum{background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.45);border-left:5px solid #2dd4bf;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.mxh-sum b{color:#5eead4}
+.mxh-sec{margin:12px 0}
+.mxh-sec h3{margin:0 0 6px;font-size:15px;color:#c4b5fd;font-weight:800;text-transform:none;letter-spacing:0;background:none;-webkit-text-fill-color:currentColor}
+.mxh-sec ol,.mxh-sec ul{margin:0 0 0 20px;padding:0}
+.mxh-sec li{margin:4px 0;color:#d1d5db}
+.mxh-sec li b{color:#f9fafb}
+.mxh-foot{padding:12px 20px 16px;border-top:1px solid #334155;font-size:12.5px;color:#9ca3af}
+.mxh-disc{text-align:center;font:12.5px/1.5 'Segoe UI',system-ui,-apple-system,Arial,sans-serif;color:#8a94a6;padding:14px 16px 76px;max-width:900px;margin:0 auto}
+@media print{.mxh-btn,.mxh-ov{display:none!important}}
+</style>
+<button class="mxh-btn" id="mxhOpen" type="button" aria-haspopup="dialog" aria-controls="mxhOv">ℹ️ Instructions</button>
+<div class="mxh-ov" id="mxhOv" role="dialog" aria-modal="true" aria-labelledby="mxhTitle">
+  <div class="mxh-panel">
+    <div class="mxh-head"><h2 id="mxhTitle">How to use: Gel Electrophoresis Lab</h2><button class="mxh-x" id="mxhClose" type="button" aria-label="Close instructions">×</button></div>
+    <div class="mxh-body"><div class="mxh-sum"><b>In brief:</b> Run agarose, native PAGE and SDS-PAGE gels for nucleic acids and proteins, size unknown bands from a standard curve, and interpret real-world gels.</div><div class="mxh-sec"><h3>Gel Bench: step by step</h3><ol><li><b>Cast:</b> choose a gel system (agarose, native PAGE or SDS-PAGE) and a percentage.</li><li><b>Prep:</b> for proteins, decide whether to heat with SDS and add a reducing agent.</li><li><b>Load:</b> click a tube in the rack, then click a well on the gel (or press <b>Demo load</b>).</li><li><b>Connect:</b> choose which electrode sits at the wells. Remember: <b>Run to Red</b> (+).</li><li><b>Run:</b> set the voltage and time, then press <b>Run gel</b> and watch the tracking dyes.</li><li><b>Stain:</b> choose a stain and press <b>Stain &amp; image</b>. Click any band for its identity and size, and read the <b>Run report</b>.</li></ol></div><div class="mxh-sec"><h3>Other tabs</h3><ul><li><b>Size the Unknown:</b> click the unknown band (lane 2), use the ladder table and the standard curve, then enter your estimate (±10% counts as correct).</li><li><b>Case Files:</b> eight real-world gels with two questions each.</li><li><b>Quiz:</b> 14 questions with explanations.</li><li>Arriving from the PCR Lab? Your PCR tubes are already loaded. Just connect, run and stain.</li></ul></div></div>
+    <div class="mxh-foot">Content and availability of these activities are subject to change without notice. For educational purposes only.</div>
+  </div>
+</div>
+<div class="mxh-disc">Content and availability of these activities are subject to change without notice. For educational purposes only.</div>
+<script>
+(function(){
+  var ov=document.getElementById('mxhOv'), op=document.getElementById('mxhOpen'), cl=document.getElementById('mxhClose');
+  function show(){ ov.classList.add('open'); cl.focus(); }
+  function hide(){ ov.classList.remove('open'); op.focus(); }
+  op.addEventListener('click', show); cl.addEventListener('click', hide);
+  ov.addEventListener('click', function(e){ if(e.target===ov) hide(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && ov.classList.contains('open')) hide(); });
+})();
+</script>
+</body>
+</html>
